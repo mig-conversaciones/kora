@@ -1,0 +1,45 @@
+# KORA — public/.htaccess (LiteSpeed/Apache), base: 04-02, 4.2.2.
+# LiteSpeed de Hostinger interpreta estas directivas; en Nginx usar la configuración equivalente (4.8).
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Forzar HTTPS (RS-009). Se contempla el proxy que informa X-Forwarded-Proto.
+    #    Excepción de desarrollo: localhost y 127.0.0.1 se sirven por HTTP en MAMP.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # 2. Bloquear archivos ocultos (salvo .well-known para Let's Encrypt) y extensiones sensibles.
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+    RewriteRule \.(?:env|ini|log|sql|md|lock|sh|phar|bak|dist|yml|yaml)$ - [F,L,NC]
+
+    # 3. Archivos estáticos existentes se sirven directamente.
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # 4. Todo lo demás pasa por el controlador frontal.
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+<IfModule mod_headers.c>
+    # Cabeceras para respuestas estáticas; las dinámicas las agrega CabecerasSeguridad (RS-008).
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set X-Frame-Options "DENY"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
+    Header always unset X-Powered-By
+    <FilesMatch "\.(ico|webmanifest|svg|png)$">
+        Header set Cache-Control "public, max-age=86400"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
+# Límite del cuerpo de la solicitud (RS-021); la aplicación aplica además límites por ruta.
+LimitRequestBody 12582912

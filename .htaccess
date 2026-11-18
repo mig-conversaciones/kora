@@ -1,0 +1,19 @@
+# KORA — .htaccess de la raíz del proyecto (solo MAMP local y «alternativa B» de Hostinger, 04-08).
+# La raíz del documento real es public/. Este archivo envía toda solicitud a public/, de modo que el código, el
+# .env, bd/, almacenamiento/ y vendor/ nunca se sirven por la web.
+Options -Indexes -MultiViews
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # El prototipo original se conserva consultable en /referencias/ (solo en local; no se despliega).
+    RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteRule ^referencias(/|$) - [L]
+
+    # Todo lo demás se resuelve dentro de public/ (su propio .htaccess decide entre archivo estático e index.php).
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>

@@ -1,0 +1,85 @@
+# Integración continua de KORA (ROB-001). Se detiene en el primer fallo.
+# Las pruebas de integración y las migraciones corren contra MariaDB 10.6 (producción) y MySQL 5.7 (paridad
+# con el MAMP local), según ADR-002.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: PHP (${{ matrix.motor.nombre }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: true
+      matrix:
+        motor:
+          - { nombre: 'MariaDB 10.6', imagen: 'mariadb:10.6', skip_locked: 'true', reclamo: 'skip_locked' }
+          - { nombre: 'MySQL 5.7', imagen: 'mysql:5.7', skip_locked: 'false', reclamo: 'actualizacion_condicional' }
+    services:
+      bd:
+        image: ${{ matrix.motor.imagen }}
+        env:
+          MYSQL_ROOT_PASSWORD: raiz_ci
+          MARIADB_ROOT_PASSWORD: raiz_ci
+          MYSQL_DATABASE: kora_pruebas
+          MYSQL_USER: kora_app
+          MYSQL_PASSWORD: clave_ci
+          MARIADB_DATABASE: kora_pruebas
+          MARIADB_USER: kora_app
+          MARIADB_PASSWORD: clave_ci
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -praiz_ci || mariadb-admin ping -h 127.0.0.1 -uroot -praiz_ci"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, mbstring, intl, sodium, zip, fileinfo, openssl
+          coverage: pcov
+      - name: Dependencias
+        run: composer install --no-interaction --no-progress
+      - name: Auditoría de dependencias (RS-015)
+        run: composer audit
+      - name: Entorno de CI
+        run: |
+          cp .env.example .env
+          sed -i "s#^APP_ENTORNO=.*#APP_ENTORNO=local#; s#^APP_URL=.*#APP_URL=http://localhost#; s#^BD_NOMBRE=.*#BD_NOMBRE=kora_pruebas#; s#^BD_USUARIO=.*#BD_USUARIO=kora_app#; s#^BD_CONTRASENA=.*#BD_CONTRASENA=clave_ci#; s#^BD_SKIP_LOCKED=.*#BD_SKIP_LOCKED=${{ matrix.motor.skip_locked }}#; s#^COLA_ESTRATEGIA_RECLAMO=.*#COLA_ESTRATEGIA_RECLAMO=${{ matrix.motor.reclamo }}#; s#^CORREO_TRANSPORTE=.*#CORREO_TRANSPORTE=archivo#" .env
+          sed -i "s#REEMPLAZAR_CON_32_BYTES_EN_BASE64#$(php -r 'echo base64_encode(random_bytes(32));')#g; s#REEMPLAZAR_CON_64_CARACTERES_HEX#$(php -r 'echo bin2hex(random_bytes(32));')#" .env
+      - name: Estilo PSR-12
+        run: composer estilo
+      - name: Análisis estático (PHPStan nivel 6)
+        run: composer analizar
+      - name: Migraciones de ida y vuelta (RBD-011)
+        run: |
+          php cli/migrar.php --aplicar --base=kora_pruebas
+          php cli/migrar.php --revertir=100 --base=kora_pruebas
+          php cli/migrar.php --aplicar --base=kora_pruebas
+      - name: Pruebas unitarias y de integración
+        run: vendor/bin/phpunit
+
+  activos:
+    name: Activos y JavaScript
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Auditoría de dependencias (RS-015)
+        run: npm audit --omit=dev --audit-level=high
+      - name: ESLint (no-alert, no-console)
+        run: npm run lint:js
+      - name: Contraste AA de los tokens (RUI-003)
+        run: npm run contraste
+      - name: Construcción con presupuesto de peso (RNF-019, RNF-PERF-020)
+        run: npm run construir

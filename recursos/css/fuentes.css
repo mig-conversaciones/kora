@@ -1,0 +1,6 @@
+/* Inter autoalojada, subconjunto latino (incluye tildes y ñ), font-display: swap (RUI-004).
+   Los archivos los copia herramientas/construir-activos.mjs desde @fontsource/inter a public/assets/fuentes. */
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('../fuentes/inter-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url('../fuentes/inter-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('../fuentes/inter-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 700 800; font-display: swap; src: url('../fuentes/inter-latin-700-normal.woff2') format('woff2'); }

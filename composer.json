@@ -1,0 +1,53 @@
+{
+    "name": "mig-conversaciones/kora",
+    "description": "KORA — gestión de la producción y tableros de mando del Centro Agropecuario de Buga (proyecto Producción CAB).",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.2",
+        "ext-fileinfo": "*",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
+        "ext-sodium": "*",
+        "ext-zip": "*",
+        "chillerlan/php-qrcode": "^5.0",
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5",
+        "phpstan/phpstan": "^2.1",
+        "friendsofphp/php-cs-fixer": "^3.65"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Pruebas\\": "tests/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "8.3.0"
+        },
+        "sort-packages": true,
+        "optimize-autoloader": true
+    },
+    "scripts": {
+        "estilo": "php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.dist.php",
+        "estilo:corregir": "php-cs-fixer fix --config=.php-cs-fixer.dist.php",
+        "analizar": "phpstan analyse --memory-limit=512M",
+        "pruebas": "phpunit",
+        "verificar": [
+            "@estilo",
+            "@analizar",
+            "@pruebas"
+        ]
+    }
+}

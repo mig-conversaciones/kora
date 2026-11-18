@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PHPUnit 11 para KORA (RNF-013). Las pruebas de integración usan la base kora_pruebas. -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/arranque.php"
+         cacheDirectory=".phpunit.cache"
+         colors="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         beStrictAboutOutputDuringTests="true">
+    <testsuites>
+        <testsuite name="Unitarias">
+            <directory>tests/Unitarias</directory>
+        </testsuite>
+        <testsuite name="Integracion">
+            <directory>tests/Integracion</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <env name="BD_NOMBRE_PRUEBAS" value="kora_pruebas"/>
+    </php>
+</phpunit>

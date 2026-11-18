@@ -1,0 +1,16 @@
+# PHPStan para KORA (RNF-012: nivel 6 o superior). Las reglas propias de capas, seguridad e interpolación de SQL
+# se agregan en la I2 junto con los repositorios con alcance.
+parameters:
+    level: 6
+    paths:
+        - app
+        - config
+        - cli
+        - public/index.php
+        - tests
+    bootstrapFiles:
+        - herramientas/phpstan-arranque.php
+    tmpDir: .phpstan-cache
+    excludePaths:
+        # Las plantillas se ejecutan dentro de Vista con variables extraídas; se revisan con PHP-CS-Fixer y pruebas.
+        - app/Vistas/*

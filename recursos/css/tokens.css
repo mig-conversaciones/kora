@@ -1,0 +1,172 @@
+/* tokens.css — KORA. Identidad: referencias/KORA_kit_identidad/KORA_paleta_sistema.md (ADR-016).
+   Estilo: skeuomorfismo funcional sutil (RUI-002): gradientes de 2 a 4 % y sombras suaves, sin texturas.
+   Tres capas separadas (RUI-001):
+     1. Identidad y semántica: marca, neutros, estados y series de datos
+     2. Estructura: espaciado y radios
+     3. Superficie y elevación: el único bloque que se sustituye para cambiar de estilo
+   Contraste verificado con `npm run contraste` (RUI-003). */
+
+:root {
+  color-scheme: light;
+
+  /* 1a. Marca e interfaz (kit KORA) */
+  --color-primario: #182b43;          /* azul pizarra: menú, encabezados, zonas de marca */
+  --color-acento: #20bfae;            /* turquesa KORA: puntual, sobre azul oscuro e indicadores. No para texto sobre claro */
+  --color-accion: #087f74;            /* turquesa oscuro: botones, enlaces y controles activos sobre fondos claros */
+  --color-acento-suave: #e1f6f3;      /* selección suave, etiquetas y fondos de énfasis */
+  --color-fondo: #f6f8fa;             /* canvas */
+  --color-superficie: #ffffff;        /* tarjetas, formularios y paneles */
+  --color-superficie-alt: #eaf0f3;    /* secciones secundarias, encabezados de tabla */
+  --color-texto: #162538;
+  --color-texto-secundario: #526477;
+  --color-linea: #d6e0e6;             /* divisores decorativos */
+  --color-borde-control: #7d8fa0;     /* límite de controles operables (campos, botones secundarios) */
+  --color-menu-texto: #c9d6e3;        /* texto del menú sobre el azul pizarra */
+  --color-texto-sobre-accion: #ffffff;
+
+  /* 1b. Estados (siempre acompañados de texto o icono) */
+  --color-exito: #0a766d;
+  --color-exito-fondo: #e8f5ef;
+  --color-advertencia: #9a5c0a;
+  --color-advertencia-fondo: #fff2d6;
+  --color-error: #b33d48;
+  --color-error-fondo: #fdebec;
+  --color-info: #2166a3;
+  --color-info-fondo: #e9f2fb;
+  --color-neutro-fondo: #eaf0f3;
+
+  /* 1c. Series de datos de los tableros (Guía de tableros de mando). Distintas de los estados: siempre con
+     leyenda o etiqueta (regla 5 del kit). Uso en barras, anillos y realces de KPI, no como color de texto. */
+  --serie-venta: #15803d;             /* venta directa */
+  --serie-autoconsumo: #d97706;       /* autoconsumo */
+  --serie-presupuesto: #182b43;       /* presupuesto: azul pizarra de la marca */
+  --serie-asignacion: #7d8fa0;        /* barra de asignación de IND_001 */
+
+  /* Tipografía: Inter autoalojada, cifras tabulares en KPI y tablas (RUI-004) */
+  --fuente-base: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fuente-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --tamano-xs: .75rem;
+  --tamano-sm: .875rem;
+  --tamano-base: 1rem;
+  --tamano-lg: 1.125rem;
+  --tamano-xl: 1.375rem;
+  --tamano-2xl: 1.75rem;
+  --tamano-kpi: 2rem;
+
+  /* 2. Estructura: espaciado (escala de 4 px) y radios */
+  --espacio-1: .25rem;
+  --espacio-2: .5rem;
+  --espacio-3: .75rem;
+  --espacio-4: 1rem;
+  --espacio-6: 1.5rem;
+  --espacio-8: 2rem;
+  --radio-pequeno: 6px;
+  --radio-medio: 10px;
+  --radio-grande: 14px;
+  --ancho-menu: 16rem;
+  --ancho-menu-colapsado: 4.5rem;
+
+  /* 3. Superficie y elevación: capa sustituible para cambiar de estilo */
+  --superficie-tarjeta: linear-gradient(180deg, #ffffff 0%, #f8fafb 100%);
+  --superficie-boton: linear-gradient(180deg, #ffffff 0%, #eef2f5 100%);
+  --superficie-boton-primario: linear-gradient(180deg, #087f74 0%, #076f66 100%);
+  --superficie-boton-peligro: linear-gradient(180deg, #b33d48 0%, #9f343e 100%);
+  --superficie-menu: linear-gradient(180deg, #1b304b 0%, #182b43 100%);
+  --superficie-menu-activo: rgba(32, 191, 174, .16);
+  --sombra-0: none;
+  --sombra-1: 0 1px 2px rgba(24, 43, 67, .08), inset 0 1px 0 rgba(255, 255, 255, .9);
+  --sombra-2: 0 2px 6px rgba(24, 43, 67, .10), inset 0 1px 0 rgba(255, 255, 255, .85);
+  --sombra-3: 0 8px 24px rgba(24, 43, 67, .16);
+  --sombra-campo: inset 0 1px 2px rgba(24, 43, 67, .12);
+  --sombra-boton: inset 0 1px 0 rgba(255, 255, 255, .35), 0 1px 2px rgba(24, 43, 67, .18);
+  --sombra-boton-presionado: inset 0 2px 3px rgba(24, 43, 67, .25);
+  --brillo-kpi: inset 0 3px 0 var(--color-acento-kpi, var(--color-linea));
+  /* Foco: anillo sólido en el color de acción con separación de 2 px (3:1 frente a superficie y fondo). */
+  --anillo-foco: 0 0 0 2px var(--color-superficie), 0 0 0 4px var(--color-accion);
+  --superficie-esqueleto: #e3e9ee;
+  --duracion-micro: 160ms;
+}
+
+/* Modo oscuro nativo (RUI-005), derivado de la familia del azul pizarra (el kit define solo el modo claro).
+   Sigue al sistema salvo preferencia explícita. Se declara dos veces porque CSS no permite combinar una consulta
+   de medios con un selector. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    color-scheme: dark;
+    --color-primario: #0e1a2a;
+    --color-accion: #20bfae;
+    --color-acento-suave: #12363a;
+    --color-fondo: #0c1522;
+    --color-superficie: #142236;
+    --color-superficie-alt: #1a2b42;
+    --color-texto: #e6edf3;
+    --color-texto-secundario: #a3b2c2;
+    --color-linea: #26394f;
+    --color-borde-control: #6f86a0;
+    --color-menu-texto: #b9c8d8;
+    --color-texto-sobre-accion: #0c1522;
+    --color-exito: #3fcf9f;
+    --color-exito-fondo: #0f3330;
+    --color-advertencia: #f0b452;
+    --color-advertencia-fondo: #3a2a10;
+    --color-error: #f28b95;
+    --color-error-fondo: #3d1c22;
+    --color-info: #7db6ec;
+    --color-info-fondo: #142c47;
+    --color-neutro-fondo: #1d2f47;
+    --serie-venta: #34c26d;
+    --serie-autoconsumo: #f2a33a;
+    --serie-presupuesto: #8fb0d3;
+    --serie-asignacion: #6f86a0;
+    --superficie-tarjeta: linear-gradient(180deg, #172740 0%, #142236 100%);
+    --superficie-boton: linear-gradient(180deg, #1f324c 0%, #1a2b42 100%);
+    --superficie-boton-primario: linear-gradient(180deg, #24c8b6 0%, #1fb3a3 100%);
+    --superficie-boton-peligro: linear-gradient(180deg, #f28b95 0%, #e57782 100%);
+    --superficie-menu: linear-gradient(180deg, #102035 0%, #0e1a2a 100%);
+    --sombra-1: 0 1px 2px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .04);
+    --sombra-2: 0 2px 8px rgba(0, 0, 0, .40), inset 0 1px 0 rgba(255, 255, 255, .05);
+    --sombra-3: 0 8px 24px rgba(0, 0, 0, .55);
+    --sombra-campo: inset 0 1px 2px rgba(0, 0, 0, .45);
+    --sombra-boton: inset 0 1px 0 rgba(255, 255, 255, .06), 0 1px 2px rgba(0, 0, 0, .45);
+    --superficie-esqueleto: #22354e;
+  }
+}
+:root[data-tema="oscuro"] {
+  color-scheme: dark;
+  --color-primario: #0e1a2a;
+  --color-accion: #20bfae;
+  --color-acento-suave: #12363a;
+  --color-fondo: #0c1522;
+  --color-superficie: #142236;
+  --color-superficie-alt: #1a2b42;
+  --color-texto: #e6edf3;
+  --color-texto-secundario: #a3b2c2;
+  --color-linea: #26394f;
+  --color-borde-control: #6f86a0;
+  --color-menu-texto: #b9c8d8;
+  --color-texto-sobre-accion: #0c1522;
+  --color-exito: #3fcf9f;
+  --color-exito-fondo: #0f3330;
+  --color-advertencia: #f0b452;
+  --color-advertencia-fondo: #3a2a10;
+  --color-error: #f28b95;
+  --color-error-fondo: #3d1c22;
+  --color-info: #7db6ec;
+  --color-info-fondo: #142c47;
+  --color-neutro-fondo: #1d2f47;
+  --serie-venta: #34c26d;
+  --serie-autoconsumo: #f2a33a;
+  --serie-presupuesto: #8fb0d3;
+  --serie-asignacion: #6f86a0;
+  --superficie-tarjeta: linear-gradient(180deg, #172740 0%, #142236 100%);
+  --superficie-boton: linear-gradient(180deg, #1f324c 0%, #1a2b42 100%);
+  --superficie-boton-primario: linear-gradient(180deg, #24c8b6 0%, #1fb3a3 100%);
+  --superficie-boton-peligro: linear-gradient(180deg, #f28b95 0%, #e57782 100%);
+  --superficie-menu: linear-gradient(180deg, #102035 0%, #0e1a2a 100%);
+  --sombra-1: 0 1px 2px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .04);
+  --sombra-2: 0 2px 8px rgba(0, 0, 0, .40), inset 0 1px 0 rgba(255, 255, 255, .05);
+  --sombra-3: 0 8px 24px rgba(0, 0, 0, .55);
+  --sombra-campo: inset 0 1px 2px rgba(0, 0, 0, .45);
+  --sombra-boton: inset 0 1px 0 rgba(255, 255, 255, .06), 0 1px 2px rgba(0, 0, 0, .45);
+  --superficie-esqueleto: #22354e;
+}

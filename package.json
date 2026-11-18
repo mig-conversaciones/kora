@@ -1,0 +1,25 @@
+{
+  "name": "kora",
+  "private": true,
+  "description": "KORA — herramientas de construcción de activos. Node solo se usa en local y en la CI, nunca en el servidor (RNF-019).",
+  "type": "module",
+  "scripts": {
+    "marca": "node herramientas/preparar-marca.mjs",
+    "construir": "node herramientas/construir-activos.mjs",
+    "vigilar:css": "tailwindcss -c tailwind.config.cjs -i recursos/css/app.css -o almacenamiento/construccion/app.css --watch",
+    "lint:js": "eslint recursos/js herramientas",
+    "contraste": "node herramientas/verificar-contraste.mjs"
+  },
+  "devDependencies": {
+    "@alpinejs/csp": "3.14.9",
+    "@fontsource/inter": "5.1.1",
+    "@eslint/js": "9.17.0",
+    "esbuild": "0.24.2",
+    "eslint": "9.17.0",
+    "globals": "15.14.0",
+    "htmx.org": "2.0.4",
+    "idiomorph": "0.7.3",
+    "sharp": "0.33.5",
+    "tailwindcss": "3.4.17"
+  }
+}

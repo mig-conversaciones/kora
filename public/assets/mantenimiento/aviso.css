@@ -1,0 +1,15 @@
+/* Aviso público de mantenimiento (RF-MAN-018). Autónomo: no depende de app.css ni de la base de datos.
+   Paleta del kit KORA (ADR-016). */
+:root { color-scheme: light dark; --fondo: #f6f8fa; --superficie: #ffffff; --texto: #162538; --secundario: #526477; --linea: #d6e0e6; --acento: #087f74; }
+@media (prefers-color-scheme: dark) { :root { --fondo: #0c1522; --superficie: #142236; --texto: #e6edf3; --secundario: #a3b2c2; --linea: #26394f; --acento: #20bfae; } }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1rem; background: var(--fondo); color: var(--texto);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; line-height: 1.5; }
+.aviso-mantenimiento { width: 100%; display: grid; place-items: center; }
+.aviso-tarjeta { width: min(34rem, 100%); padding: 2rem; text-align: center; background: var(--superficie); border: 1px solid var(--linea);
+  border-radius: 14px; box-shadow: 0 8px 24px rgba(24, 43, 67, .16); }
+.aviso-tarjeta img { border-radius: 12px; }
+.aviso-tarjeta h1 { margin: 1rem 0 .5rem; font-size: 1.5rem; }
+.aviso-tarjeta p { margin: 0 0 .75rem; color: var(--secundario); }
+.aviso-estimado strong { color: var(--acento); }
+.aviso-ayuda { font-size: .875rem; }
