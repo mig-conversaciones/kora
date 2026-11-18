@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#4a718f"/>
+    </marker>
+    <linearGradient id="centro" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b5e3b"/>
+      <stop offset="1" stop-color="#102f2c"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="1198" height="698" rx="18" fill="#f8faf9" stroke="#dfe5ea"/>
+  <text x="600" y="44" text-anchor="middle" font-size="26" font-weight="700" fill="#14532d">Contexto de Producción CAB</text>
+
+  <!-- Usuarios -->
+  <rect x="30" y="90" width="300" height="330" rx="14" fill="#ffffff" stroke="#15803d" stroke-width="2"/>
+  <text x="180" y="122" text-anchor="middle" font-size="20" font-weight="700" fill="#14532d">Usuarios por rol</text>
+  <g font-size="16" fill="#1a2938">
+    <text x="50" y="158">• Coordinación administrativa</text>
+    <text x="50" y="188">• Grupo de Recaudo</text>
+    <text x="50" y="218">• Líder de producción de centro</text>
+    <text x="50" y="248">• Líderes de unidad (piloto GAN)</text>
+    <text x="50" y="278">• Coordinación académica</text>
+    <text x="50" y="308">• Administrador funcional</text>
+    <text x="50" y="338">• Superadministrador</text>
+  </g>
+  <text x="180" y="395" text-anchor="middle" font-size="15" fill="#5f6b76">Navegador: HTMX 2 · Alpine CSP</text>
+
+  <!-- Sistema central -->
+  <rect x="420" y="190" width="360" height="300" rx="18" fill="url(#centro)"/>
+  <rect x="424" y="194" width="352" height="120" rx="15" fill="#ffffff" opacity=".07"/>
+  <text x="600" y="240" text-anchor="middle" font-size="26" font-weight="700" fill="#ffffff">Producción CAB</text>
+  <text x="600" y="272" text-anchor="middle" font-size="16" fill="#c8efa6">Hostinger Cloud</text>
+  <g font-size="16" fill="#e6edf0" text-anchor="middle">
+    <text x="600" y="318">PHP 8.3 MVC nativo · LiteSpeed</text>
+    <text x="600" y="346">MariaDB: negocio, sesiones, auditoría, cola</text>
+    <text x="600" y="374">Trabajador y programador por cron</text>
+    <text x="600" y="402">Tableros IND_001 · 002 · 003 · 08 · 12 · 17</text>
+    <text x="600" y="430">Importación asistida · Exportaciones</text>
+    <text x="600" y="458">Auditoría · Modo mantenimiento</text>
+  </g>
+
+  <!-- Fuentes externas -->
+  <rect x="870" y="80" width="300" height="110" rx="14" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+  <text x="1020" y="114" text-anchor="middle" font-size="18" font-weight="700" fill="#b45309">Dirección General SENA</text>
+  <text x="1020" y="142" text-anchor="middle" font-size="15" fill="#1a2938">Archivo de recaudos (Wompi,</text>
+  <text x="1020" y="164" text-anchor="middle" font-size="15" fill="#1a2938">Ecollect, QR) sin producto ni unidad</text>
+
+  <rect x="870" y="230" width="300" height="110" rx="14" fill="#ffffff" stroke="#d97706" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="1020" y="264" text-anchor="middle" font-size="18" font-weight="700" fill="#b45309">Software de ventas</text>
+  <text x="1020" y="292" text-anchor="middle" font-size="15" fill="#1a2938">(en desarrollo) · contrato API</text>
+  <text x="1020" y="314" text-anchor="middle" font-size="15" fill="#1a2938">o archivo equivalente (anexo E)</text>
+
+  <rect x="870" y="380" width="300" height="90" rx="14" fill="#ffffff" stroke="#4a718f" stroke-width="2"/>
+  <text x="1020" y="414" text-anchor="middle" font-size="18" font-weight="700" fill="#4a718f">SMTP del dominio</text>
+  <text x="1020" y="442" text-anchor="middle" font-size="15" fill="#1a2938">Invitaciones, recuperación, avisos</text>
+
+  <rect x="870" y="510" width="300" height="90" rx="14" fill="#ffffff" stroke="#4a718f" stroke-width="2"/>
+  <text x="1020" y="544" text-anchor="middle" font-size="18" font-weight="700" fill="#4a718f">Monitoreo y copias externas</text>
+  <text x="1020" y="572" text-anchor="middle" font-size="15" fill="#1a2938">/health/live · copias cifradas</text>
+
+  <rect x="30" y="480" width="300" height="120" rx="14" fill="#ffffff" stroke="#15803d" stroke-width="2"/>
+  <text x="180" y="514" text-anchor="middle" font-size="18" font-weight="700" fill="#14532d">Libros Excel actuales</text>
+  <text x="180" y="542" text-anchor="middle" font-size="15" fill="#1a2938">ADMON · Producción · Hato</text>
+  <text x="180" y="566" text-anchor="middle" font-size="15" fill="#1a2938">Carga del piloto con cifras de control</text>
+
+  <!-- Flechas -->
+  <g stroke="#4a718f" stroke-width="2.5" fill="none">
+    <path d="M330 255 L415 300" marker-end="url(#flecha)"/>
+    <path d="M415 330 L330 285" marker-end="url(#flecha)"/>
+    <path d="M870 140 L785 230" marker-end="url(#flecha)"/>
+    <path d="M870 285 L785 300" marker-end="url(#flecha)" stroke-dasharray="8 6"/>
+    <path d="M785 420 L865 425" marker-end="url(#flecha)"/>
+    <path d="M865 555 L785 470" marker-end="url(#flecha)"/>
+    <path d="M330 540 L415 460" marker-end="url(#flecha)"/>
+  </g>
+  <g font-size="14" fill="#5f6b76">
+    <text x="340" y="250">HTTPS</text>
+    <text x="878" y="214">Importación</text>
+    <text x="796" y="270">v1: archivo</text>
+    <text x="795" y="448">Correo</text>
+    <text x="362" y="565">Importación</text>
+  </g>
+  <text x="600" y="660" text-anchor="middle" font-size="15" fill="#5f6b76">Piloto: Unidad de Ganadería · Hato El Milagroso · Centro Agropecuario de Buga (9124)</text>
+</svg>

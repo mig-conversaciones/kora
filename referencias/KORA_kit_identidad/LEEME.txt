@@ -1,0 +1,13 @@
+KORA · IDENTIDAD BASE
+
+Colores: azul pizarra #182B43, turquesa #20BFAE, blanco #FFFFFF.
+
+Versiones:
+- KORA_logo_horizontal_claro: sobre fondos claros.
+- KORA_logo_horizontal_oscuro: sobre fondo azul pizarra.
+- KORA_logo_vertical: composiciones cuadradas.
+- KORA_logo_monocromatico: reproducción a una tinta.
+- KORA_favicon: icono web; ICO con tamaños 16, 32, 48 y 64 px.
+- KORA_icono_movil: concepto para icono móvil en formato 1024 x 1024 px.
+
+Los SVG contienen trazados tipográficos para que las letras conserven su aspecto sin depender de fuentes instaladas. No sustituye la revisión de marca, disponibilidad del nombre ni la integración técnica en las tiendas de aplicaciones.

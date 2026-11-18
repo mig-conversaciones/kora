@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 340" width="1000" height="340" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b5e3b"/>
+      <stop offset="1" stop-color="#102f2c"/>
+    </linearGradient>
+    <linearGradient id="hoja" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c8efa6"/>
+      <stop offset="1" stop-color="#8ccc6c"/>
+    </linearGradient>
+    <g id="icono">
+      <rect width="64" height="64" rx="15" fill="url(#fondo)"/>
+      <rect x="2" y="2" width="60" height="28" rx="13" fill="#ffffff" opacity=".07"/>
+      <path d="M14 46c0-18 20-25 31-26 1 18-10 29-27 27z" fill="url(#hoja)"/>
+      <path d="M17 46l15-14" stroke="#1b5e3b" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M46 35c3 4 6 7.5 6 10.5a6 6 0 0 1-12 0c0-3 3-6.5 6-10.5z" fill="#ffffff" opacity=".95"/>
+    </g>
+  </defs>
+  <rect x="1" y="1" width="998" height="338" rx="18" fill="#f8faf9" stroke="#dfe5ea"/>
+  <use href="#icono" transform="translate(60 50) scale(3.6)"/>
+  <use href="#icono" transform="translate(400 110) scale(1.5)"/>
+  <use href="#icono" transform="translate(560 142) scale(.5)"/>
+  <use href="#icono" transform="translate(660 150) scale(.25)"/>
+  <rect x="760" y="126" width="200" height="80" rx="10" fill="#102f2c"/>
+  <use href="#icono" transform="translate(780 150) scale(.5)"/>
+  <text x="826" y="174" font-size="15" fill="#e6edf0">Modo oscuro</text>
+  <g font-size="15" fill="#5f6b76" text-anchor="middle">
+    <text x="175" y="310">Maestro SVG (230 px)</text>
+    <text x="448" y="232">96 px</text>
+    <text x="576" y="232">32 px</text>
+    <text x="668" y="232">16 px</text>
+  </g>
+</svg>

@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" width="1200" height="780" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#4a718f"/>
+    </marker>
+  </defs>
+  <rect x="1" y="1" width="1198" height="778" rx="18" fill="#f8faf9" stroke="#dfe5ea"/>
+  <text x="600" y="40" text-anchor="middle" font-size="26" font-weight="700" fill="#14532d">Entidades principales (alcance: centro_id y unidad_id)</text>
+
+  <!-- Organizacion -->
+  <rect x="30" y="64" width="1140" height="70" rx="12" fill="#102f2c"/>
+  <text x="50" y="96" font-size="18" font-weight="700" fill="#c8efa6">Organización</text>
+  <text x="50" y="120" font-size="15" fill="#e6edf0">centros (tenant) 1—N unidades_productivas (GAN, GRA, AGR, IND…) · destinos_internos · todas las tablas de negocio llevan centro_id y unidad_id</text>
+
+  <g font-size="14" fill="#1a2938">
+    <!-- Catálogos -->
+    <rect x="30" y="160" width="270" height="200" rx="12" fill="#ffffff" stroke="#4a718f" stroke-width="2"/>
+    <text x="165" y="188" text-anchor="middle" font-size="17" font-weight="700" fill="#4a718f">Catálogos</text>
+    <text x="45" y="216">productos (SGAC, medida,</text>
+    <text x="60" y="236">derivado lácteo, factor_leche)</text>
+    <text x="45" y="262">homologaciones_producto</text>
+    <text x="45" y="288">categorias_gasto (incluye</text>
+    <text x="60" y="308">Materiales de formación)</text>
+    <text x="45" y="334">parametros_indicadores</text>
+
+    <!-- Finanzas -->
+    <rect x="320" y="160" width="270" height="200" rx="12" fill="#ffffff" stroke="#4a718f" stroke-width="2"/>
+    <text x="455" y="188" text-anchor="middle" font-size="17" font-weight="700" fill="#4a718f">Finanzas</text>
+    <text x="335" y="216">asignaciones_presupuestales</text>
+    <text x="335" y="242">gastos_ejecutados</text>
+    <text x="335" y="268">procesos_autoconsumo</text>
+    <text x="335" y="294">recaudos (HMAC de pagador)</text>
+    <text x="335" y="320">conciliaciones_recaudo</text>
+    <text x="335" y="346">periodos_cierre</text>
+
+    <!-- Operacion -->
+    <rect x="610" y="160" width="270" height="200" rx="12" fill="#ffffff" stroke="#15803d" stroke-width="2"/>
+    <text x="745" y="188" text-anchor="middle" font-size="17" font-weight="700" fill="#14532d">Operación</text>
+    <text x="625" y="216">recepciones_lote</text>
+    <text x="640" y="236">(número interno + producto)</text>
+    <text x="625" y="266">salidas (venta directa /</text>
+    <text x="640" y="286">autoconsumo, proceso)</text>
+    <text x="625" y="316">transformaciones (leche →</text>
+    <text x="640" y="336">recepción del derivado)</text>
+
+    <!-- Hato -->
+    <rect x="900" y="160" width="270" height="200" rx="12" fill="#ffffff" stroke="#15803d" stroke-width="2"/>
+    <text x="1035" y="188" text-anchor="middle" font-size="17" font-weight="700" fill="#14532d">Hato</text>
+    <text x="915" y="216">animales</text>
+    <text x="915" y="242">cortes_hato (fecha de corte)</text>
+    <text x="915" y="268">registros_reproductivos</text>
+    <text x="930" y="288">(lote, IEP y días abiertos</text>
+    <text x="930" y="308">calculados e importados)</text>
+
+    <!-- Identidad -->
+    <rect x="30" y="420" width="370" height="170" rx="12" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+    <text x="215" y="448" text-anchor="middle" font-size="17" font-weight="700" fill="#b45309">Identidad y seguridad</text>
+    <text x="45" y="476">usuarios · roles · permisos · roles_permisos</text>
+    <text x="45" y="502">usuarios_roles · usuarios_unidades (ABAC)</text>
+    <text x="45" y="528">sesiones (ID en hash) · tokens_cuenta</text>
+    <text x="45" y="554">codigos_respaldo_2fa · limites_tasa</text>
+    <text x="45" y="580">claves_idempotencia</text>
+
+    <!-- Plataforma -->
+    <rect x="420" y="420" width="370" height="170" rx="12" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+    <text x="605" y="448" text-anchor="middle" font-size="17" font-weight="700" fill="#b45309">Plataforma</text>
+    <text x="435" y="476">trabajos · trabajos_fallidos · estado_circuitos</text>
+    <text x="435" y="502">eventos_auditoria · cadena_auditoria</text>
+    <text x="435" y="528">configuracion_sistema · versiones_datos</text>
+    <text x="435" y="554">notificaciones · archivos_adjuntos</text>
+    <text x="435" y="580">exportaciones</text>
+
+    <!-- Importacion -->
+    <rect x="810" y="420" width="360" height="170" rx="12" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+    <text x="990" y="448" text-anchor="middle" font-size="17" font-weight="700" fill="#b45309">Importación y calidad</text>
+    <text x="825" y="476">lotes_importacion (hash, estado,</text>
+    <text x="840" y="496">cifras de control)</text>
+    <text x="825" y="522">filas_importacion (valores anteriores)</text>
+    <text x="825" y="548">incidencias_calidad</text>
+    <text x="825" y="574">Procedencia en cada registro de negocio</text>
+  </g>
+
+  <g stroke="#4a718f" stroke-width="2" fill="none">
+    <path d="M590 280 L605 280" marker-end="url(#flecha)"/>
+    <path d="M745 360 L745 395 L455 395 L455 365" marker-end="url(#flecha)"/>
+    <path d="M990 420 L990 400 L745 400" stroke-dasharray="6 5"/>
+  </g>
+  <g font-size="13" fill="#5f6b76">
+    <text x="470" y="414">conciliación recaudo–salida</text>
+    <text x="770" y="415">procedencia (lote_importacion_id)</text>
+  </g>
+
+  <rect x="30" y="620" width="1140" height="130" rx="12" fill="#ecf6ef" stroke="#15803d"/>
+  <g font-size="15" fill="#1a2938">
+    <text x="50" y="652">Relaciones clave: recepciones_lote 1—N salidas · salida de leche 1—N transformaciones · transformación 1—1 recepción del derivado</text>
+    <text x="50" y="680">procesos_autoconsumo 1—N salidas (autoconsumo) · cortes_hato 1—N registros_reproductivos N—1 animales · productos 1—N recepciones</text>
+    <text x="50" y="708">Claves foráneas compuestas (centro_id, id) impiden vincular registros de centros distintos (RDI-011)</text>
+    <text x="50" y="734">Nunca se unen tablas transaccionales por nombre o fecha (lección del prototipo)</text>
+  </g>
+</svg>

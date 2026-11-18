@@ -1,0 +1,62 @@
+{
+  "archivoSalida": "SRS_Produccion_CAB_v1.0.docx",
+  "documento": {
+    "titulo": "SRS Producción CAB v1.0",
+    "autor": "Equipo consultor",
+    "descripcion": "Especificación de Requisitos de Software del sistema Producción CAB (SENA, Centro Agropecuario de Buga).",
+    "asunto": "Requisitos, arquitectura, planificación y anexos técnicos",
+    "palabrasClave": "SRS, IEEE 830, ISO/IEC/IEEE 29148, SENA, Producción CAB, HTMX, PHP, MariaDB, Hostinger"
+  },
+  "portada": {
+    "entidad": "Servicio Nacional de Aprendizaje — SENA",
+    "dependencia": "Regional Valle · Centro Agropecuario de Buga · Código 9124",
+    "titulo": "Especificación de Requisitos de Software (SRS)",
+    "subtitulo": "Producción CAB — Sistema de gestión y tableros de mando de la producción de centro",
+    "piloto": "Prueba piloto: Unidad Productiva de Ganadería · Hato El Milagroso",
+    "datos": [
+      ["Código del documento", "SRS-PCAB-001"],
+      ["Versión", "1.0 — Borrador para revisión y aprobación"],
+      ["Fecha", "17 de noviembre de 2026"],
+      ["Estándar de referencia", "Estructura IEEE 830-1998, alineada con ISO/IEC/IEEE 29148:2018"],
+      ["Clasificación", "Uso interno. Describe controles de seguridad: no publicar."],
+      ["Elaborado por", "Equipo consultor (proveedor del desarrollo)"],
+      ["Insumos", "Guía de especificaciones de los tableros de mando (con comentarios de la contraparte), prototipo funcional y su verificación, revisión general del mockup (noviembre de 2026) y bases de datos Excel fuente."]
+    ],
+    "nota": "Documento elaborado con asistencia de inteligencia artificial. Requiere revisión técnica humana y aprobación formal antes de usarse como base contractual o de desarrollo (ver familia RDOC y el registro de evidencia IA del Anexo F)."
+  },
+  "control": {
+    "versiones": [
+      ["0.1", "17/11/2026", "Estructura, variables del proyecto y supuestos iniciales a partir de la plantilla del SRS, la guía de especificaciones, el prototipo y la revisión del mockup.", "Equipo consultor"],
+      ["1.0", "17/11/2026", "Versión completa para revisión: requisitos, arquitectura técnica, planificación con recursos y costos, y anexos técnicos.", "Equipo consultor"]
+    ],
+    "aprobaciones": [
+      ["Líder de Producción de Centro (CAB)", "", "", ""],
+      ["Coordinación Administrativa (CAB)", "", "", ""],
+      ["Líder de la Unidad de Ganadería (piloto)", "", "", ""],
+      ["Coordinación Académica (CAB)", "", "", ""],
+      ["Arquitecto / líder técnico del proveedor", "", "", ""]
+    ],
+    "notaAprobacion": "La aprobación confirma el alcance, los supuestos del capítulo 2.7 y las decisiones del capítulo 2.8. Los supuestos marcados como PENDIENTE DE VALIDACIÓN deben resolverse antes de la iteración indicada en el capítulo 5.",
+    "distribucion": [
+      ["Contraparte funcional del CAB (Líder de Producción de Centro)", "Revisión del alcance funcional, reglas de negocio e indicadores."],
+      ["Coordinación Administrativa y Grupo de Recaudo", "Validación de presupuesto, recaudo, conciliación y permisos."],
+      ["Líder de la Unidad de Ganadería y Coordinación Académica", "Validación de hato, transformación láctea, prácticas e indicadores técnicos."],
+      ["Equipo de desarrollo (proveedor)", "Insumo único para diseño, construcción, pruebas y despliegue."],
+      ["Responsable de TI / seguridad de la información del centro", "Revisión de controles de seguridad, privacidad, respaldo y operación."]
+    ],
+    "convenciones": [
+      "Cada requisito tiene un identificador único (por ejemplo RF-012, RAC-004) y una prioridad: Debe, Debería, Podría o Futuro.",
+      "Los criterios de aceptación son verificables; la columna «Implementación / verificación» indica el componente responsable y los tipos de prueba (PU, PI, PE, PC, PCA, PS, PA, PR, PO).",
+      "«PENDIENTE DE EJECUCIÓN» indica una prueba especificada sin evidencia todavía; «PENDIENTE DE VALIDACIÓN» indica un supuesto que la contraparte debe confirmar.",
+      "Los nombres técnicos van en español (camelCase para variables y funciones, PascalCase para clases, snake_case para la base de datos) salvo contratos externos (HTTP, HTMX, estándares).",
+      "Los recuadros de color señalan supuestos (azul), decisiones (verde), advertencias (ámbar) y pendientes (rojo)."
+    ]
+  },
+  "encabezado": {
+    "izquierda": "Producción CAB · Especificación de Requisitos de Software",
+    "derecha": "SRS-PCAB-001 · v1.0"
+  },
+  "pie": {
+    "izquierda": "SENA · Centro Agropecuario de Buga (9124) · Uso interno"
+  }
+}

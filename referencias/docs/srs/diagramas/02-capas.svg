@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#4a718f"/>
+    </marker>
+  </defs>
+  <rect x="1" y="1" width="1198" height="758" rx="18" fill="#f8faf9" stroke="#dfe5ea"/>
+  <text x="600" y="42" text-anchor="middle" font-size="26" font-weight="700" fill="#14532d">Capas y recorrido de una solicitud</text>
+
+  <!-- Navegador -->
+  <rect x="60" y="70" width="1080" height="80" rx="14" fill="#ffffff" stroke="#15803d" stroke-width="2"/>
+  <text x="600" y="104" text-anchor="middle" font-size="20" font-weight="700" fill="#14532d">Navegador</text>
+  <text x="600" y="132" text-anchor="middle" font-size="16" fill="#1a2938">HTML semántico · HTMX 2 (allowEval=false) · Alpine CSP (estado visual) · retroalimentacion-ui.js · Tailwind compilado</text>
+
+  <!-- index -->
+  <rect x="360" y="185" width="480" height="62" rx="12" fill="#fff6e6" stroke="#d97706" stroke-width="2"/>
+  <text x="600" y="214" text-anchor="middle" font-size="18" font-weight="700" fill="#b45309">public/index.php</text>
+  <text x="600" y="236" text-anchor="middle" font-size="14" fill="#1a2938">Señal de mantenimiento evaluada antes de conectar a la base</text>
+
+  <!-- Cadena -->
+  <text x="30" y="282" font-size="17" font-weight="700" fill="#1a2938">Cadena de intermediarios (orden fijo)</text>
+  <g font-size="13" text-anchor="middle" fill="#1a2938">
+    <rect x="30" y="296" width="118" height="56" rx="10" fill="#eef3f7" stroke="#4a718f"/><text x="89" y="320">IdSolicitud</text><text x="89" y="340">X-Request-ID</text>
+    <rect x="158" y="296" width="118" height="56" rx="10" fill="#eef3f7" stroke="#4a718f"/><text x="217" y="320">Cabeceras</text><text x="217" y="340">CSP con nonce</text>
+    <rect x="286" y="296" width="118" height="56" rx="10" fill="#eef3f7" stroke="#4a718f"/><text x="345" y="320">Mantenimiento</text><text x="345" y="340">503 controlado</text>
+    <rect x="414" y="296" width="118" height="56" rx="10" fill="#eef3f7" stroke="#4a718f"/><text x="473" y="320">Sesión</text><text x="473" y="340">BD · __Host-</text>
+    <rect x="542" y="296" width="118" height="56" rx="10" fill="#eef3f7" stroke="#4a718f"/><text x="601" y="320">LimitarTasa</text><text x="601" y="340">429</text>
+    <rect x="670" y="296" width="118" height="56" rx="10" fill="#eef3f7" stroke="#4a718f"/><text x="729" y="320">VerificarCsrf</text><text x="729" y="340">token y Origin</text>
+    <rect x="798" y="296" width="118" height="56" rx="10" fill="#eef3f7" stroke="#4a718f"/><text x="857" y="320">Autenticar</text><text x="857" y="340">nivel 2FA</text>
+    <rect x="926" y="296" width="118" height="56" rx="10" fill="#eef3f7" stroke="#4a718f"/><text x="985" y="320">Idempotencia</text><text x="985" y="340">X-Idempotency</text>
+    <rect x="1054" y="296" width="118" height="56" rx="10" fill="#ecf6ef" stroke="#15803d"/><text x="1113" y="320">Autorizar</text><text x="1113" y="340">RBAC + alcance</text>
+  </g>
+
+  <!-- MVC -->
+  <rect x="60" y="400" width="300" height="100" rx="14" fill="#ffffff" stroke="#15803d" stroke-width="2"/>
+  <text x="210" y="436" text-anchor="middle" font-size="19" font-weight="700" fill="#14532d">Controlador</text>
+  <text x="210" y="462" text-anchor="middle" font-size="14" fill="#1a2938">Delgado: permiso, validación</text>
+  <text x="210" y="482" text-anchor="middle" font-size="14" fill="#1a2938">ControladorBase: página o fragmento</text>
+
+  <rect x="450" y="400" width="300" height="100" rx="14" fill="#ffffff" stroke="#15803d" stroke-width="2"/>
+  <text x="600" y="436" text-anchor="middle" font-size="19" font-weight="700" fill="#14532d">Servicios de dominio</text>
+  <text x="600" y="462" text-anchor="middle" font-size="14" fill="#1a2938">Reglas portadas del prototipo</text>
+  <text x="600" y="482" text-anchor="middle" font-size="14" fill="#1a2938">Indicadores · transacciones</text>
+
+  <rect x="840" y="400" width="300" height="100" rx="14" fill="#ffffff" stroke="#15803d" stroke-width="2"/>
+  <text x="990" y="436" text-anchor="middle" font-size="19" font-weight="700" fill="#14532d">Repositorios con alcance</text>
+  <text x="990" y="462" text-anchor="middle" font-size="14" fill="#1a2938">centro_id y unidad_id obligatorios</text>
+  <text x="990" y="482" text-anchor="middle" font-size="14" fill="#1a2938">PDO con sentencias preparadas</text>
+
+  <!-- Infra -->
+  <rect x="60" y="560" width="300" height="90" rx="14" fill="#fff6e6" stroke="#d97706" stroke-width="2"/>
+  <text x="210" y="596" text-anchor="middle" font-size="18" font-weight="700" fill="#b45309">Vistas PHP</text>
+  <text x="210" y="622" text-anchor="middle" font-size="14" fill="#1a2938">Escape e() · HX-Trigger (toasts)</text>
+
+  <rect x="450" y="560" width="300" height="90" rx="14" fill="#fff6e6" stroke="#d97706" stroke-width="2"/>
+  <text x="600" y="596" text-anchor="middle" font-size="18" font-weight="700" fill="#b45309">Caché · Auditoría · Cola</text>
+  <text x="600" y="622" text-anchor="middle" font-size="14" fill="#1a2938">Versión de datos · cadena hash · 202</text>
+
+  <rect x="840" y="560" width="300" height="90" rx="14" fill="#eef3f7" stroke="#4a718f" stroke-width="2"/>
+  <text x="990" y="596" text-anchor="middle" font-size="18" font-weight="700" fill="#4a718f">MariaDB (InnoDB)</text>
+  <text x="990" y="622" text-anchor="middle" font-size="14" fill="#1a2938">Negocio · sesiones · auditoría · trabajos</text>
+
+  <g stroke="#4a718f" stroke-width="2.5" fill="none">
+    <path d="M600 150 L600 180" marker-end="url(#flecha)"/>
+    <path d="M600 247 L600 290" marker-end="url(#flecha)"/>
+    <path d="M1113 352 L1113 376 L210 376 L210 395" marker-end="url(#flecha)"/>
+    <path d="M360 450 L445 450" marker-end="url(#flecha)"/>
+    <path d="M750 450 L835 450" marker-end="url(#flecha)"/>
+    <path d="M990 500 L990 555" marker-end="url(#flecha)"/>
+    <path d="M600 500 L600 555" marker-end="url(#flecha)"/>
+    <path d="M210 500 L210 555" marker-end="url(#flecha)"/>
+    <path d="M60 605 L30 605 L30 110 L55 110" marker-end="url(#flecha)"/>
+  </g>
+  <text x="42" y="680" font-size="14" fill="#5f6b76">Respuesta: página completa o fragmento según HX-Request · Vary: HX-Request · no-store</text>
+  <text x="42" y="706" font-size="14" fill="#5f6b76">Trabajo pesado (más de 1.500 ms): DespachadorCola → 202 + Location → trabajador_cron (sección 4.4)</text>
+</svg>

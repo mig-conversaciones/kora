@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#4a718f"/>
+    </marker>
+  </defs>
+  <rect x="1" y="1" width="1198" height="698" rx="18" fill="#f8faf9" stroke="#dfe5ea"/>
+  <text x="600" y="42" text-anchor="middle" font-size="26" font-weight="700" fill="#14532d">Despliegue en Hostinger Cloud</text>
+
+  <!-- CI -->
+  <rect x="40" y="80" width="260" height="250" rx="14" fill="#ffffff" stroke="#4a718f" stroke-width="2"/>
+  <text x="170" y="114" text-anchor="middle" font-size="19" font-weight="700" fill="#4a718f">Integración continua</text>
+  <g font-size="14" fill="#1a2938">
+    <text x="58" y="146">Lint · PHPStan · gitleaks</text>
+    <text x="58" y="172">PHPUnit (MariaDB) · Playwright</text>
+    <text x="58" y="198">Tailwind CLI · huellas</text>
+    <text x="58" y="224">SBOM · composer audit</text>
+    <text x="58" y="250">Paquete + manifiesto SHA-256</text>
+    <text x="58" y="276">E2E críticas en verde</text>
+    <text x="58" y="302">→ despliegue por SSH/rsync</text>
+  </g>
+
+  <!-- Hostinger -->
+  <rect x="350" y="70" width="810" height="430" rx="18" fill="#ffffff" stroke="#15803d" stroke-width="2.5"/>
+  <text x="755" y="104" text-anchor="middle" font-size="20" font-weight="700" fill="#14532d">Cuenta Hostinger Cloud · /home/USUARIO/domains/DOMINIO</text>
+
+  <rect x="380" y="130" width="230" height="70" rx="12" fill="#fff6e6" stroke="#d97706" stroke-width="2"/>
+  <text x="495" y="162" text-anchor="middle" font-size="17" font-weight="700" fill="#b45309">public_html</text>
+  <text x="495" y="186" text-anchor="middle" font-size="13" fill="#1a2938">enlace → current/public (LiteSpeed)</text>
+
+  <rect x="660" y="130" width="230" height="70" rx="12" fill="#ecf6ef" stroke="#15803d" stroke-width="2"/>
+  <text x="775" y="162" text-anchor="middle" font-size="17" font-weight="700" fill="#14532d">current</text>
+  <text x="775" y="186" text-anchor="middle" font-size="13" fill="#1a2938">ln -sfn atómico → releases/vX.Y.Z</text>
+
+  <rect x="660" y="230" width="470" height="110" rx="12" fill="#ffffff" stroke="#15803d" stroke-width="2"/>
+  <text x="895" y="262" text-anchor="middle" font-size="17" font-weight="700" fill="#14532d">releases/ (últimas 5 versiones)</text>
+  <text x="895" y="290" text-anchor="middle" font-size="14" fill="#1a2938">v1.0.0 · v1.0.1 · … código, vendor, assets con huella</text>
+  <text x="895" y="314" text-anchor="middle" font-size="14" fill="#1a2938">.env y almacenamiento como enlaces a compartido/</text>
+
+  <rect x="380" y="230" width="250" height="110" rx="12" fill="#eef3f7" stroke="#4a718f" stroke-width="2"/>
+  <text x="505" y="262" text-anchor="middle" font-size="17" font-weight="700" fill="#4a718f">compartido/</text>
+  <text x="505" y="290" text-anchor="middle" font-size="14" fill="#1a2938">.env (600, fuera de public)</text>
+  <text x="505" y="314" text-anchor="middle" font-size="14" fill="#1a2938">almacenamiento/ (privado)</text>
+
+  <rect x="380" y="370" width="250" height="100" rx="12" fill="#eef3f7" stroke="#4a718f" stroke-width="2"/>
+  <text x="505" y="402" text-anchor="middle" font-size="17" font-weight="700" fill="#4a718f">MariaDB 10.6 o superior</text>
+  <text x="505" y="428" text-anchor="middle" font-size="14" fill="#1a2938">127.0.0.1:3306 · prod y staging</text>
+  <text x="505" y="450" text-anchor="middle" font-size="14" fill="#1a2938">separadas</text>
+
+  <rect x="660" y="370" width="470" height="100" rx="12" fill="#fff6e6" stroke="#d97706" stroke-width="2"/>
+  <text x="895" y="402" text-anchor="middle" font-size="17" font-weight="700" fill="#b45309">Cron de hPanel</text>
+  <text x="895" y="428" text-anchor="middle" font-size="14" fill="#1a2938">trabajador_cron (cada minuto, más 30 s) · programador</text>
+  <text x="895" y="450" text-anchor="middle" font-size="14" fill="#1a2938">backup.sh diario 02:30 · registros en cron.log</text>
+
+  <!-- Externos -->
+  <rect x="40" y="380" width="260" height="120" rx="14" fill="#ffffff" stroke="#4a718f" stroke-width="2"/>
+  <text x="170" y="414" text-anchor="middle" font-size="17" font-weight="700" fill="#4a718f">Monitoreo externo</text>
+  <text x="170" y="442" text-anchor="middle" font-size="14" fill="#1a2938">/health/live cada 5 min</text>
+  <text x="170" y="464" text-anchor="middle" font-size="14" fill="#1a2938">/health/ready con token</text>
+
+  <rect x="350" y="540" width="390" height="120" rx="14" fill="#ffffff" stroke="#4a718f" stroke-width="2"/>
+  <text x="545" y="574" text-anchor="middle" font-size="17" font-weight="700" fill="#4a718f">Copias externas cifradas</text>
+  <text x="545" y="602" text-anchor="middle" font-size="14" fill="#1a2938">age/gpg con la llave pública del custodio</text>
+  <text x="545" y="624" text-anchor="middle" font-size="14" fill="#1a2938">30 diarias · 12 mensuales · restauración trimestral</text>
+
+  <rect x="770" y="540" width="390" height="120" rx="14" fill="#ffffff" stroke="#4a718f" stroke-width="2"/>
+  <text x="965" y="574" text-anchor="middle" font-size="17" font-weight="700" fill="#4a718f">SMTP y DNS del dominio</text>
+  <text x="965" y="602" text-anchor="middle" font-size="14" fill="#1a2938">SPF · DKIM · DMARC · SSL Let's Encrypt</text>
+  <text x="965" y="624" text-anchor="middle" font-size="14" fill="#1a2938">aviso de vencimiento a 15 días</text>
+
+  <g stroke="#4a718f" stroke-width="2.5" fill="none">
+    <path d="M300 205 L345 205" marker-end="url(#flecha)"/>
+    <path d="M610 165 L655 165" marker-end="url(#flecha)"/>
+    <path d="M775 200 L775 225" marker-end="url(#flecha)"/>
+    <path d="M660 285 L635 285" marker-end="url(#flecha)"/>
+    <path d="M300 440 L375 440" marker-end="url(#flecha)"/>
+    <path d="M545 470 L545 535" marker-end="url(#flecha)"/>
+    <path d="M895 470 L940 535" marker-end="url(#flecha)"/>
+  </g>
+</svg>

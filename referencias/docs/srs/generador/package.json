@@ -1,0 +1,19 @@
+{
+  "name": "generador-srs-produccion-cab",
+  "private": true,
+  "type": "module",
+  "description": "Genera el SRS de Produccion CAB en Word (.docx) a partir de las fuentes Markdown de docs/srs/fuente.",
+  "scripts": {
+    "diagramas": "node renderizar-diagramas.mjs",
+    "verificar": "node verificar-srs.mjs",
+    "generar": "node generar-docx.mjs",
+    "pdf": "powershell -NoProfile -ExecutionPolicy Bypass -File exportar-pdf.ps1",
+    "todo": "npm run diagramas && npm run verificar && npm run generar && npm run pdf"
+  },
+  "dependencies": {
+    "docx": "9.15.4",
+    "marked": "18.2.1",
+    "mupdf": "1.28.6",
+    "sharp": "0.35.5"
+  }
+}

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123b35">
+  <meta name="description" content="Gestión de producción del Centro Agropecuario de Buga. Prototipo de tableros, trazabilidad y administración.">
+  <title>Producción CAB · Tableros de gestión</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Ir al contenido</a>
+  <div id="app"><div class="boot"><span class="spinner"></span><h1>Producción CAB</h1><p>Preparando los tableros del centro…</p></div></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <dialog id="modal" aria-labelledby="modal-title"></dialog>
+  <div id="chart-tooltip" role="tooltip" hidden></div>
+  <input id="backup-file" type="file" accept="application/json,.json" hidden>
+  <script defer src="assets/app.bundle.js" onerror="document.querySelector('.boot h1').textContent='No se pudo cargar la aplicación';document.querySelector('.boot p').textContent='Conserva la carpeta assets junto a index.html y vuelve a abrirlo.';document.querySelector('.spinner').remove();"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+# Secretos y configuración local (RS-012): nunca versionar el .env real.
+.env
+.env.*
+!.env.example
+
+# Dependencias y herramientas descargadas
+/vendor/
+node_modules/
+/herramientas/composer.phar
+
+# Almacenamiento privado en tiempo de ejecución (se conservan solo los .gitkeep)
+/almacenamiento/**
+!/almacenamiento/**/
+!/almacenamiento/**/.gitkeep
+!/almacenamiento/.htaccess
+
+# Cachés de herramientas
+/.phpunit.cache/
+/.php-cs-fixer.cache
+/.phpstan-cache/
+
+# Prototipo y material de referencia: se versiona el código y la documentación,
+# no los binarios pesados ni los datos institucionales originales.
+/referencias/node_modules/
+/referencias/tmp/
+/referencias/*.rar
+/referencias/*.xlsx
+/referencias/*.docx
+/referencias/**/*.pdf
+/referencias/**/*.docx
+
+# Sistema y editores
+Thumbs.db
+.DS_Store
+/.idea/
+
+# Activos construidos por npm run construir (RNF-019: se generan en local y en la CI, no se versionan)
+/public/assets/css/
+/public/assets/js/
+/public/assets/vendor/
+/public/assets/fuentes/
+/public/assets/manifest.json
+/public/favicon-32.png
+/public/favicon.ico
+/public/icono-*.png
+/public/apple-touch-icon.png
+
+# Datos institucionales reales extraídos de los Excel del piloto (nombres de personas, referencias de pago y
+# facturas). El repositorio es público: estos archivos se conservan solo en el equipo local.
+/referencias/data/
+/referencias/assets/app.bundle.js
