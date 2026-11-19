@@ -21,7 +21,9 @@ cd "$TEMPORAL"
 "$COMPOSER" install --no-dev --optimize-autoloader --classmap-authoritative --no-interaction --no-progress --quiet
 npm ci --no-audit --no-fund --silent
 npm run --silent construir
-rm -rf node_modules referencias tests docs .github herramientas almacenamiento
+# De docs/ solo viajan las guías: son la ayuda en línea (RDOC-009).
+find docs -mindepth 1 -maxdepth 1 ! -name guias -exec rm -rf {} +
+rm -rf node_modules referencias tests .github herramientas almacenamiento
 rm -f .env .env.* phpunit.xml phpstan.neon* .php-cs-fixer* package-lock.json composer.lock.bak
 echo "${VERSION#v}" > VERSION
 git -C "$RAIZ" rev-parse HEAD > COMMIT

@@ -8,12 +8,16 @@
     "construir": "node herramientas/construir-activos.mjs",
     "vigilar:css": "tailwindcss -c tailwind.config.cjs -i recursos/css/app.css -o almacenamiento/construccion/app.css --watch",
     "lint:js": "eslint recursos/js herramientas",
-    "contraste": "node herramientas/verificar-contraste.mjs"
+    "contraste": "node herramientas/verificar-contraste.mjs",
+    "e2e": "playwright test",
+    "guias:pdf": "node herramientas/guias-pdf.mjs"
   },
   "devDependencies": {
     "@alpinejs/csp": "3.14.9",
-    "@fontsource/inter": "5.1.1",
+    "@axe-core/playwright": "4.10.1",
     "@eslint/js": "9.17.0",
+    "@fontsource/inter": "5.1.1",
+    "@playwright/test": "1.55.1",
     "esbuild": "0.24.2",
     "eslint": "9.17.0",
     "globals": "15.14.0",

@@ -70,7 +70,7 @@ ob_start(); ?>
         <?php if ($animales === []): ?>
             <p class="texto-secundario">Ningún animal cumple este filtro en el corte vigente.</p>
         <?php else: ?>
-            <div class="contenedor-tabla">
+            <div class="contenedor-tabla" tabindex="0" role="region" aria-label="Salud reproductiva del hato">
                 <table class="tabla">
                     <caption class="sr-only">Salud reproductiva: <?= $this->e($filtrosRapidos[$filtroSalud]) ?></caption>
                     <thead><tr><th scope="col">Animal</th><th scope="col">Lote</th><th scope="col">Estado reproductivo</th><th scope="col">Último parto</th><th scope="col">IEP</th><th scope="col">Días abiertos</th><th scope="col"><span class="sr-only">Detalle</span></th></tr></thead>

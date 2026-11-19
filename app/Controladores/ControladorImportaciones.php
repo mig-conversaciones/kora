@@ -199,7 +199,7 @@ final class ControladorImportaciones extends ControladorModulo
     {
         return [
             'titulo' => $titulo, 'sobretitulo' => 'Importación de BBDD', 'descripcion' => $descripcion,
-            'pestanas' => [['texto' => 'Lotes', 'ruta' => '/importaciones'], ['texto' => 'Acta de carga', 'ruta' => '/importaciones/acta']],
+            'pestanas' => [['texto' => 'Lotes', 'ruta' => '/importaciones'], ['texto' => 'Acta de carga', 'ruta' => '/importaciones/acta'], ['texto' => 'Carga inicial', 'ruta' => '/importaciones/carga-inicial', 'permiso' => ['carga_inicial.gestionar', 'carga_inicial.firmar']]],
             'migas' => [['texto' => 'Importaciones', 'url' => '/importaciones'], ['texto' => $titulo]],
         ];
     }

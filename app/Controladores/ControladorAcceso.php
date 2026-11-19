@@ -149,7 +149,9 @@ final class ControladorAcceso extends ControladorBase
     public function salir(Solicitud $solicitud): Respuesta
     {
         $this->autenticacion->cerrarSesion($solicitud, $this->sesion);
-        return $this->redirigir($solicitud, '/ingresar?aviso=salida');
+        // ASVS V14.3.1: al salir, el navegador descarta la caché y el almacenamiento del sitio (preferencias de la barra
+        // lateral incluidas). No se usa "cookies": la cookie de sesión ya se invalidó en el servidor y se borra aparte.
+        return $this->redirigir($solicitud, '/ingresar?aviso=salida')->conCabecera('Clear-Site-Data', '"cache", "storage"');
     }
 
     public function formularioActivacion(Solicitud $solicitud): Respuesta

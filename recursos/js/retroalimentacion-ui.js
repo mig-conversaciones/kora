@@ -353,6 +353,12 @@
     }, Math.max(0, (segundos - 120) * 1000));
   }
 
+  // Botones «Imprimir» de actas y guías (I8): delegado, porque la CSP no admite manejadores en línea.
+  document.addEventListener('click', (evento) => {
+    const boton = evento.target instanceof Element ? evento.target.closest('[data-imprimir]') : null;
+    if (boton) window.print();
+  });
+
   document.addEventListener('DOMContentLoaded', () => {
     if (window.htmx && movimientoReducido()) window.htmx.config.globalViewTransitions = false;
     vigilarSesion(Number(meta('sesion-expira-en')));

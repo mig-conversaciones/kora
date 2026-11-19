@@ -64,7 +64,7 @@
             </main>
             <footer class="pie">
                 <span>KORA · Centro Agropecuario de Buga</span>
-                <span>Proyecto Producción CAB · Iteración 2</span>
+                <span>Proyecto Producción CAB · versión <?= $this->e(trim((string) @file_get_contents(RAIZ . '/VERSION')) ?: 'en desarrollo') ?></span>
             </footer>
         </div>
     </div>

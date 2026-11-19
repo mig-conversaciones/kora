@@ -35,3 +35,10 @@ Estado al cierre de la I0: el desarrollo es local (MAMP). Los ítems que depende
 | 16 | Firewall de aplicaciones y protección contra bots; IP real del cliente detrás del proxy | Sin cambios en la I7 | Pendiente |
 | 17 | Prueba de restauración completa en staging (RDL-005) | `cli/respaldo.php simulacro` con acta, ensayado en local (2026-11-19, conforme) y en la CI en cada push | Pendiente: la prueba trimestral en staging con la llave del custodio |
 | 18 | Autorización escrita para las pruebas de carga en staging (RNF-PERF-015) | Scripts k6, dataset, validación de negocio y plantilla del informe (`tests/carga/`) | **Pendiente: bloquea la medición de RNF-PERF-003 a RNF-PERF-006** |
+
+## Ítems 19 y 20 del 4.8 (I8, «Endurecimiento, UAT y salida»)
+
+| # | Verificación | Qué quedó listo en la I8 | Estado en Hostinger |
+|---|---|---|---|
+| 19 | Sin `phpinfo` ni archivos de diagnóstico; ZAP *baseline* sin hallazgos altos | ZAP baseline y escaneo completo autenticado en cada push (trabajo «Navegador, accesibilidad y ZAP»); un riesgo alto bloquea. El paquete no lleva pruebas, herramientas ni documentación (salvo las guías). Las demostraciones de la vitrina responden 404 en producción | Pendiente: ZAP autenticado contra staging antes de la versión de producción (RS-016) |
+| 20 | Acta de salida con pruebas de humo, carga inicial verificada y lista ASVS firmada | Plantilla del acta (`docs/operacion/actas/plantilla-salida-produccion.md`), carga inicial con acta y huella (RF-094), lista ASVS generada con sección de firma | Pendiente: carga inicial en producción con los libros corregidos, firmas de la contraparte y del responsable de seguridad |

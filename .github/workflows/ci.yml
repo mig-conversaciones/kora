@@ -186,3 +186,123 @@ jobs:
         run: |
           php -r '$l = @file("/tmp/operacion.log", FILE_IGNORE_NEW_LINES) ?: ["Sin registro."]; $t = implode("\n", array_slice($l, -80));
             echo "::error title=Trabajo operacion::" . strtr($t, ["%" => "%25", "\r" => "%0D", "\n" => "%0A"]) . "\n";'
+
+  secretos:
+    # Búsqueda de secretos en todo el historial (RS-016). Cualquier hallazgo bloquea; el valor nunca se imprime.
+    name: Secretos (gitleaks)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: gitleaks 8.21.2 sobre el historial completo
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz | tar -xz -C /tmp gitleaks
+          /tmp/gitleaks git . --config .gitleaks.toml --redact --no-banner --exit-code 0 --report-format json --report-path /tmp/gitleaks.json
+          php .github/evaluar-seguridad.php gitleaks /tmp/gitleaks.json
+
+  navegador:
+    # Navegador real contra el servidor embebido de PHP con MariaDB 10.6 y el dataset «mini» (I8):
+    #   1. axe WCAG 2.2 AA y CSP en escritorio y móvil, y flujos E2E (RUI-002 a RUI-024, RS-007);
+    #   2. OWASP ZAP: baseline sin sesión y escaneo completo autenticado (RS-016). Un riesgo alto bloquea.
+    name: Navegador, accesibilidad y ZAP (MariaDB 10.6)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      bd:
+        image: mariadb:10.6
+        env:
+          MARIADB_ROOT_PASSWORD: raiz_ci
+          MARIADB_DATABASE: kora_pruebas
+          MARIADB_USER: kora_app
+          MARIADB_PASSWORD: clave_ci
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -praiz_ci"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      KORA_URL: http://127.0.0.1:8080
+      KORA_CUENTAS: /tmp/cuentas.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, mbstring, intl, sodium, zip, fileinfo, openssl
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Dependencias y activos
+        run: |
+          composer install --no-interaction --no-progress
+          npm ci
+          npm run construir
+          npx playwright install --with-deps chromium
+      - name: Entorno de staging local con el dataset «mini»
+        run: |
+          cp .env.example .env
+          sed -i "s#^APP_ENTORNO=.*#APP_ENTORNO=staging#; s#^APP_URL=.*#APP_URL=$KORA_URL#; s#^BD_NOMBRE=.*#BD_NOMBRE=kora_pruebas#; s#^BD_USUARIO=.*#BD_USUARIO=kora_app#; s#^BD_CONTRASENA=.*#BD_CONTRASENA=clave_ci#; s#^CORREO_TRANSPORTE=.*#CORREO_TRANSPORTE=archivo#" .env
+          sed -i "s#REEMPLAZAR_CON_32_BYTES_EN_BASE64#$(php -r 'echo base64_encode(random_bytes(32));')#g; s#REEMPLAZAR_CON_64_CARACTERES_HEX#$(php -r 'echo bin2hex(random_bytes(32));')#" .env
+          php cli/generar_dataset.php --base=kora_pruebas --escala=mini --preparar --cuentas=30 --usuarios-k6=$KORA_CUENTAS
+      - name: Servidor embebido de PHP
+        run: |
+          PHP_CLI_SERVER_WORKERS=4 nohup php -S 127.0.0.1:8080 -t public tests/seguridad/servidor.php > /tmp/servidor.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf $KORA_URL/health/live > /dev/null && break; sleep 1; done
+          curl -sf $KORA_URL/health/live
+      - name: Accesibilidad WCAG 2.2 AA, CSP y flujos E2E
+        run: npx playwright test
+      - name: Resumen de axe
+        if: always()
+        run: |
+          php -r '$n = 0; foreach (@file("almacenamiento/construccion/e2e/axe.jsonl") ?: [] as $l) { $r = json_decode($l, true); $n++;
+            foreach ($r["violaciones"] as $v) { echo "::error title=axe " . $v["regla"] . "::" . $r["proyecto"] . " " . $r["rol"] . " " . $r["ruta"] . ": " . $v["nodos"] . " nodo(s), " . $v["impacto"] . ", p. ej. " . $v["ejemplo"] . "\n"; } }
+            file_put_contents(getenv("GITHUB_STEP_SUMMARY"), "### axe\n{$n} pantallas auditadas (WCAG 2.2 AA).\n\n", FILE_APPEND);'
+      - name: Anotar las pruebas de navegador fallidas
+        if: failure()
+        run: |
+          php -r '$d = json_decode((string) @file_get_contents("almacenamiento/construccion/e2e/resultados.json"), true) ?: [];
+            $f = function (array $s) use (&$f) { foreach ($s["suites"] ?? [] as $x) { $f($x); } foreach ($s["specs"] ?? [] as $e) { foreach ($e["tests"] ?? [] as $t) { foreach ($t["results"] ?? [] as $r) {
+              if (($r["status"] ?? "") !== "passed" && ($r["status"] ?? "") !== "skipped") { $m = substr((string) ($r["error"]["message"] ?? ""), 0, 1500); echo "::error title=E2E " . $t["projectName"] . "::" . strtr($e["title"] . "\n" . $m, ["%" => "%25", "\r" => "%0D", "\n" => "%0A"]) . "\n"; } } } } };
+            foreach ($d["suites"] ?? [] as $s) { $f($s); }'
+          tail -n 40 /tmp/servidor.log | sed 's/^/servidor: /'
+      - name: Sesión para ZAP (ingreso real con CSRF)
+        run: |
+          CORREO=$(php -r '$c = json_decode(file_get_contents(getenv("KORA_CUENTAS")), true); foreach ($c as $x) { if ($x["rol"] === "lider_produccion_centro" && $x["centro"] === "9124") { echo $x["correo"]; break; } }')
+          CLAVE=$(php -r '$c = json_decode(file_get_contents(getenv("KORA_CUENTAS")), true); foreach ($c as $x) { if ($x["rol"] === "lider_produccion_centro" && $x["centro"] === "9124") { echo $x["contrasena"]; break; } }')
+          echo "::add-mask::$CLAVE"
+          CSRF=$(curl -s -c /tmp/zap.cookies $KORA_URL/ingresar | sed -n 's/.*name="_csrf" value="\([^"]*\)".*/\1/p' | head -n1)
+          curl -s -b /tmp/zap.cookies -c /tmp/zap.cookies -o /dev/null -w '%{http_code} %{redirect_url}\n' --data-urlencode "_csrf=$CSRF" --data-urlencode "correo=$CORREO" --data-urlencode "contrasena=$CLAVE" -H "Origin: $KORA_URL" $KORA_URL/ingresar
+          SESION=$(awk '$6 == "kora_sesion" { print $7 }' /tmp/zap.cookies)
+          test -n "$SESION"
+          echo "::add-mask::$SESION"
+          echo "ZAP_SESION=$SESION" >> "$GITHUB_ENV"
+          mkdir -p zap && chmod 777 zap
+      - name: ZAP baseline sin sesión
+        run: |
+          docker run --rm --network host -v "$PWD/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:2.16.1 \
+            zap-baseline.py -t "$KORA_URL/ingresar" -J base.json -r base.html -I -m 2
+      - name: ZAP escaneo completo autenticado
+        run: |
+          docker run --rm --network host -v "$PWD/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:2.16.1 \
+            zap-full-scan.py -t "$KORA_URL/" -J completo.json -r completo.html -I -m 3 \
+            -z "-config replacer.full_list(0).description=sesion -config replacer.full_list(0).enabled=true -config replacer.full_list(0).matchtype=REQ_HEADER -config replacer.full_list(0).matchstr=Cookie -config replacer.full_list(0).regex=false -config replacer.full_list(0).replacement=kora_sesion=$ZAP_SESION -config spider.postform=false"
+      - name: Evaluar ZAP (un riesgo alto bloquea)
+        if: always()
+        run: php .github/evaluar-seguridad.php zap zap/base.json zap/completo.json
+      - name: Informes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informes-navegador-zap
+          path: |
+            zap/*.html
+            zap/*.json
+            almacenamiento/construccion/e2e/axe.jsonl
+            almacenamiento/construccion/e2e/resultados.json
+          retention-days: 30

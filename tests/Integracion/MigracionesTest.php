@@ -28,9 +28,9 @@ final class MigracionesTest extends TestCase
         'recepciones_lote', 'salidas', 'transformaciones', 'conciliaciones_recaudo',
         'animales', 'cortes_hato', 'registros_reproductivos',
         'incidencias_calidad', 'exportaciones',
-        'respaldos', 'despliegues',
+        'respaldos', 'despliegues', 'cargas_iniciales',
     ];
-    private const TOTAL_MIGRACIONES = 14;
+    private const TOTAL_MIGRACIONES = 15;
 
     private BaseDatos $bd;
     private Migrador $migrador;
@@ -50,8 +50,8 @@ final class MigracionesTest extends TestCase
         self::assertCount(self::TOTAL_MIGRACIONES, $aplicadas);
         $esperadas = self::TABLAS_ESPERADAS;
         sort($esperadas);
-        self::assertSame($esperadas, $this->tablasPresentes(), 'Exactamente las tablas de las migraciones 001 a 014.');
-        self::assertSame('014_indices_listados', $this->migrador->ultimaAplicada());
+        self::assertSame($esperadas, $this->tablasPresentes(), 'Exactamente las tablas de las migraciones 001 a 015.');
+        self::assertSame('015_crear_cargas_iniciales', $this->migrador->ultimaAplicada());
         self::assertSame(1, (int) $this->bd->valor('SELECT COUNT(*) FROM cadena_auditoria'));
 
         self::assertCount(self::TOTAL_MIGRACIONES, $this->migrador->revertir(self::TOTAL_MIGRACIONES));

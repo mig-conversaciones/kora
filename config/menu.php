@@ -28,7 +28,7 @@ return [
             ['texto' => 'Producción y lotes', 'ruta' => '/produccion/recepciones', 'seccion' => '/produccion', 'icono' => 'caja', 'permiso' => ['recepciones.consultar', 'salidas.consultar', 'transformaciones.consultar']],
             ['texto' => 'Hato', 'ruta' => '/hato', 'icono' => 'hoja', 'permiso' => 'hato.consultar'],
             ['texto' => 'Calidad de datos', 'ruta' => '/calidad', 'icono' => 'alerta', 'permiso' => 'calidad.consultar'],
-            ['texto' => 'Importación de BBDD', 'ruta' => '/importaciones', 'icono' => 'carga', 'permiso' => ['asignaciones.importar', 'gastos.importar', 'recaudos.importar', 'procesos.importar', 'recepciones.importar', 'salidas.importar', 'hato.importar', 'catalogo.importar']],
+            ['texto' => 'Importación de BBDD', 'ruta' => '/importaciones', 'icono' => 'carga', 'permiso' => ['asignaciones.importar', 'gastos.importar', 'recaudos.importar', 'procesos.importar', 'recepciones.importar', 'salidas.importar', 'hato.importar', 'catalogo.importar', 'carga_inicial.gestionar', 'carga_inicial.firmar']],
         ],
     ],
     [
@@ -47,6 +47,7 @@ return [
             ['texto' => 'Mantenimiento', 'ruta' => '/sistema/mantenimiento', 'icono' => 'ajustes', 'permiso' => 'mantenimiento.gestionar'],
             ['texto' => 'Colas de trabajos', 'ruta' => '/sistema/colas', 'icono' => 'reloj', 'permiso' => 'sistema.colas'],
             ['texto' => 'Sistema de diseño', 'ruta' => '/sistema-diseno', 'icono' => 'paleta'],
+            ['texto' => 'Ayuda', 'ruta' => '/ayuda', 'icono' => 'info', 'autenticada' => true],
         ],
     ],
 ];

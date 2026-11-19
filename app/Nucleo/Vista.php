@@ -140,7 +140,13 @@ final class Vista
         if ($valor === null || is_array($valor) || (is_object($valor) && !method_exists($valor, '__toString'))) {
             return '';
         }
-        return htmlspecialchars((string) $valor, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+        return self::escapar((string) $valor);
+    }
+
+    /** El mismo escape que e(), para código fuera de las plantillas (p. ej. Markdown). */
+    public static function escapar(string $valor): string
+    {
+        return htmlspecialchars($valor, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
     }
 
     /** Pesos colombianos sin decimales y con separador de miles «.» (RUI-009): 3.045.000. */

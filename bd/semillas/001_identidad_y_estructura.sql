@@ -83,7 +83,19 @@ INSERT IGNORE INTO permisos (codigo, descripcion) VALUES
     ('sistema.funcionalidades', 'Gestionar funcionalidades configurables'),
     ('mantenimiento.gestionar', 'Activar y desactivar el modo mantenimiento'),
     ('mantenimiento.acceso_excepcional', 'Acceso autorizado durante el mantenimiento'),
-    ('soporte.vista_usuario', 'Vista de soporte de solo lectura');
+    ('soporte.vista_usuario', 'Vista de soporte de solo lectura'),
+    ('carga_inicial.gestionar', 'Conducir la carga inicial del piloto (RF-094)'),
+    ('carga_inicial.firmar', 'Firmar el acta de la carga inicial (RF-094)');
+
+-- Carga inicial (I8): la conduce la coordinación administrativa (Obs. 3) o el administrador funcional; el acta la
+-- firman la coordinación administrativa o el Grupo de Recaudo (anexo M.3).
+INSERT IGNORE INTO roles_permisos (rol_id, permiso_id)
+SELECT r.id, p.id FROM roles r JOIN permisos p ON p.codigo IN ('carga_inicial.gestionar', 'carga_inicial.firmar')
+WHERE r.codigo IN ('administrador', 'coordinacion_administrativa');
+
+INSERT IGNORE INTO roles_permisos (rol_id, permiso_id)
+SELECT r.id, p.id FROM roles r JOIN permisos p ON p.codigo = 'carga_inicial.firmar'
+WHERE r.codigo = 'grupo_recaudo';
 
 -- Asignación de permisos según la matriz de autorización (3.10, RAC-025).
 INSERT IGNORE INTO roles_permisos (rol_id, permiso_id)

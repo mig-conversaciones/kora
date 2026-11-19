@@ -21,7 +21,7 @@
                     <?php if (isset($entrada['ruta'])): ?>
                         <?php $seccion = $entrada['seccion'] ?? $entrada['ruta']; ?>
                         <?php $activa = $entrada['ruta'] === $rutaActual || ($seccion !== '/' && str_starts_with($rutaActual, $seccion . '/')); ?>
-                        <a class="menu-enlace" href="<?= $this->url($entrada['ruta']) ?>"<?= $activa ? ' aria-current="page"' : '' ?>>
+                        <a class="menu-enlace" href="<?= $this->url($entrada['ruta']) ?>" title="<?= $this->e($entrada['texto']) ?>"<?= $activa ? ' aria-current="page"' : '' ?>>
                             <?= $this->parcial('parciales/icono', ['nombre' => $entrada['icono']]) ?>
                             <span class="menu-texto"><?= $this->e($entrada['texto']) ?></span>
                         </a>

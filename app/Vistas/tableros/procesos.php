@@ -18,7 +18,7 @@ $enlaceModo = fn (string $m): string => ControladorTableros::enlace('/tableros/c
         <h2 id="titulo-ind002" class="titulo-tarjeta">IND_002 · Ejecución de los procesos de autoconsumo</h2>
         <div class="selector-tema" role="group" aria-label="Medir el avance en">
             <?php foreach (['pesos' => 'Pesos COP', 'unidades' => 'Unidades físicas'] as $clave => $texto): ?>
-                <a class="boton boton-pequeno" href="<?= $this->e($enlaceModo($clave)) ?>" hx-get="<?= $this->e($enlaceModo($clave)) ?>" hx-target="#seccion-procesos" hx-swap="outerHTML" aria-pressed="<?= $modo === $clave ? 'true' : 'false' ?>"><?= $this->e($texto) ?></a>
+                <a class="boton boton-pequeno" href="<?= $this->e($enlaceModo($clave)) ?>" hx-get="<?= $this->e($enlaceModo($clave)) ?>" hx-target="#seccion-procesos" hx-swap="outerHTML"<?= $modo === $clave ? ' aria-current="true"' : '' ?>><?= $this->e($texto) ?></a>
             <?php endforeach; ?>
         </div>
     </div>
@@ -41,7 +41,7 @@ $enlaceModo = fn (string $m): string => ControladorTableros::enlace('/tableros/c
                 </li>
             <?php endforeach; ?>
         </ul>
-        <div class="contenedor-tabla">
+        <div class="contenedor-tabla" tabindex="0" role="region" aria-label="Trazabilidad de los procesos de autoconsumo">
             <table class="tabla">
                 <caption class="sr-only">Trazabilidad de los procesos de autoconsumo</caption>
                 <thead>

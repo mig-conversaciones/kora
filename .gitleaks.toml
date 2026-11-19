@@ -1,0 +1,18 @@
+# Búsqueda de secretos de KORA (RS-016). Se usan las reglas por defecto de gitleaks; solo se exceptúan los marcadores
+# de .env.example y las credenciales desechables de los contenedores de la CI, que no protegen nada real.
+title = "KORA"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Marcadores de ejemplo y credenciales desechables de la CI"
+paths = [
+    '''(^|/)\.env\.example$''',
+    '''(^|/)package-lock\.json$''',
+    '''(^|/)composer\.lock$''',
+]
+regexes = [
+    '''REEMPLAZAR_CON_[A-Z0-9_]+''',
+    '''\b(clave_ci|raiz_ci)\b''',
+]

@@ -59,7 +59,7 @@ use App\Trabajos\LimpiezaPeriodica;
 
 $https = str_starts_with(Entorno::texto('APP_URL'), 'https://');
 // Última migración que este código espera; /health/ready y la salida del mantenimiento la comparan (06-04).
-$versionEsquema = '014';
+$versionEsquema = '015';
 $cola = static fn (): array => require RAIZ . '/config/cola.php';
 $seguridad = static fn (): array => require RAIZ . '/config/seguridad.php';
 $claveBinaria = static fn (string $variable): string => (string) base64_decode(Entorno::texto($variable), true);

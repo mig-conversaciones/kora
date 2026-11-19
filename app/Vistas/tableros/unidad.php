@@ -84,7 +84,7 @@ $derivado = (string) ($solicitud->consulta['derivado'] ?? 'global');
                     </div>
                     <details class="tabla-equivalente">
                         <summary>Tendencia por lote</summary>
-                        <div class="contenedor-tabla">
+                        <div class="contenedor-tabla" tabindex="0" role="region" aria-label="Tendencia por lote">
                             <table class="tabla">
                                 <thead><tr><th scope="col">Fecha</th><th scope="col">Lote</th><th scope="col">Derivado</th><th scope="col" class="numero">Litros</th><th scope="col" class="numero">Cantidad</th><th scope="col" class="numero">Rendimiento</th><th scope="col" class="numero">Aprovechamiento</th></tr></thead>
                                 <tbody>
@@ -131,7 +131,7 @@ $derivado = (string) ($solicitud->consulta['derivado'] ?? 'global');
             <?php if ($r['lotes'] === []): ?>
                 <p class="texto-secundario">No hay lotes recibidos en <?= $this->e($periodo) ?>.</p>
             <?php else: ?>
-                <div class="contenedor-tabla">
+                <div class="contenedor-tabla" tabindex="0" role="region" aria-label="Rotación de lotes">
                     <table class="tabla">
                         <thead><tr><th scope="col">Lote</th><th scope="col">Producto</th><th scope="col">Recepción</th><th scope="col" class="numero">Cantidad</th><th scope="col" class="numero">Saldo</th><th scope="col">Estado</th><th scope="col" class="numero">Días</th></tr></thead>
                         <tbody>

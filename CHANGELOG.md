@@ -2,6 +2,53 @@
 
 Formato basado en *Keep a Changelog*, con versionado semántico (RNF-015).
 
+## [0.9.0] — Iteración 8 «Endurecimiento, UAT y salida» (sin publicar)
+
+### Agregado
+
+- **Carga inicial guiada del piloto** (RF-094, RDL-011):
+  - `ServicioCargaInicial` y la migración 015 (`cargas_iniciales`);
+  - pantalla **Importación de BBDD > Carga inicial** con los 8 pasos en orden y la copia cifrada al iniciar;
+  - verificación de filas y sumas, en total y por unidad, entre el archivo y lo vigente en la base, con las filas rechazadas;
+  - acta imprimible con huella SHA-256 y firma con reautenticación, que vuelve a verificar antes de firmar;
+  - anulación con motivo, y permisos `carga_inicial.gestionar` y `carga_inicial.firmar`.
+- **Ensayo con los libros reales:** 7 fuentes obligatorias. Coinciden 5. El catálogo tiene 20 filas rechazadas y la base de ventas 1, así que la carga queda con diferencias hasta corregirlas (acta en `docs/operacion/actas/`).
+- **Lista ASVS 5.0.0 nivel 2** (RS-001, RGO-009):
+  - `docs/seguridad/asvs.md`, generada desde el CSV oficial y `asvs-estado.csv`: 210 requisitos (154 cumplen, 9 parciales, 13 de staging, 4 decisiones y 30 no aplican);
+  - inventarios criptográfico y de registros, y sección de firma;
+  - `ListaAsvsTest` la mantiene completa y al día.
+- **CI de seguridad y navegador** (RS-016, anexo M.1):
+  - trabajo «Secretos» con gitleaks 8.21.2 sobre todo el historial;
+  - trabajo «Navegador, accesibilidad y ZAP» con Playwright y axe (WCAG 2.2 AA en escritorio y móvil, CSP y flujos de teclado) y OWASP ZAP baseline más el escaneo completo autenticado;
+  - un riesgo alto bloquea, y los hallazgos quedan como anotaciones.
+- **Ayuda en línea y guías** (RDOC-009):
+  - `/ayuda` con 9 guías por rol de `docs/guias/` (primeros pasos, cinco roles, administración, carga inicial y operación), renderizadas con un Markdown mínimo que escapa todo;
+  - PDF desde la misma fuente (`npm run guias:pdf`);
+  - el paquete de despliegue lleva las guías.
+- **Salida a producción:**
+  - plan de UAT con los casos de las observaciones 1 a 6;
+  - plan de capacitación por rol;
+  - registro de los supuestos de 2.7;
+  - informe de la auditoría WCAG;
+  - plantilla del acta de salida (M7).
+- ADR-022.
+
+### Cambiado
+
+- Al salir se envía `Clear-Site-Data` (caché y almacenamiento), por ASVS V14.3.1.
+- La demostración «respuesta lenta» de la vitrina responde 404 en producción, igual que la de la cola (ASVS V15.2.3).
+- La pestaña activa de un módulo es la de ruta más larga que coincide: «Carga inicial» ya no marca también «Lotes».
+- El pie de página muestra la versión en lugar de la iteración.
+- `scripts/desplegar.sh` y `scripts/backup.sh`: un `grep` sin coincidencias ya no aborta con `pipefail`. Lo encontró el primer ensayo del trabajo `operacion`.
+- Las pestañas de los módulos aceptan una lista de permisos.
+
+### Corregido (accesibilidad, encontrado por axe)
+
+- Contraste del código de las páginas de error (1.4.3).
+- `aria-pressed` en enlaces del tablero central: ahora `aria-current` (4.1.2).
+- Cinco tablas desplazables de los tableros sin foco de teclado (2.1.1).
+- Enlaces del menú contraído sin nombre accesible (2.4.4).
+
 ## [0.8.0] — Iteración 7 «Rendimiento y operación» (sin publicar)
 
 ### Agregado

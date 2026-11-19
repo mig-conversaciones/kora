@@ -82,7 +82,7 @@ $enlaceTecnico = static fn (array $u): ?string => $puedeTecnico ? ControladorTab
                     </figure>
                     <details class="tabla-equivalente">
                         <summary>Ver la tabla de datos del gráfico</summary>
-                        <div class="contenedor-tabla">
+                        <div class="contenedor-tabla" tabindex="0" role="region" aria-label="Tabla de datos de IND_001 por unidad">
                             <table class="tabla">
                                 <caption class="sr-only">IND_001 por unidad, periodo <?= $this->e($periodo) ?></caption>
                                 <thead><tr><th scope="col">Unidad</th><th scope="col" class="numero">Asignación</th><th scope="col" class="numero">Venta directa</th><th scope="col" class="numero">Autoconsumo</th><th scope="col" class="numero">Total</th><th scope="col" class="numero">Cobertura</th></tr></thead>

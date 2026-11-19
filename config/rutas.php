@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Controladores\ControladorAcceso;
+use App\Controladores\ControladorAyuda;
 use App\Controladores\ControladorCalidad;
+use App\Controladores\ControladorCargaInicial;
 use App\Controladores\ControladorCatalogos;
 use App\Controladores\ControladorColas;
 use App\Controladores\ControladorCsp;
@@ -172,6 +174,13 @@ return static function (Enrutador $r): void {
     $r->agregar('POST', '/importaciones', [ControladorImportaciones::class, 'crear'], '', ['autenticada' => true]);
     $r->agregar('GET', '/importaciones/acta', [ControladorImportaciones::class, 'acta'], '', ['autenticada' => true]);
     $r->agregar('GET', '/importaciones/plantillas/{fuente}', [ControladorImportaciones::class, 'plantilla'], '', ['autenticada' => true]);
+    // Carga inicial guiada del piloto (I8, RF-094, RDL-011). La consulta la decide el controlador (gestionar o firmar).
+    $r->agregar('GET', '/importaciones/carga-inicial', [ControladorCargaInicial::class, 'inicio'], '', ['autenticada' => true]);
+    $r->agregar('POST', '/importaciones/carga-inicial', [ControladorCargaInicial::class, 'iniciar'], 'carga_inicial.gestionar', ['limite' => 'administracion']);
+    $r->agregar('GET', '/importaciones/carga-inicial/{ulid}/acta', [ControladorCargaInicial::class, 'acta'], '', ['autenticada' => true]);
+    $r->agregar('POST', '/importaciones/carga-inicial/{ulid}/verificar', [ControladorCargaInicial::class, 'verificar'], 'carga_inicial.gestionar', ['limite' => 'administracion']);
+    $r->agregar('POST', '/importaciones/carga-inicial/{ulid}/firmar', [ControladorCargaInicial::class, 'firmar'], 'carga_inicial.firmar', ['reautenticacion' => true]);
+    $r->agregar('POST', '/importaciones/carga-inicial/{ulid}/anular', [ControladorCargaInicial::class, 'anular'], 'carga_inicial.gestionar', ['reautenticacion' => true]);
     $r->agregar('GET', '/importaciones/{ulid}', [ControladorImportaciones::class, 'detalle'], '', ['autenticada' => true]);
     $r->agregar('GET', '/importaciones/{ulid}/estado', [ControladorImportaciones::class, 'estado'], '', ['autenticada' => true]);
     $r->agregar('GET', '/importaciones/{ulid}/errores', [ControladorImportaciones::class, 'errores'], '', ['autenticada' => true]);
@@ -197,6 +206,10 @@ return static function (Enrutador $r): void {
     $r->agregar('POST', '/sistema/mantenimiento/desactivar', [ControladorMantenimiento::class, 'desactivar'], 'mantenimiento.gestionar', ['exceptuadaMantenimiento' => true, 'reautenticacion' => true]);
     $r->agregar('GET', '/sistema/colas', [ControladorColas::class, 'mostrar'], 'sistema.colas');
     $r->agregar('POST', '/sistema/colas/{ulid}/{accion}', [ControladorColas::class, 'operar'], 'sistema.colas', ['limite' => 'administracion']);
+
+    // Ayuda en línea (I8, RDOC-009): guías por rol de docs/guias, imprimibles en PDF.
+    $r->agregar('GET', '/ayuda', [ControladorAyuda::class, 'indice'], '', ['autenticada' => true]);
+    $r->agregar('GET', '/ayuda/{clave}', [ControladorAyuda::class, 'guia'], '', ['autenticada' => true]);
 
     // Vitrina del sistema de diseño (hito M1). La demostración de la cola solo responde fuera de producción.
     $r->agregar('GET', '/sistema-diseno', [ControladorSistemaDiseno::class, 'mostrar'], '', ['publica' => true]);

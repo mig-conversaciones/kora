@@ -105,6 +105,8 @@ final class ControladorSistemaDiseno extends ControladorBase
     /** Espera 1,2 s para que el esqueleto (umbral de 300 ms) sea visible (RUI-016). */
     private function lento(Solicitud $solicitud): Respuesta
     {
+        // Retiene un proceso de PHP 1,2 s sin sesión: en producción sería un vector de agotamiento (ASVS V15.2.3).
+        $this->exigirFueraDeProduccion();
         usleep(1_200_000);
         return $this->renderizar($solicitud, 'sistema_diseno/tabla_demostracion', 'sistema_diseno/tabla_demostracion', [
             'filas' => [
