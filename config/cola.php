@@ -7,9 +7,9 @@ declare(strict_types=1);
  * carga (RNF-PERF-004) y los límites reales del plan Hostinger Cloud.
  *
  * Tipos registrados: correo, limpieza y demostración (I1); verificación y exportación de la auditoría (I2);
- * recálculo de la bandeja de calidad (I4); validación, aplicación y reversión de importaciones (I5). Los demás tipos
- * de la v1 (exportación, caché, seguridad, capacitación) se registran en la iteración que entrega su manejador; un
- * tipo no registrado nunca se encola (ErrorDefinitivo).
+ * recálculo de la bandeja de calidad (I4); validación, aplicación y reversión de importaciones (I5); exportaciones
+ * XLSX, CSV y PDF (I6). Los demás tipos de la v1 (caché, seguridad, capacitación) se registran en la iteración que
+ * entrega su manejador; un tipo no registrado nunca se encola (ErrorDefinitivo).
  */
 
 use App\Nucleo\Entorno;
@@ -17,6 +17,8 @@ use App\Trabajos\AplicarImportacion;
 use App\Trabajos\DemostracionProgreso;
 use App\Trabajos\EnviarCorreo;
 use App\Trabajos\ExportarLoteAuditoria;
+use App\Trabajos\ExportarPdf;
+use App\Trabajos\ExportarXlsx;
 use App\Trabajos\LimpiezaPeriodica;
 use App\Trabajos\RecalcularCalidad;
 use App\Trabajos\RevertirImportacion;
@@ -66,6 +68,9 @@ return [
         'importacion.validar' => $tipo(ValidarImportacion::class, 'importacion', 3, 120),
         'importacion.aplicar' => $tipo(AplicarImportacion::class, 'importacion', 5, 120),
         'importacion.revertir' => $tipo(RevertirImportacion::class, 'importacion', 3, 120),
+        // I6: exportaciones de tableros y listados (RF-080, RF-081), en la cola de reportes (04-04a).
+        'exportacion.xlsx' => $tipo(ExportarXlsx::class, 'reportes', 3, 120),
+        'exportacion.pdf' => $tipo(ExportarPdf::class, 'reportes', 3, 180),
         // Solo fuera de producción: ejercita progreso, latidos y bloques desde /sistema-diseno.
         'demostracion.progreso' => $tipo(DemostracionProgreso::class, 'predeterminada', 3, 60, false, 5),
     ],

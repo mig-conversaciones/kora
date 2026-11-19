@@ -15,6 +15,7 @@
         "ext-sodium": "*",
         "ext-zip": "*",
         "chillerlan/php-qrcode": "^5.0",
+        "dompdf/dompdf": "^3.0",
         "openspout/openspout": "^4.28",
         "phpmailer/phpmailer": "^6.9"
     },

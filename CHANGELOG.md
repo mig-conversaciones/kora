@@ -2,6 +2,35 @@
 
 Formato basado en *Keep a Changelog*, con versionado semántico (RNF-015).
 
+## [0.7.0] — Iteración 6 «Tableros e indicadores» (sin publicar)
+
+### Agregado
+
+- **Tablero central** (`/tableros/central`, RF-062 a RF-072):
+  - Filtros validados en el servidor y reflejados en la URL: vigencia, desde y hasta, unidad del alcance, producto o concepto, y canal.
+  - Seis KPI con nota y número de registros.
+  - IND_001: barras combinadas por unidad en SVG accesible, con tabla equivalente.
+  - IND_002: bullet por proceso, en pesos o unidades.
+  - Estado de la información y aviso de conciliación.
+  - El líder de unidad solo ve sus unidades (Obs. 4).
+- **Tablero técnico de Ganadería** (`/tableros/unidad/GAN`, RF-073 a RF-079):
+  - Interruptor de práctica.
+  - IND_003 con anillo y panel de salud reproductiva con filtros rápidos.
+  - IND_08 con velocímetro y selector de derivado.
+  - IND_12 de rotación e IND_17 de costo por litro.
+  - Las demás unidades muestran «Tablero técnico en preparación».
+- **Caché de tableros** versionada por centro, alcance, filtros, datos y cálculo (RNF-PERF-012).
+- **Exportaciones** XLSX, CSV y PDF (RF-080 a RF-082):
+  - Se generan con los trabajos `exportacion.xlsx` y `exportacion.pdf` en la cola `reportes`.
+  - Solo las descarga su autor, durante 24 h, con `no-store`; la limpieza borra las vencidas.
+- **Oráculos de no regresión** (`OraculosIndicadoresTest`, RF-066): escenario del centro, escenario de capacitación y libros reales cuando están en la máquina.
+- ADR-020, runbook de tableros y exportaciones, y borrador del plan de carga (RNF-PERF-001).
+- **Dependencia:** `dompdf/dompdf` ^3.0, solo en el trabajador.
+
+### Corregido
+
+- **Importación del presupuesto:** un componente vacío (mantenimiento, alimentación o materiales) vale 0. Antes se rechazaban Agrícola y Hortalizas, que no tienen semovientes.
+
 ## [0.6.0] — Iteración 5 «Importación y recaudos» (sin publicar)
 
 ### Agregado

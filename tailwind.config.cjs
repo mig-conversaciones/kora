@@ -4,7 +4,7 @@
  * @type {import('tailwindcss').Config}
  */
 module.exports = {
-  content: ['./app/Vistas/**/*.php', './recursos/js/**/*.js'],
+  content: ['./app/Vistas/**/*.php', './app/Tableros/**/*.php', './recursos/js/**/*.js'],
   // El modo oscuro lo resuelven los tokens; la variante dark: queda para casos puntuales con tema explícito.
   darkMode: ['selector', '[data-tema="oscuro"]'],
   theme: {

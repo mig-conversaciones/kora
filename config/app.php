@@ -12,6 +12,7 @@ use App\Cola\ConductorCola;
 use App\Cola\ConductorColaMysql;
 use App\Cola\DespachadorCola;
 use App\Cola\Trabajador;
+use App\Controladores\ControladorExportaciones;
 use App\Controladores\ControladorSalud;
 use App\Controladores\ControladorSistemaDiseno;
 use App\Controladores\ControladorTrabajos;
@@ -48,6 +49,8 @@ use App\Servicios\ServicioQr;
 use App\Servicios\ServicioSegundoFactor;
 use App\Servicios\ServicioTokensCuenta;
 use App\Servicios\ServicioTotp;
+use App\Tableros\ServicioExportacion;
+use App\Tableros\ServicioIndicadores;
 use App\Trabajos\ExportarLoteAuditoria;
 use App\Trabajos\LimpiezaPeriodica;
 
@@ -139,6 +142,14 @@ return [
         ),
         // Libros de importación en almacenamiento privado, fuera de public/ (RF-084, RS-011).
         ServicioCargaArchivos::class => static fn (): ServicioCargaArchivos => new ServicioCargaArchivos(RAIZ . '/almacenamiento/importaciones'),
+        ServicioExportacion::class => static fn (Contenedor $c): ServicioExportacion => new ServicioExportacion(
+            $c->obtener(BaseDatos::class),
+            $c->obtener(ServicioIndicadores::class),
+            $c->obtener(DespachadorCola::class),
+            $c->obtener(ServicioAuditoria::class),
+            $c->obtener(Vista::class),
+            RAIZ . '/almacenamiento/exportaciones',
+        ),
         ExportarLoteAuditoria::class => static fn (Contenedor $c): ExportarLoteAuditoria => new ExportarLoteAuditoria(
             $c->obtener(BaseDatos::class),
             $c->obtener(Cifrador::class),
@@ -203,6 +214,7 @@ return [
             $cola(),
             Entorno::entero('CACHE_TAMANO_MAXIMO_MB', 200) * 1048576,
             RAIZ . '/almacenamiento/correos',
+            $c->obtener(ServicioExportacion::class),
         ),
 
         // Controladores con valores escalares
@@ -213,6 +225,12 @@ return [
             Entorno::texto('TOKEN_MONITOREO'),
             $versionEsquema,
             $cola()['alertas'],
+        ),
+        ControladorExportaciones::class => static fn (Contenedor $c): ControladorExportaciones => new ControladorExportaciones(
+            $c->obtener(Vista::class),
+            $c->obtener(ServicioExportacion::class),
+            $c->obtener(ServicioIndicadores::class),
+            $cola()['consulta_periodica_segundos'],
         ),
         ControladorTrabajos::class => static fn (Contenedor $c): ControladorTrabajos => new ControladorTrabajos(
             $c->obtener(Vista::class),

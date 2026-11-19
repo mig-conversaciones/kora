@@ -8,6 +8,7 @@ use App\Cola\ContextoTrabajo;
 use App\Cola\ManejadorTrabajo;
 use App\Nucleo\BaseDatos;
 use App\Nucleo\Cache;
+use App\Tableros\ServicioExportacion;
 
 /**
  * Limpieza periódica (tipo mantenimiento.limpieza; RF-Q-015, RDL-010, RNF-PERF-012). La encola el programador:
@@ -28,6 +29,7 @@ final class LimpiezaPeriodica implements ManejadorTrabajo
         private readonly array $config,
         private readonly int $cacheMaximoBytes,
         private readonly string $directorioCorreos,
+        private readonly ?ServicioExportacion $exportaciones = null,
     ) {
     }
 
@@ -42,6 +44,8 @@ final class LimpiezaPeriodica implements ManejadorTrabajo
             ),
             'sesiones' => $this->borrarPorLotes('DELETE FROM sesiones WHERE expira_absoluta_en < UTC_TIMESTAMP(3) - INTERVAL 1 DAY'),
         ];
+        // Exportaciones de más de 24 h (RF-082): el archivo se borra y el enlace deja de funcionar.
+        $resultado['exportaciones'] = $this->exportaciones?->limpiarVencidas() ?? 0;
         $contexto->latido(30, 'Registros de seguridad vencidos depurados.');
         if ($alcance === 'diaria') {
             $retencion = $this->config['retencion'];

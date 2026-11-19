@@ -85,7 +85,11 @@ final class FuentePresupuesto extends FuenteImportacion
         }
         $datos = ['unidad_id' => $unidad, 'vigencia' => (int) $contexto->opcion('vigencia')];
         foreach (['valor_total', 'mantenimiento', 'alimentacion', 'materiales_formacion'] as $campo) {
-            $numero = Normalizador::numero($valores[$campo] ?? 0) ?? null;
+            // Un componente vacío es 0: las unidades sin semovientes dejan en blanco «Alimentación» (libro real).
+            // El valor total vacío sí es un error.
+            $crudo = $valores[$campo] ?? null;
+            $vacio = $crudo === null || (is_string($crudo) && trim($crudo) === '');
+            $numero = $vacio ? ($campo === 'valor_total' ? null : '0.00') : Normalizador::numero($crudo);
             if ($numero === null) {
                 self::error($errores, $campo, 'Escribe un valor en pesos mayor o igual que 0.');
             }

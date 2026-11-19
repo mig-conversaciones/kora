@@ -8,6 +8,7 @@ use App\Controladores\ControladorCatalogos;
 use App\Controladores\ControladorColas;
 use App\Controladores\ControladorCsp;
 use App\Controladores\ControladorCuenta;
+use App\Controladores\ControladorExportaciones;
 use App\Controladores\ControladorFinanzas;
 use App\Controladores\ControladorHato;
 use App\Controladores\ControladorImportaciones;
@@ -17,6 +18,7 @@ use App\Controladores\ControladorProduccion;
 use App\Controladores\ControladorRecaudos;
 use App\Controladores\ControladorSalud;
 use App\Controladores\ControladorSistemaDiseno;
+use App\Controladores\ControladorTableros;
 use App\Controladores\ControladorTrabajos;
 use App\Controladores\ControladorUsuarios;
 use App\Nucleo\Enrutador;
@@ -145,6 +147,17 @@ return static function (Enrutador $r): void {
     $r->agregar('GET', '/recaudos/diferencias', [ControladorRecaudos::class, 'diferencias'], 'recaudos.conciliar');
     $r->agregar('GET', '/recaudos/{id}/conciliar', [ControladorRecaudos::class, 'conciliacion'], 'recaudos.conciliar');
     $r->agregar('POST', '/recaudos/{id}/conciliar', [ControladorRecaudos::class, 'conciliar'], 'recaudos.conciliar');
+
+    // Tableros (I6, RF-062 a RF-079). El alcance y la unidad se validan en el controlador (RF-072).
+    $r->agregar('GET', '/tableros/central', [ControladorTableros::class, 'central'], 'tablero_central.consultar');
+    $r->agregar('GET', '/tableros/central/procesos', [ControladorTableros::class, 'procesos'], 'tablero_central.consultar');
+    $r->agregar('GET', '/tableros/unidad/{codigo}', [ControladorTableros::class, 'unidad'], 'tablero_unidad.consultar');
+    $r->agregar('GET', '/tableros/unidad/{codigo}/hato', [ControladorTableros::class, 'hato'], 'tablero_unidad.consultar');
+
+    // Exportaciones (I6, RF-080 a RF-082): solo el autor descarga, durante 24 h.
+    $r->agregar('POST', '/exportaciones', [ControladorExportaciones::class, 'solicitar'], 'exportaciones.solicitar', ['limite' => 'administracion']);
+    $r->agregar('GET', '/exportaciones/{ulid}', [ControladorExportaciones::class, 'estado'], 'exportaciones.solicitar');
+    $r->agregar('GET', '/exportaciones/{ulid}/descargar', [ControladorExportaciones::class, 'descargar'], 'exportaciones.solicitar');
 
     // Bandeja de calidad (I4, RF-058, RF-059).
     $r->agregar('GET', '/calidad', [ControladorCalidad::class, 'bandeja'], 'calidad.consultar');

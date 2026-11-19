@@ -14,8 +14,8 @@ return [
         'grupo' => 'Vista general',
         'entradas' => [
             ['texto' => 'Inicio', 'ruta' => '/', 'icono' => 'inicio'],
-            ['texto' => 'Tablero central', 'icono' => 'tablero', 'iteracion' => 'I6'],
-            ['texto' => 'Ganadería — Hato El Milagroso', 'icono' => 'hoja', 'iteracion' => 'I6'],
+            ['texto' => 'Tablero central', 'ruta' => '/tableros/central', 'icono' => 'tablero', 'permiso' => 'tablero_central.consultar'],
+            ['texto' => 'Ganadería — Hato El Milagroso', 'ruta' => '/tableros/unidad/GAN', 'icono' => 'hoja', 'permiso' => 'tablero_unidad.consultar'],
         ],
     ],
     [

@@ -23,3 +23,4 @@ Formato del Anexo D (D.5) del SRS. Un ADR aceptado no se edita: se reemplaza por
 | [ADR-017](017-modulos-de-gestion.md) | Módulos de gestión con montos decimales exactos y reglas de bloqueo que se activan con el esquema | Aceptado |
 | [ADR-018](018-operacion-productiva.md) | Operación productiva con reglas puras, bloqueo del lote y transacción única para la transformación | Aceptado |
 | [ADR-019](019-importacion-asistida.md) | Importación asistida por fuentes, con lotes validados en la cola y aplicación reanudable | Aceptado |
+| [ADR-020](020-tableros-e-indicadores.md) | Tableros con indicadores calculados en SQL sobre el alcance, caché versionada, SVG del servidor y exportaciones en la cola | Aceptado |
