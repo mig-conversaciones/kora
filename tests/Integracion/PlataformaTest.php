@@ -48,7 +48,10 @@ final class PlataformaTest extends TestCase
 
     protected function setUp(): void
     {
-        foreach (['trabajos_fallidos', 'trabajos', 'estado_circuitos', 'eventos_auditoria', 'configuracion_sistema', 'notificaciones', 'usuarios_roles', 'usuarios', 'roles'] as $tabla) {
+        // Independiente del orden de las clases: primero las tablas hijas de usuarios y roles.
+        foreach (['trabajos_fallidos', 'trabajos', 'estado_circuitos', 'eventos_auditoria', 'configuracion_sistema', 'notificaciones',
+            'claves_idempotencia', 'codigos_respaldo_2fa', 'tokens_cuenta', 'sesiones', 'limites_tasa', 'usuarios_unidades', 'usuarios_roles',
+            'roles_permisos', 'usuarios', 'roles'] as $tabla) {
             self::$bd->ejecutar("DELETE FROM {$tabla}");
         }
         $this->temporal = sys_get_temp_dir() . '/kora-plataforma-' . bin2hex(random_bytes(4));

@@ -204,7 +204,7 @@ final class ControladorFinanzas extends ControladorModulo
         try {
             $this->periodos->reabrir($solicitud, ServicioCatalogos::centro($solicitud), (int) $anio, (int) $mes, (string) ($solicitud->cuerpo['motivo'] ?? ''));
         } catch (ErrorValidacion $error) {
-            return $this->validacion($lista, $error, 'finanzas/periodos', $this->datosPeriodos($lista) + ['mesConError' => (int) $mes], $this->meta('Cierres de periodo'));
+            return $this->validacion($lista, $error, 'finanzas/periodos', ['mesConError' => (int) $mes] + $this->datosPeriodos($lista), $this->meta('Cierres de periodo'));
         }
         return $this->trasGuardar($this->pantalla($lista, 'finanzas/periodos', $this->datosPeriodos($lista), $this->meta('Cierres de periodo')), '/finanzas/periodos?vigencia=' . (int) $anio, 'Periodo reabierto; la reapertura quedó auditada.');
     }

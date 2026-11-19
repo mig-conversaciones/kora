@@ -37,7 +37,8 @@ abstract class ControladorModulo extends ControladorBase
     protected function validacion(Solicitud $solicitud, \App\Nucleo\ErrorValidacion $error, string $fragmento, array $datos, array $meta): Respuesta
     {
         $valores = $solicitud->cuerpo;
-        unset($valores['_csrf'], $valores['secreto'], $valores['contrasena']);
+        // Ni secretos ni datos personales que no se guardan en claro (la identificación del pagador, RF-034).
+        unset($valores['_csrf'], $valores['secreto'], $valores['contrasena'], $valores['identificacion']);
         return $this->pantalla($solicitud, $fragmento, ['valores' => $valores, 'errores' => $error->errores()] + $datos, $meta, 422);
     }
 

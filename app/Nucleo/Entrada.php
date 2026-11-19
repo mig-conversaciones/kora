@@ -76,6 +76,55 @@ final class Entrada
         return $na <=> $nb;
     }
 
+    /**
+     * Decimal canónico (puede venir de la base: «12.500») a unidades enteras de 10^-$decimales. Admite signo.
+     */
+    public static function aUnidades(string $valor, int $decimales): int
+    {
+        $negativo = str_starts_with($valor, '-');
+        [$e, $f] = array_pad(explode('.', ltrim($valor, '-+'), 2), 2, '');
+        $unidades = (int) $e * 10 ** $decimales + (int) str_pad(substr($f, 0, $decimales), $decimales, '0');
+        return $negativo ? -$unidades : $unidades;
+    }
+
+    /** Inverso de aUnidades(): «12500» con 3 decimales → «12.500». */
+    public static function desdeUnidades(int $unidades, int $decimales): string
+    {
+        $signo = $unidades < 0 ? '-' : '';
+        $absoluto = abs($unidades);
+        if ($decimales === 0) {
+            return $signo . $absoluto;
+        }
+        $base = 10 ** $decimales;
+        return $signo . intdiv($absoluto, $base) . '.' . str_pad((string) ($absoluto % $base), $decimales, '0', STR_PAD_LEFT);
+    }
+
+    /** Suma con la precisión indicada (cantidades de 3 decimales, montos de 2). */
+    public static function sumarCon(int $decimales, string ...$valores): string
+    {
+        $total = 0;
+        foreach ($valores as $valor) {
+            $total += self::aUnidades($valor, $decimales);
+        }
+        return self::desdeUnidades($total, $decimales);
+    }
+
+    /**
+     * Cantidad (3 decimales) × precio unitario (2 decimales), redondeado a 2 decimales con medio hacia arriba
+     * (RF-043, RBD-015). Null si el resultado no cabe en DECIMAL(15,2).
+     */
+    public static function valorSalida(string $cantidad, string $precio): ?string
+    {
+        $milesimas = self::aUnidades($cantidad, 3);
+        $centavosPrecio = self::aUnidades($precio, 2);
+        // Cota explícita en lugar de dejar que el producto desborde a float.
+        if ($milesimas !== 0 && abs($centavosPrecio) > intdiv(PHP_INT_MAX - 500, abs($milesimas))) {
+            return null;
+        }
+        $centavos = intdiv($milesimas * $centavosPrecio + 500, 1000);
+        return $centavos > 999_999_999_999_99 ? null : self::desdeUnidades($centavos, 2);
+    }
+
     /** Suma de decimales canónicos en centavos enteros (hasta 13 dígitos enteros cabe en int de 64 bits). */
     public static function sumar(string ...$valores): string
     {

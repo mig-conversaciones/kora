@@ -3,13 +3,17 @@
 declare(strict_types=1);
 
 use App\Controladores\ControladorAcceso;
+use App\Controladores\ControladorCalidad;
 use App\Controladores\ControladorCatalogos;
 use App\Controladores\ControladorColas;
 use App\Controladores\ControladorCsp;
 use App\Controladores\ControladorCuenta;
 use App\Controladores\ControladorFinanzas;
+use App\Controladores\ControladorHato;
 use App\Controladores\ControladorInicio;
 use App\Controladores\ControladorMantenimiento;
+use App\Controladores\ControladorProduccion;
+use App\Controladores\ControladorRecaudos;
 use App\Controladores\ControladorSalud;
 use App\Controladores\ControladorSistemaDiseno;
 use App\Controladores\ControladorTrabajos;
@@ -98,6 +102,48 @@ return static function (Enrutador $r): void {
     $r->agregar('GET', '/finanzas/periodos', [ControladorFinanzas::class, 'periodos'], 'periodos.cerrar');
     $r->agregar('POST', '/finanzas/periodos/{anio}/{mes}/cerrar', [ControladorFinanzas::class, 'cerrarPeriodo'], 'periodos.cerrar');
     $r->agregar('POST', '/finanzas/periodos/{anio}/{mes}/reabrir', [ControladorFinanzas::class, 'reabrirPeriodo'], 'periodos.cerrar', ['reautenticacion' => true]);
+
+    // Producción y lotes (I4, RF-039 a RF-051). Las rutas fijas van antes de las que llevan {id}.
+    $r->agregar('GET', '/produccion/recepciones', [ControladorProduccion::class, 'recepciones'], 'recepciones.consultar');
+    $r->agregar('GET', '/produccion/recepciones/nueva', [ControladorProduccion::class, 'formularioRecepcion'], 'recepciones.gestionar');
+    $r->agregar('GET', '/produccion/recepciones/numero-sugerido', [ControladorProduccion::class, 'numeroSugerido'], 'recepciones.gestionar');
+    $r->agregar('POST', '/produccion/recepciones', [ControladorProduccion::class, 'guardarRecepcion'], 'recepciones.gestionar');
+    $r->agregar('GET', '/produccion/recepciones/{id}', [ControladorProduccion::class, 'recepcion'], 'recepciones.consultar');
+    $r->agregar('GET', '/produccion/recepciones/{id}/editar', [ControladorProduccion::class, 'formularioRecepcion'], 'recepciones.gestionar');
+    $r->agregar('POST', '/produccion/recepciones/{id}', [ControladorProduccion::class, 'guardarRecepcion'], 'recepciones.gestionar');
+    $r->agregar('POST', '/produccion/recepciones/{id}/archivar', [ControladorProduccion::class, 'archivarRecepcion'], 'recepciones.gestionar');
+    $r->agregar('GET', '/produccion/salidas', [ControladorProduccion::class, 'salidas'], 'salidas.consultar');
+    $r->agregar('GET', '/produccion/salidas/nueva', [ControladorProduccion::class, 'formularioSalida'], 'salidas.gestionar');
+    $r->agregar('POST', '/produccion/salidas', [ControladorProduccion::class, 'guardarSalida'], 'salidas.gestionar');
+    $r->agregar('GET', '/produccion/salidas/{id}/editar', [ControladorProduccion::class, 'formularioSalida'], 'salidas.gestionar');
+    $r->agregar('POST', '/produccion/salidas/{id}', [ControladorProduccion::class, 'guardarSalida'], 'salidas.gestionar');
+    $r->agregar('POST', '/produccion/salidas/{id}/archivar', [ControladorProduccion::class, 'archivarSalida'], 'salidas.gestionar');
+    $r->agregar('GET', '/produccion/transformaciones', [ControladorProduccion::class, 'transformaciones'], 'transformaciones.consultar');
+    $r->agregar('GET', '/produccion/transformaciones/nueva', [ControladorProduccion::class, 'formularioTransformacion'], 'transformaciones.gestionar');
+    $r->agregar('POST', '/produccion/transformaciones', [ControladorProduccion::class, 'guardarTransformacion'], 'transformaciones.gestionar');
+    $r->agregar('POST', '/produccion/transformaciones/{id}/archivar', [ControladorProduccion::class, 'archivarTransformacion'], 'transformaciones.gestionar');
+
+    // Hato (I4, RF-052 a RF-057).
+    $r->agregar('GET', '/hato', [ControladorHato::class, 'inventario'], 'hato.consultar');
+    $r->agregar('POST', '/hato/cortes', [ControladorHato::class, 'crearCorte'], 'hato.gestionar');
+    $r->agregar('GET', '/hato/animales/nuevo', [ControladorHato::class, 'formularioAnimal'], 'hato.gestionar');
+    $r->agregar('POST', '/hato/animales', [ControladorHato::class, 'guardarAnimal'], 'hato.gestionar');
+    $r->agregar('GET', '/hato/animales/{id}', [ControladorHato::class, 'formularioAnimal'], 'hato.consultar');
+    $r->agregar('POST', '/hato/animales/{id}', [ControladorHato::class, 'guardarAnimal'], 'hato.gestionar');
+    $r->agregar('POST', '/hato/animales/{id}/practica', [ControladorHato::class, 'cambiarPractica'], 'hato.gestionar_practica');
+    $r->agregar('POST', '/hato/animales/{id}/archivar', [ControladorHato::class, 'archivarAnimal'], 'hato.gestionar');
+
+    // Recaudos (I4, RF-029, RF-035): consulta según el alcance; escritura solo del Grupo de Recaudo.
+    $r->agregar('GET', '/recaudos', [ControladorRecaudos::class, 'listado'], 'recaudos.consultar');
+    $r->agregar('GET', '/recaudos/nuevo', [ControladorRecaudos::class, 'formulario'], 'recaudos.gestionar');
+    $r->agregar('POST', '/recaudos', [ControladorRecaudos::class, 'guardar'], 'recaudos.gestionar');
+
+    // Bandeja de calidad (I4, RF-058, RF-059).
+    $r->agregar('GET', '/calidad', [ControladorCalidad::class, 'bandeja'], 'calidad.consultar');
+    $r->agregar('POST', '/calidad/recalcular', [ControladorCalidad::class, 'recalcular'], 'calidad.gestionar', ['limite' => 'administracion']);
+    $r->agregar('POST', '/calidad/{id}/vincular-recepcion', [ControladorCalidad::class, 'vincularRecepcion'], 'calidad.gestionar');
+    $r->agregar('POST', '/calidad/{id}/asignar-proceso', [ControladorCalidad::class, 'asignarProceso'], 'calidad.gestionar');
+    $r->agregar('POST', '/calidad/{id}/aceptar', [ControladorCalidad::class, 'aceptar'], 'calidad.gestionar');
 
     // Usuarios, roles y auditoría (I3, RF-009 a RF-012, RAU-001).
     $r->agregar('GET', '/sistema/usuarios', [ControladorUsuarios::class, 'listar'], 'usuarios.gestionar');

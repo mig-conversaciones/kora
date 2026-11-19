@@ -159,7 +159,7 @@ final class ControladorCatalogos extends ControladorModulo
         try {
             $this->catalogos->guardarDestino($solicitud, $id === '' ? null : (int) $id, $solicitud->cuerpo);
         } catch (ErrorValidacion $error) {
-            return $this->validacion($solicitud, $error, 'catalogos/destinos', $this->datosDestinos($solicitud) + ['editando' => $id === '' ? null : (int) $id], $this->meta('Destinos y clientes internos'));
+            return $this->validacion($solicitud, $error, 'catalogos/destinos', ['editando' => $id === '' ? null : (int) $id] + $this->datosDestinos($solicitud), $this->meta('Destinos y clientes internos'));
         }
         return $this->trasGuardar($this->pantalla($solicitud, 'catalogos/destinos', $this->datosDestinos($solicitud), $this->meta('Destinos y clientes internos')), '/catalogos/destinos', 'Destino guardado.');
     }

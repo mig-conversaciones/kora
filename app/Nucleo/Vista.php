@@ -155,6 +155,17 @@ final class Vista
         return number_format((float) $valor, $decimales, ',', '.');
     }
 
+    /** Cantidad física (hasta 3 decimales) sin ceros de relleno: «1234.500» → «1.234,5». No pasa por float. */
+    public function cantidad(mixed $valor): string
+    {
+        $texto = (string) $valor;
+        if (preg_match('/^(-?)(\d+)(?:\.(\d+))?$/', $texto, $m) !== 1) {
+            return $texto;
+        }
+        $fraccion = rtrim($m[3] ?? '', '0');
+        return $m[1] . number_format((float) $m[2], 0, ',', '.') . ($fraccion === '' ? '' : ',' . $fraccion);
+    }
+
     /** Fecha DATE o DATETIME (AAAA-MM-DD…) en formato DD/MM/AAAA. */
     public function fecha(mixed $valor): string
     {

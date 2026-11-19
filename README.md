@@ -9,7 +9,7 @@ Gestión de la producción, la trazabilidad y los tableros de mando del Centro A
 - Tailwind CSS 3.4.
 - MySQL 5.7 en desarrollo local (MAMP) y MariaDB 10.6 o superior en producción (Hostinger Cloud); ver [ADR-002](docs/adr/002-mariadb-sql-portable.md).
 
-**Estado:** iteración 3, «Maestros y finanzas», terminada; sigue la I4, «Operación productiva». Ver el [CHANGELOG](CHANGELOG.md) y los runbooks de [cola, cron y mantenimiento](docs/runbooks/cola-cron-mantenimiento.md), [acceso y cuentas](docs/runbooks/acceso-y-cuentas.md) y [maestros y finanzas](docs/runbooks/maestros-y-finanzas.md).
+**Estado:** iteración 4, «Operación productiva», terminada; sigue la I5, «Importación y recaudos». Ver el [CHANGELOG](CHANGELOG.md) y los runbooks de [cola, cron y mantenimiento](docs/runbooks/cola-cron-mantenimiento.md), [acceso y cuentas](docs/runbooks/acceso-y-cuentas.md), [maestros y finanzas](docs/runbooks/maestros-y-finanzas.md) y [operación productiva](docs/runbooks/operacion-productiva.md).
 
 ## Puesta en marcha local con MAMP
 

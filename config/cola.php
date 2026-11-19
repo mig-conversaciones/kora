@@ -6,9 +6,10 @@ declare(strict_types=1);
  * Configuración de la cola (RF-Q-005, RF-Q-019; 04-04a). Los valores de capacidad se calibran con las pruebas de
  * carga (RNF-PERF-004) y los límites reales del plan Hostinger Cloud.
  *
- * Tipos registrados: correo, limpieza y demostración (I1); verificación y exportación de la auditoría (I2). Los
- * demás tipos de la v1 (importación, exportación, calidad, caché, seguridad, capacitación) se registran en la
- * iteración que entrega su manejador; un tipo no registrado nunca se encola (ErrorDefinitivo).
+ * Tipos registrados: correo, limpieza y demostración (I1); verificación y exportación de la auditoría (I2);
+ * recálculo de la bandeja de calidad (I4). Los demás tipos de la v1 (importación, exportación, caché, seguridad,
+ * capacitación) se registran en la iteración que entrega su manejador; un tipo no registrado nunca se encola
+ * (ErrorDefinitivo).
  */
 
 use App\Nucleo\Entorno;
@@ -16,6 +17,7 @@ use App\Trabajos\DemostracionProgreso;
 use App\Trabajos\EnviarCorreo;
 use App\Trabajos\ExportarLoteAuditoria;
 use App\Trabajos\LimpiezaPeriodica;
+use App\Trabajos\RecalcularCalidad;
 use App\Trabajos\VerificarCadena;
 
 $tipo = static fn (string $manejador, string $cola, int $intentos, int $reserva, bool $tecnico = false, int $prioridad = 5): array => [
@@ -55,6 +57,8 @@ return [
         'auditoria.verificar_cadena' => $tipo(VerificarCadena::class, 'predeterminada', 3, 300, true, 7),
         'auditoria.exportar_lote' => $tipo(ExportarLoteAuditoria::class, 'predeterminada', 5, 300, true, 7),
         'mantenimiento.limpieza' => $tipo(LimpiezaPeriodica::class, 'predeterminada', 3, 300, true, 9),
+        // I4: bandeja de calidad (RF-058). Se encola tras cada importación y desde la bandeja.
+        'calidad.recalcular' => $tipo(RecalcularCalidad::class, 'predeterminada', 3, 300, false, 6),
         // Solo fuera de producción: ejercita progreso, latidos y bloques desde /sistema-diseno.
         'demostracion.progreso' => $tipo(DemostracionProgreso::class, 'predeterminada', 3, 60, false, 5),
     ],

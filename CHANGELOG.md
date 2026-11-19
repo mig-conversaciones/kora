@@ -2,6 +2,29 @@
 
 Formato basado en *Keep a Changelog*, con versionado semántico (RNF-015).
 
+## [0.5.0] — Iteración 4 «Operación productiva» (sin publicar)
+
+### Agregado
+
+- **Migraciones 010 a 012** del Anexo B, con su reversión: recepciones, salidas, transformaciones y conciliaciones (010); animales, cortes y registros reproductivos (011); incidencias de calidad y exportaciones (012). `animales` suma `archivado_por` y `motivo_archivo`.
+- **Producción y lotes** (`/produccion`, RF-039 a RF-051):
+  - **Recepciones** con número interno `{PREFIJO}-REC-{DDMMAA}-{NNN}` sugerido, medida del catálogo y reglas del lote con los mensajes del prototipo.
+  - **Existencias:** saldo, número de salidas y fecha de cierre de cada lote.
+  - **Salidas** de venta directa y autoconsumo desde un lote, con el lote bloqueado durante la validación del saldo, valor redondeado a 2 decimales y proceso coherente. La venta directa no crea recaudos.
+  - **Transformación láctea** con selección del derivado y su recepción en la misma transacción; diagnóstico de listas vacías (Obs. 6); rendimiento en litros por unidad frente a la meta.
+- **Hato** (`/hato`, RF-052 a RF-057): inventario por cortes fechados, IEP y días abiertos calculados en el servidor, semáforos con color, texto e icono, y lote de práctica académica con motivo.
+- **Bandeja de calidad** (`/calidad`, RF-058, RF-059, RF-061): siete tipos de incidencia, recálculo idempotente en línea o con el trabajo `calidad.recalcular`, vinculación de salidas a lotes, asignación de procesos y aceptación sin corrección, todo auditado.
+- **Recaudos** (`/recaudos`, RF-029, RF-035): consulta filtrada y ordenable dentro del alcance; registro manual solo para el Grupo de Recaudo (`PoliticaRecaudos`), con la identificación del pagador como HMAC y últimos 4 dígitos.
+- **Menú:** Recaudos, Producción y lotes, Hato y Calidad de datos activos.
+- **CI:** sin fail-fast y con los fallos de PHPUnit publicados como anotaciones de GitHub.
+- ADR-018 y runbook de operación productiva.
+
+### Corregido
+
+- **Cola en MariaDB:** el reclamo con `SKIP LOCKED` se reintenta ante interbloqueos (1213) y esperas agotadas (1205) en lugar de terminar el trabajador. Era la causa del fallo de la CI de MariaDB 10.6.
+- **Formularios con error:** en cierres de periodo y destinos, el mes o el destino con error vuelve a marcarse tras un 422.
+- La lista blanca de columnas de los repositorios admite dígitos.
+
 ## [0.4.0] — Iteración 3 «Maestros y finanzas» (sin publicar)
 
 ### Agregado

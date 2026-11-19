@@ -81,7 +81,7 @@ abstract class RepositorioConAlcance
         $this->obtener($alcance, $id);
         $asignaciones = [];
         foreach (array_keys($cambios) as $columna) {
-            if (preg_match('/^[a-z_]+$/', $columna) !== 1) {
+            if (preg_match('/^[a-z_][a-z0-9_]*$/', $columna) !== 1) {
                 throw new InvalidArgumentException('Columna no permitida.');
             }
             $asignaciones[] = "{$columna} = :{$columna}";
@@ -121,7 +121,7 @@ abstract class RepositorioConAlcance
     public function insertar(array $valores, int $usuarioId): int
     {
         foreach (array_keys($valores) as $columna) {
-            if (preg_match('/^[a-z_]+$/', $columna) !== 1) {
+            if (preg_match('/^[a-z_][a-z0-9_]*$/', $columna) !== 1) {
                 throw new InvalidArgumentException('Columna no permitida.');
             }
         }

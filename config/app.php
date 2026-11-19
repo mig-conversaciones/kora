@@ -29,6 +29,7 @@ use App\Nucleo\Sesion;
 use App\Nucleo\Vista;
 use App\Politicas\Autorizador;
 use App\Politicas\PoliticaAlcanceUnidad;
+use App\Politicas\PoliticaRecaudos;
 use App\Politicas\PoliticaUsuarios;
 use App\Repositorios\RepositorioUsuarios;
 use App\Servicios\Programador;
@@ -51,7 +52,7 @@ use App\Trabajos\LimpiezaPeriodica;
 
 $https = str_starts_with(Entorno::texto('APP_URL'), 'https://');
 // Última migración que este código espera; /health/ready y la salida del mantenimiento la comparan (06-04).
-$versionEsquema = '009';
+$versionEsquema = '012';
 $cola = static fn (): array => require RAIZ . '/config/cola.php';
 $seguridad = static fn (): array => require RAIZ . '/config/seguridad.php';
 $claveBinaria = static fn (string $variable): string => (string) base64_decode(Entorno::texto($variable), true);
@@ -104,12 +105,18 @@ return [
             $c->obtener(Cifrador::class),
             (string) $seguridad()['totp']['emisor'],
         ),
-        // Políticas por recurso, por prefijo del permiso. Las de recaudos, hato… se agregan en la iteración de su módulo.
+        // Políticas por recurso, por prefijo del permiso (las de la operación productiva y los recaudos, desde la I4).
         Autorizador::class => static fn (): Autorizador => new Autorizador([
             'usuarios' => new PoliticaUsuarios(),
             'asignaciones' => new PoliticaAlcanceUnidad(),
             'gastos' => new PoliticaAlcanceUnidad(),
             'procesos' => new PoliticaAlcanceUnidad(),
+            'recepciones' => new PoliticaAlcanceUnidad(),
+            'salidas' => new PoliticaAlcanceUnidad(),
+            'transformaciones' => new PoliticaAlcanceUnidad(),
+            'hato' => new PoliticaAlcanceUnidad(),
+            'calidad' => new PoliticaAlcanceUnidad(),
+            'recaudos' => new PoliticaRecaudos(),
         ]),
         VerificarCsrf::class => static fn (Contenedor $c): VerificarCsrf => new VerificarCsrf(
             $c->obtener(Sesion::class),
