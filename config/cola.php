@@ -22,6 +22,7 @@ use App\Trabajos\ExportarXlsx;
 use App\Trabajos\LimpiezaPeriodica;
 use App\Trabajos\PrecalentarCache;
 use App\Trabajos\RecalcularCalidad;
+use App\Trabajos\RecifrarDatos;
 use App\Trabajos\RevertirImportacion;
 use App\Trabajos\ValidarImportacion;
 use App\Trabajos\VerificarCadena;
@@ -76,6 +77,8 @@ return [
         // I7: precalentamiento de los tableros (días hábiles, 06:30) y verificación de integridad (03:15), tabla D.4.
         'cache.precalentar' => $tipo(PrecalentarCache::class, 'predeterminada', 3, 300, true, 8),
         'seguridad.verificar_integridad' => $tipo(VerificarIntegridad::class, 'predeterminada', 3, 300, true, 7),
+        // I8: recifrado tras una rotación de claves (RS-013, D-15); se encola con cli/recifrar.php.
+        'seguridad.recifrar' => $tipo(RecifrarDatos::class, 'predeterminada', 5, 300, true, 7),
         // Solo fuera de producción: ejercita progreso, latidos y bloques desde /sistema-diseno.
         'demostracion.progreso' => $tipo(DemostracionProgreso::class, 'predeterminada', 3, 60, false, 5),
     ],

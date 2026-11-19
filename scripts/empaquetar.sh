@@ -21,6 +21,8 @@ cd "$TEMPORAL"
 "$COMPOSER" install --no-dev --optimize-autoloader --classmap-authoritative --no-interaction --no-progress --quiet
 npm ci --no-audit --no-fund --silent
 npm run --silent construir
+# Inventario de componentes (SBOM CycloneDX, ASVS V15.1.2), antes de quitar los lockfiles y las herramientas.
+php herramientas/generar-sbom.php sbom.cdx.json
 # De docs/ solo viajan las guías: son la ayuda en línea (RDOC-009).
 find docs -mindepth 1 -maxdepth 1 ! -name guias -exec rm -rf {} +
 rm -rf node_modules referencias tests .github herramientas almacenamiento

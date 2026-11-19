@@ -6,6 +6,17 @@ Options -Indexes -MultiViews
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # HTTPS aquí, con la URI original: después de reescribir a public/, REQUEST_URI ya no la conserva y la
+    # redirección de public/.htaccess apuntaría a /public/… El monitoreo y la API no se redirigen (ASVS V4.1.2).
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteRule ^(health|api)(/|$) - [F,L]
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
     # El prototipo original se conserva consultable en /referencias/ (solo en local; no se despliega).
     RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
     RewriteRule ^referencias(/|$) - [L]

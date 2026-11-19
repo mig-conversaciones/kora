@@ -4,8 +4,8 @@ La capacitación entrega las guías y las **valida con la contraparte**: cada se
 
 ## Preparación
 
-- **Entorno de práctica:** una base aislada de staging con el dataset sintético «mini» (`php cli/generar_dataset.php --base=kora_capacitacion_pruebas --escala=mini --preparar --cuentas=12 --usuarios-k6=…`). Nunca se capacita sobre la base de producción, y los datos sintéticos no se mezclan con los reales (D-19).
-- **Cuentas de práctica:** las crea el generador, una por rol; el archivo con sus contraseñas se entrega en la sesión y se destruye al final.
+- **Entorno de práctica:** una base aislada (`kora_capacitacion`) con el escenario demostrativo del prototipo: `php cli/generar_capacitacion.php --base=kora_capacitacion --preparar --cuentas=…/capacitacion.json` (RF-100). Es el mismo escenario que verifican las pruebas de oráculos: AUTO_001 al 80 %, IND_08 del 97 % e IND_17 de 1.337,5 COP/L. Nunca se capacita sobre la base de producción, y los datos sintéticos no se mezclan con los reales (D-19).
+- **Cuentas de práctica:** las crea el generador, una por rol de negocio (coordinación administrativa, Grupo de Recaudo, líder de producción, líder de Ganadería y coordinación académica). El archivo con su contraseña se entrega en la sesión y se destruye al final.
 - **Material:** los PDF de las guías (`npm run guias:pdf`) y la ayuda en línea en el menú **Ayuda**.
 - **Duración:** 90 minutos por grupo, con práctica guiada y 15 minutos de preguntas.
 

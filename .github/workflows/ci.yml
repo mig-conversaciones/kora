@@ -134,8 +134,11 @@ jobs:
         run: |
           bash scripts/empaquetar.sh v0.8.0-ci1 /tmp/kora-v1.tar.gz
           bash scripts/empaquetar.sh v0.8.0-ci2 /tmp/kora-v2.tar.gz
-          tar -tzf /tmp/kora-v1.tar.gz | grep -qx './manifiesto.sha256'
-          ! tar -tzf /tmp/kora-v1.tar.gz | grep -qE '^\./(\.env|referencias/|tests/|almacenamiento/)'
+          tar -tzf /tmp/kora-v1.tar.gz > /tmp/kora-v1.lista  # a un archivo: grep -q cerraría la tubería y tar fallaría con pipefail
+          grep -qx './manifiesto.sha256' /tmp/kora-v1.lista
+          grep -qx './docs/guias/primeros-pasos.md' /tmp/kora-v1.lista
+          grep -qx './sbom.cdx.json' /tmp/kora-v1.lista
+          ! grep -qE '^\./(\.env|referencias/|tests/|almacenamiento/|docs/(adr|ia|seguridad|uat)/)' /tmp/kora-v1.lista
       - name: Estructura compartida, .env de staging y llaves del custodio
         run: |
           mkdir -p $RAIZ_APP/releases $RAIZ_APP/respaldos
@@ -306,3 +309,41 @@ jobs:
             almacenamiento/construccion/e2e/axe.jsonl
             almacenamiento/construccion/e2e/resultados.json
           retention-days: 30
+
+  contrato:
+    # Pruebas de contrato de la integración con el software de ventas (RF-095, anexo E): Schemathesis genera solicitudes
+    # firmadas a partir de docs/api/integracion-ventas.yaml y verifica las respuestas del simulador contra el esquema.
+    name: Contrato de integración (Schemathesis)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, sodium
+          coverage: none
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Dependencias
+        run: |
+          composer install --no-interaction --no-progress --no-dev
+          pip install --quiet -r tests/contrato/requisitos.txt
+      - name: Simulador del receptor
+        run: |
+          echo "SIMULADOR_CLAVES=ventas-ci:$(php -r 'echo bin2hex(random_bytes(32));')" >> "$GITHUB_ENV"
+          echo "SIMULADOR_DATOS=/tmp/kora-simulador" >> "$GITHUB_ENV"
+      - name: Schemathesis sobre el contrato
+        run: |
+          nohup php -S 127.0.0.1:8090 tests/contrato/simulador.php > /tmp/simulador.log 2>&1 &
+          sleep 2
+          SCHEMATHESIS_HOOKS=tests.contrato.ganchos schemathesis run docs/api/integracion-ventas.yaml --experimental=openapi-3.1 \
+            --base-url http://127.0.0.1:8090/api/v1 --checks all --hypothesis-max-examples 150 --hypothesis-seed 20261119 \
+            --junit-xml junit-contrato.xml --no-color
+          # En mantenimiento: 503 con Retry-After y nada recibido (RF-MAN-015).
+          touch /tmp/kora-simulador/mantenimiento
+          curl -s -o /dev/null -D /tmp/cabeceras -w '%{http_code}' -X POST http://127.0.0.1:8090/api/v1/integracion/ventas/lotes | grep -qx 503
+          grep -qi '^retry-after: 120' /tmp/cabeceras
+      - name: Anotar los fallos del contrato
+        if: failure()
+        run: php .github/anotar-junit.php junit-contrato.xml

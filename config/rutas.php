@@ -195,6 +195,9 @@ return static function (Enrutador $r): void {
     $r->agregar('GET', '/sistema/usuarios/{id}', [ControladorUsuarios::class, 'mostrar'], 'usuarios.gestionar');
     $r->agregar('POST', '/sistema/usuarios/{id}/acceso', [ControladorUsuarios::class, 'actualizarAcceso'], 'usuarios.gestionar', ['reautenticacion' => true]);
     $r->agregar('POST', '/sistema/usuarios/{id}/reenviar', [ControladorUsuarios::class, 'reenviarInvitacion'], 'usuarios.gestionar', ['limite' => 'administracion']);
+    // Cierre de sesiones sin desactivar la cuenta (I8, ASVS V7.4.5): de una cuenta, o de todas (solo superadministrador).
+    $r->agregar('POST', '/sistema/usuarios/sesiones/cerrar-todas', [ControladorUsuarios::class, 'cerrarTodasLasSesiones'], 'usuarios.gestionar', ['reautenticacion' => true]);
+    $r->agregar('POST', '/sistema/usuarios/{id}/cerrar-sesiones', [ControladorUsuarios::class, 'cerrarSesiones'], 'usuarios.gestionar', ['reautenticacion' => true]);
     $r->agregar('POST', '/sistema/usuarios/{id}/{accion}', [ControladorUsuarios::class, 'cambiarEstado'], 'usuarios.gestionar');
     $r->agregar('GET', '/sistema/roles', [ControladorUsuarios::class, 'roles'], '', ['autenticada' => true]);
     $r->agregar('POST', '/sistema/roles/{rol}/{permiso}/{accion}', [ControladorUsuarios::class, 'cambiarPermiso'], 'roles.gestionar', ['reautenticacion' => true]);

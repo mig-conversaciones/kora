@@ -59,4 +59,15 @@ $invitar = $this->url('/sistema/usuarios/invitar');
             <?= $this->parcial('parciales/paginacion', ['ruta' => '/sistema/usuarios', 'consulta' => $filtros, 'pagina' => $pagina, 'hayMas' => $hayMas, 'objetivo' => '#panel-modulo']) ?>
         <?php endif; ?>
     </section>
+    <?php if (!empty($esSuperadministrador)): ?>
+        <details class="zona-peligro"<?= isset($errores['motivo']) ? ' open' : '' ?>>
+            <summary>Cerrar las sesiones de todos</summary>
+            <p>Ante un incidente de seguridad: todas las personas deben ingresar de nuevo. Tu sesión sigue abierta. Queda en la auditoría con su motivo.</p>
+            <form class="formulario" hx-post="<?= $this->e($this->url('/sistema/usuarios/sesiones/cerrar-todas')) ?>" hx-target="#panel-modulo" hx-swap="outerHTML"
+                  data-confirmar="Se cerrarán las sesiones de todas las personas, menos la tuya." data-confirmar-titulo="Cerrar todas las sesiones" data-confirmar-accion="Cerrar todas" data-peligro novalidate>
+                <?= $this->parcial('parciales/campo', ['nombre' => 'motivo', 'etiqueta' => 'Motivo', 'tipo' => 'textarea', 'valor' => '', 'errores' => $errores ?? [], 'atributos' => 'maxlength="500" required']) ?>
+                <button type="submit" class="boton boton-peligro">Cerrar todas las sesiones</button>
+            </form>
+        </details>
+    <?php endif; ?>
 </div>

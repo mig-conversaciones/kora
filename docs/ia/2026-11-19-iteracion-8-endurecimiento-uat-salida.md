@@ -86,3 +86,28 @@ Todas son resultados reales en MAMP: PHP 8.3.36 y MySQL 5.7.24.
 ## Aprobación humana
 
 Pendiente: revisión del líder técnico, aceptación de la UAT y firma del acta de salida (hito M7).
+
+## Anexo: pendientes de desarrollo cerrados en la 0.9.1
+
+Por pedido del responsable, se desarrolló todo lo pendiente que se puede probar en local antes de migrar a Hostinger.
+
+| Pendiente | Qué se hizo | Verificación local |
+|---|---|---|
+| RF-095 (contrato con simulador) | Firma alineada al anexo E, simulador del receptor y Schemathesis 3.39.7 en la CI (ADR-023) | Schemathesis: 7 comprobaciones, 160 de 160 casos; el simulador aceptó 29 lotes válidos y rechazó el resto con 4xx documentados. `ContratoVentasTest` (4 pruebas) |
+| Recifrado (RS-013, D-15) | `ServicioRecifrado`, trabajo `seguridad.recifrar` y `cli/recifrar.php` | `RecifradoTest`: después de rotar, todo se descifra solo con la clave nueva; un trabajo reservado no se toca; repetirlo no hace nada |
+| RF-100 (escenario de capacitación) | `GeneradorCapacitacion` y `cli/generar_capacitacion.php` | Las 9 pruebas de oráculos corren sobre el generador; se generó `kora_capacitacion` con 5 cuentas de práctica |
+| ASVS V7.4.5 | Cerrar las sesiones de una persona o de todas desde Sistema > Usuarios | `CierreSesionesTest` (22 aserciones) |
+| ASVS V4.1.2 | `/health` y `/api` responden 403 por HTTP | MAMP con un host externo: 403 en `/health` y `/api`, y 301 con la ruta original en `/ingresar` |
+| ASVS V15.1.2 | SBOM CycloneDX 1.5 en cada paquete | `SbomTest` (302 aserciones) |
+| ASVS V15.2.1 | sharp, esbuild y eslint actualizados | `npm audit`: 0 avisos; construcción y ESLint en verde |
+
+**Hallazgos de esta ronda:**
+
+- La redirección a HTTPS de la alternativa B apuntaba a `/public/…`. Se corrigió en el `.htaccess` de la raíz.
+- El trabajo `operacion` de la CI fallaba porque `grep -q` cerraba la tubería de `tar`, que salía con error por `pipefail`. Se corrigió.
+
+**Sigue sin poderse hacer en local:**
+
+- el envío continuo de registros a un sistema separado (V16.4.3), que necesita el destino;
+- las 4 decisiones de la contraparte en la lista ASVS;
+- todo lo que depende de Hostinger y de staging.

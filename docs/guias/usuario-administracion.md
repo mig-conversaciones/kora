@@ -12,6 +12,10 @@ Antes de empezar, lee [Primeros pasos](primeros-pasos.md).
 
 Desde el detalle de un usuario puedes cambiar su rol o sus unidades y desactivarlo. Desactivar una cuenta **cierra todas sus sesiones** al instante. Los cambios de rol se aplican en la siguiente solicitud del usuario.
 
+### Cerrar las sesiones de una persona
+
+Si alguien perdió un equipo o sospecha que otra persona usó su sesión, abre su detalle y, en **Sesiones abiertas**, elige **Cerrar sus sesiones** con un motivo. La cuenta sigue activa: la persona vuelve a ingresar con su contraseña. Al superadministrador, **Sistema > Usuarios** le ofrece además **Cerrar las sesiones de todos** ante un incidente de seguridad; su propia sesión sigue abierta. Las dos acciones piden reautenticación y quedan en la auditoría.
+
 > No compartas cuentas. Cada acción queda en la auditoría a nombre de quien la hizo.
 
 ## Roles y permisos

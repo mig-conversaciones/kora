@@ -39,7 +39,11 @@
    - `bash current/scripts/backup.sh manual`;
    - exportación del lote de auditoría.
 2. **Activar el mantenimiento** si el compromiso está en curso (ver [mantenimiento](mantenimiento.md)).
-3. **Revocar sesiones**, de todas las cuentas o de las afectadas:
+3. **Revocar sesiones**, de todas las cuentas o de las afectadas. Desde la aplicación (con reautenticación y auditoría):
+   - de una persona: **Sistema > Usuarios**, su detalle, **Cerrar sus sesiones**;
+   - de todos menos la propia (superadministrador): **Sistema > Usuarios > Cerrar las sesiones de todos**.
+
+   Si la aplicación no responde, por SQL:
 
    ```sql
    UPDATE sesiones SET revocada_en = UTC_TIMESTAMP(3) WHERE revocada_en IS NULL;

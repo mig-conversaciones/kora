@@ -50,6 +50,16 @@ Runbook: `cola-cron-mantenimiento.md`.
 
 Runbooks: `backup-corrupto.md` y `rotacion-claves.md`.
 
+## Rotar la clave de cifrado
+
+1. Agrega la nueva clave **al inicio** de `CLAVES_CIFRADO` en `compartido/.env`. La primera cifra y todas descifran.
+2. Ejecuta `php current/cli/recifrar.php ejecutar`, o `encolar` para dejárselo a la cola. Vuelve a cifrar con la nueva los secretos TOTP, los correos pendientes y los lotes de auditoría.
+3. Cuando `php current/cli/recifrar.php estado` informe 0 pendientes, retira la clave anterior y registra la huella del `.env` (`php current/cli/verificar_integridad.php --registrar-env`).
+
+## Inventario de componentes
+
+Cada paquete trae `sbom.cdx.json` (CycloneDX 1.5) con las dependencias de esa versión. Ante un aviso de seguridad de una biblioteca, ahí se ve si la versión desplegada la usa.
+
 ## Vigilancia
 
 - **Monitoreo externo:** `/health/live` (proceso vivo) y `/health/ready` (base, esquema, disco y almacenamiento), con `TOKEN_MONITOREO`.

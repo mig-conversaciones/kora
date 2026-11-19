@@ -2,6 +2,34 @@
 
 Formato basado en *Keep a Changelog*, con versionado semántico (RNF-015).
 
+## [0.9.1] — Pendientes de desarrollo de la I8 (sin publicar)
+
+### Agregado
+
+- **Pruebas de contrato de la integración con ventas** (RF-095):
+  - simulador del receptor (`tests/contrato/simulador.php`) con firma HMAC, idempotencia, errores RFC 9457 y 503 en mantenimiento;
+  - Schemathesis en el trabajo «Contrato de integración» de la CI. En local, 7 comprobaciones con 160 de 160 casos.
+  - `App\Integracion\FirmaIntegracion` y `ValidadorLoteVentas`, que se reutilizarán en RF-098.
+  - ADR-023.
+- **Recifrado tras una rotación de claves** (RS-013, D-15): `cli/recifrar.php` (estado, ejecutar y encolar) y el trabajo `seguridad.recifrar`. Recifra los secretos TOTP, los correos pendientes o fallidos de la cola y los lotes de auditoría.
+- **Escenario de capacitación** (RF-100):
+  - `App\Operacion\GeneradorCapacitacion` y `cli/generar_capacitacion.php`, con una cuenta de práctica por rol;
+  - es el mismo escenario que verifican las pruebas de oráculos.
+- **Cierre de sesiones desde la administración** (ASVS V7.4.5): de una persona sin desactivarla, o de todas (superadministrador). Con motivo, reautenticación y auditoría.
+- **SBOM CycloneDX 1.5** en cada paquete (`sbom.cdx.json`, ASVS V15.1.2).
+
+### Cambiado
+
+- **Contrato de integración:** la firma pasa a la del anexo E (`X-Clave-Id`, `X-Fecha`, `X-Firma`), se documenta el 503, y los patrones usan `[0-9]`.
+- **HTTP:** `/health` y `/api` responden 403 en lugar de redirigir a HTTPS (ASVS V4.1.2).
+- **Alternativa B de Hostinger:** la redirección a HTTPS se hace en el `.htaccess` de la raíz. Antes apuntaba a `/public/…`.
+- **Herramientas de desarrollo:** sharp 0.35.5, esbuild 0.28.2 y eslint 9.39.5. `npm audit` queda sin avisos.
+- **Lista ASVS:** 159 requisitos cumplen y quedan 4 parciales.
+
+### Corregido
+
+- **CI, trabajo `operacion`:** `grep -q` cerraba la tubería del listado del paquete y `tar` fallaba con `pipefail`.
+
 ## [0.9.0] — Iteración 8 «Endurecimiento, UAT y salida» (sin publicar)
 
 ### Agregado

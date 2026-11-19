@@ -26,3 +26,4 @@ Formato del Anexo D (D.5) del SRS. Un ADR aceptado no se edita: se reemplaza por
 | [ADR-020](020-tableros-e-indicadores.md) | Tableros con indicadores calculados en SQL sobre el alcance, caché versionada, SVG del servidor y exportaciones en la cola | Aceptado |
 | [ADR-021](021-operacion-respaldos-despliegue.md) | Copias cifradas en sobre desde PHP, despliegue por versiones verificado en la CI y presupuesto de consultas medido sobre un dataset sintético | Aceptado |
 | [ADR-022](022-salida-carga-inicial-verificacion.md) | Carga inicial con verificación repetida al firmar, lista ASVS generada desde el texto oficial y verificación de navegador y DAST en la CI | Aceptado |
+| [ADR-023](023-contrato-integracion-simulador.md) | Contrato de integración con la firma del anexo E, simulador propio y pruebas de contrato con Schemathesis | Aceptado |

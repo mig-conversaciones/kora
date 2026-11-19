@@ -8,6 +8,12 @@ DirectoryIndex index.php
 
     # 1. Forzar HTTPS (RS-009). Se contempla el proxy que informa X-Forwarded-Proto.
     #    Excepción de desarrollo: localhost y 127.0.0.1 se sirven por HTTP en MAMP.
+    #    El monitoreo (/health) y la API (/api) no se redirigen: por HTTP responden 403, para que un cliente mal
+    #    configurado falle a la vista en lugar de seguir una redirección (ASVS V4.1.2).
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteRule ^(health|api)(/|$) - [F,L]
     RewriteCond %{HTTPS} !=on
     RewriteCond %{HTTP:X-Forwarded-Proto} !=https
     RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]

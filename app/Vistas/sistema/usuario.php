@@ -55,5 +55,19 @@ $base = '/sistema/usuarios/' . (int) $cuenta['id'];
                 <button type="submit" class="boton <?= $accion === 'desactivar' ? 'boton-peligro' : 'boton-primario' ?>"><?= $accion === 'desactivar' ? 'Desactivar cuenta' : 'Reactivar cuenta' ?></button>
             </form>
         </section>
+        <?php $abiertas = (int) ($sesionesActivas ?? 0); ?>
+        <?php if ($cuenta['estado'] !== 'desactivado'): ?>
+            <section class="tarjeta seccion" aria-labelledby="titulo-sesiones">
+                <h2 id="titulo-sesiones" class="titulo-tarjeta">Sesiones abiertas</h2>
+                <p><?= $abiertas === 1 ? 'Hay 1 sesión abierta.' : "Hay {$abiertas} sesiones abiertas." ?> Cerrarlas obliga a ingresar de nuevo sin desactivar la cuenta; sirve, por ejemplo, ante un equipo perdido.</p>
+                <?php if ($abiertas > 0): ?>
+                    <form class="formulario" hx-post="<?= $this->e($this->url($base . '/cerrar-sesiones')) ?>" hx-target="#panel-modulo" hx-swap="outerHTML"
+                          data-confirmar="Todas las sesiones de esta persona se cerrarán de inmediato." data-confirmar-titulo="Cerrar sus sesiones" data-confirmar-accion="Cerrar sesiones" data-peligro novalidate>
+                        <?= $campo(['nombre' => 'motivo', 'etiqueta' => 'Motivo del cierre', 'tipo' => 'textarea', 'valor' => '', 'atributos' => 'maxlength="500" required']) ?>
+                        <button type="submit" class="boton boton-peligro">Cerrar sus sesiones</button>
+                    </form>
+                <?php endif; ?>
+            </section>
+        <?php endif; ?>
     </div>
 </div>

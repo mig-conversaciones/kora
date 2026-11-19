@@ -15,7 +15,7 @@
 
 | Clave (`compartido/.env`) | Frecuencia | Procedimiento | Efecto |
 |---|---|---|---|
-| `CLAVES_CIFRADO` (llavero versionado) | 90 días | Agregar la nueva **al inicio**: `CLAVES_CIFRADO="v3:NUEVA,v2:ANTERIOR,v1:…"`. La primera cifra y todas descifran | Ninguno. **No retirar la anterior** mientras haya datos cifrados con ella: el recifrado (`seguridad.recifrar`) aún no está implementado (llega con RF-Q de seguridad), así que la anterior sigue en el llavero |
+| `CLAVES_CIFRADO` (llavero versionado) | 90 días | Agregar la nueva **al inicio**: `CLAVES_CIFRADO="v3:NUEVA,v2:ANTERIOR,v1:…"`. La primera cifra y todas descifran | Ninguno. Después de agregarla: `php current/cli/recifrar.php ejecutar` (o `encolar`, para dejarlo a la cola). Vuelve a cifrar con la nueva el secreto TOTP, los correos pendientes o fallidos de la cola y los lotes de auditoría. **Retirar la anterior** solo cuando `php current/cli/recifrar.php estado` informe 0 pendientes y no haya correos reservados en curso |
 | `TOKEN_MONITOREO` | 90 días | Generar con `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` y actualizar el monitor externo en el mismo momento | `/health/ready` responde 404 al monitor hasta actualizarlo |
 | `BD_CONTRASENA` | 90 días | Cambiar en hPanel → Bases de datos y, de inmediato, en el `.env` | Segundos de errores de conexión. Hacerlo en baja actividad |
 | `CORREO_CONTRASENA` | 90 días o al cambiar la cuenta | Cambiar en hPanel → Correo y en el `.env`. Luego `php cli/correo.php prueba` | El correo espera en la cola mientras tanto |

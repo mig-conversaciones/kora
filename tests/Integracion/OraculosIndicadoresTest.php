@@ -207,6 +207,19 @@ final class OraculosIndicadoresTest extends TestCase
         self::assertNotNull($parcial['cierre']);
     }
 
+    public function testElEscenarioDeCapacitacionNuncaSeGeneraEnProduccionNiSobreDatos(): void
+    {
+        try {
+            (new \App\Operacion\GeneradorCapacitacion(self::$bd, 'produccion'))->generar($this->centro);
+            self::fail('En producción debe negarse (D-19).');
+        } catch (\RuntimeException $e) {
+            self::assertStringContainsString('producción', $e->getMessage());
+        }
+        $this->escenarioCapacitacion();
+        $this->expectExceptionMessage('ya tiene recepciones o salidas');
+        (new \App\Operacion\GeneradorCapacitacion(self::$bd, 'pruebas'))->generar($this->centro);
+    }
+
     public function testFiltrosValidanRangoYNoAmplianElAlcance(): void
     {
         $alcance = AlcanceDatos::deUsuario(1, [5], false);
@@ -437,55 +450,16 @@ final class OraculosIndicadoresTest extends TestCase
     }
 
     /**
-     * Escenario de capacitación del prototipo (makeDemo) en la vigencia 2027.
+     * Escenario de capacitación del prototipo (makeDemo) en la vigencia 2027: el mismo generador que usa la
+     * capacitación (RF-100), así que estas pruebas son también las de ese escenario.
      *
      * @return array<string,int>
      */
     private function escenarioCapacitacion(): array
     {
-        $this->productosBase();
-        $gan = $this->unidad('GAN');
-        $ids = [];
-        foreach ([['AUTO_001', 'leche', 4000, 'L', 7200000], ['AUTO_002', 'bovino', 1000, 'kg', 8000000]] as [$codigo, $producto, $cupo, $medida, $valor]) {
-            self::$bd->ejecutar(
-                'INSERT INTO procesos_autoconsumo (centro_id, unidad_id, codigo, vigencia, producto_id, producto_texto, cupo_cantidad, medida, cupo_valor, destino_texto)
-                 VALUES (:c, :u, :cod, 2027, :p, :t, :q, :m, :v, \'Agroindustria\')',
-                ['c' => $this->centro, 'u' => $gan, 'cod' => $codigo, 'p' => $this->productos[$producto], 't' => $producto, 'q' => $cupo, 'm' => $medida, 'v' => $valor]
-            );
-        }
-        $ids['auto_001'] = (int) self::$bd->valor("SELECT id FROM procesos_autoconsumo WHERE codigo = 'AUTO_001' AND vigencia = 2027");
-        $auto002 = (int) self::$bd->valor("SELECT id FROM procesos_autoconsumo WHERE codigo = 'AUTO_002' AND vigencia = 2027");
-        $derivados = [['queso', 8.0], ['yogurt', 1.0], ['manjar', 3.4], ['cortado', 4.0]];
-        for ($i = 1; $i <= 4; $i++) {
-            $fecha = sprintf('2027-04-%02d', $i * 5);
-            $siguiente = sprintf('2027-04-%02d', $i * 5 + 1);
-            $lote = $this->recepcion('GAN', 'GAN-REC-DEMO-00' . $i, $fecha, 'leche', '4000', 'L');
-            $auto = $this->salida('GAN', $fecha, 'leche', '800', '1800', 'AUTOCONSUMO', $lote, $ids['auto_001']);
-            $venta = $this->salida('GAN', $siguiente, 'leche', '3200', '2200', 'VENTA_DIRECTA', $lote);
-            if ($i === 1) {
-                $ids += ['lote_leche_1' => $lote, 'salida_auto_1' => $auto, 'salida_venta_1' => $venta];
-            }
-            [$producto, $factor] = $derivados[$i - 1];
-            $cantidad = number_format(800 * 0.97 / $factor, 3, '.', '');
-            $derivado = $this->recepcion('IND', 'IND-REC-DEMO-00' . $i, $siguiente, $producto, $cantidad, $producto === 'yogurt' ? 'L' : 'kg');
-            self::$bd->ejecutar(
-                'INSERT INTO transformaciones (centro_id, unidad_id, fecha, salida_leche_id, recepcion_derivado_id, litros_asignados) VALUES (:c, :u, :f, :s, :r, 800)',
-                ['c' => $this->centro, 'u' => $gan, 'f' => $siguiente, 's' => $auto, 'r' => $derivado]
-            );
-        }
-        $bovino = $this->recepcion('GAN', 'GAN-REC-DEMO-BOV', '2027-04-01', 'bovino', '650', 'kg');
-        $this->salida('GAN', '2027-04-19', 'bovino', '650', '8000', 'AUTOCONSUMO', $bovino, $auto002);
-        $categorias = array_column(self::$bd->consultar('SELECT id, codigo FROM categorias_gasto WHERE centro_id = :c', ['c' => $this->centro]), 'id', 'codigo');
-        foreach ([['ALIMENTACION', 18000000, 2200000], ['MANTENIMIENTO', 6400000, 800000], ['MATERIALES_FORMACION', 1000000, 0]] as [$categoria, $valor, $academico]) {
-            self::$bd->ejecutar(
-                "INSERT INTO gastos_ejecutados (centro_id, unidad_id, fecha, categoria_id, valor, valor_componente_academico) VALUES (:c, :u, '2027-04-30', :cat, :v, :a)",
-                ['c' => $this->centro, 'u' => $gan, 'cat' => $categorias[$categoria], 'v' => $valor, 'a' => $academico]
-            );
-        }
-        self::$bd->ejecutar(
-            'INSERT INTO asignaciones_presupuestales (centro_id, unidad_id, vigencia, valor_total, mantenimiento, alimentacion, materiales_formacion) VALUES (:c, :u, 2027, 185000000, 45000000, 80000000, 60000000)',
-            ['c' => $this->centro, 'u' => $gan]
-        );
+        $ids = (new \App\Operacion\GeneradorCapacitacion(self::$bd, 'pruebas'))->generar($this->centro);
+        $this->productos = $ids['productos'];
+        unset($ids['productos']);
         return $ids;
     }
 
@@ -518,15 +492,6 @@ final class OraculosIndicadoresTest extends TestCase
             ['c' => $this->centro, 'u' => $unidad === null ? null : $this->unidad($unidad), 'p' => $producto === null ? null : $this->productos[$producto],
                 'concepto' => $concepto, 'f' => $fecha, 'v' => $valor, 't' => $tipo, 'e' => $unidad === null ? 'ambiguo' : 'clasificado', 'k' => hash('sha256', 'recaudo' . $this->secuencia)]
         );
-    }
-
-    private function recepcion(string $unidad, string $numero, string $fecha, string $producto, string $cantidad, string $medida): int
-    {
-        self::$bd->ejecutar(
-            'INSERT INTO recepciones_lote (centro_id, unidad_id, numero_interno, fecha_recepcion, producto_id, cantidad, medida) VALUES (:c, :u, :n, :f, :p, :q, :m)',
-            ['c' => $this->centro, 'u' => $this->unidad($unidad), 'n' => $numero, 'f' => $fecha, 'p' => $this->productos[$producto], 'q' => $cantidad, 'm' => $medida]
-        );
-        return (int) self::$bd->valor('SELECT MAX(id) FROM recepciones_lote');
     }
 
     private function salida(string $unidad, string $fecha, string $producto, string $cantidad, string $precio, string $canal, ?int $recepcion = null, ?int $proceso = null): int

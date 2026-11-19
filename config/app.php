@@ -30,6 +30,7 @@ use App\Nucleo\Registro;
 use App\Nucleo\Sesion;
 use App\Nucleo\Vista;
 use App\Operacion\MonitorCertificado;
+use App\Operacion\ServicioRecifrado;
 use App\Operacion\ServicioRespaldo;
 use App\Operacion\VerificadorIntegridad;
 use App\Politicas\Autorizador;
@@ -183,6 +184,11 @@ return [
             $c->obtener(ServicioAuditoria::class),
             $c->obtener(Vista::class),
             RAIZ . '/almacenamiento/exportaciones',
+        ),
+        ServicioRecifrado::class => static fn (Contenedor $c): ServicioRecifrado => new ServicioRecifrado(
+            $c->obtener(BaseDatos::class),
+            $c->obtener(Cifrador::class),
+            RAIZ . '/almacenamiento/exportaciones/auditoria',
         ),
         ExportarLoteAuditoria::class => static fn (Contenedor $c): ExportarLoteAuditoria => new ExportarLoteAuditoria(
             $c->obtener(BaseDatos::class),

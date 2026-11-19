@@ -7,6 +7,7 @@ namespace App\Controladores;
 use App\Nucleo\ErrorHttp;
 use App\Nucleo\ErrorValidacion;
 use App\Nucleo\Respuesta;
+use App\Nucleo\Sesion;
 use App\Nucleo\Solicitud;
 use App\Nucleo\Vista;
 use App\Servicios\AutorizacionRecurso;
@@ -34,6 +35,7 @@ final class ControladorUsuarios extends ControladorModulo
         private readonly ServicioPermisos $permisos,
         private readonly ServicioConsultaAuditoria $auditoria,
         private readonly ServicioCatalogos $catalogos,
+        private readonly Sesion $sesion,
     ) {
         parent::__construct($vista);
     }
@@ -63,7 +65,7 @@ final class ControladorUsuarios extends ControladorModulo
     public function mostrar(Solicitud $solicitud, string $id): Respuesta
     {
         $cuenta = $this->usuarios->obtener($solicitud, (int) $id);
-        return $this->pantalla($solicitud, 'sistema/usuario', $this->datosFormulario($solicitud) + ['cuenta' => $cuenta, 'valores' => ['nombre' => $cuenta['nombre'], 'rol' => $cuenta['roles'][0] ?? '', 'unidades' => $cuenta['unidades']]], $this->meta($cuenta['nombre']));
+        return $this->pantalla($solicitud, 'sistema/usuario', $this->datosFormulario($solicitud) + ['sesionesActivas' => $this->usuarios->sesionesActivas((int) $id), 'cuenta' => $cuenta, 'valores' => ['nombre' => $cuenta['nombre'], 'rol' => $cuenta['roles'][0] ?? '', 'unidades' => $cuenta['unidades']]], $this->meta($cuenta['nombre']));
     }
 
     public function actualizarAcceso(Solicitud $solicitud, string $id): Respuesta
@@ -88,6 +90,29 @@ final class ControladorUsuarios extends ControladorModulo
             return $this->validacion($solicitud, $error, 'sistema/usuario', $this->datosFormulario($solicitud) + ['cuenta' => $cuenta, 'valores' => ['nombre' => $cuenta['nombre'], 'rol' => $cuenta['roles'][0] ?? '', 'unidades' => $cuenta['unidades']]], $this->meta('Usuario'));
         }
         return $this->detalleActualizado($solicitud, (int) $id, $accion === 'desactivar' ? 'Cuenta desactivada: sus sesiones se cerraron.' : 'Cuenta reactivada.');
+    }
+
+    /** Cierra las sesiones de una cuenta sin desactivarla (ASVS V7.4.5). */
+    public function cerrarSesiones(Solicitud $solicitud, string $id): Respuesta
+    {
+        try {
+            $cerradas = $this->usuarios->cerrarSesiones($solicitud, (int) $id, (string) ($solicitud->cuerpo['motivo'] ?? ''));
+        } catch (ErrorValidacion $error) {
+            $cuenta = $this->usuarios->obtener($solicitud, (int) $id);
+            return $this->validacion($solicitud, $error, 'sistema/usuario', $this->datosFormulario($solicitud) + ['sesionesActivas' => $this->usuarios->sesionesActivas((int) $id), 'cuenta' => $cuenta, 'valores' => ['nombre' => $cuenta['nombre'], 'rol' => $cuenta['roles'][0] ?? '', 'unidades' => $cuenta['unidades']]], $this->meta('Usuario'));
+        }
+        return $this->detalleActualizado($solicitud, (int) $id, $cerradas === 1 ? 'Se cerró 1 sesión.' : "Se cerraron {$cerradas} sesiones.");
+    }
+
+    /** Cierra las sesiones de todos los usuarios menos la propia: solo el superadministrador (ASVS V7.4.5). */
+    public function cerrarTodasLasSesiones(Solicitud $solicitud): Respuesta
+    {
+        try {
+            $cerradas = $this->usuarios->cerrarTodasLasSesiones($solicitud, $this->sesion->huella(), (string) ($solicitud->cuerpo['motivo'] ?? ''));
+        } catch (ErrorValidacion $error) {
+            return $this->validacion($solicitud, $error, 'sistema/usuarios', $this->datosListado($solicitud), $this->meta('Usuarios'));
+        }
+        return $this->trasGuardar($this->listar($solicitud), '/sistema/usuarios', "Se cerraron {$cerradas} sesiones; la tuya sigue abierta.");
     }
 
     public function reenviarInvitacion(Solicitud $solicitud, string $id): Respuesta
@@ -124,7 +149,7 @@ final class ControladorUsuarios extends ControladorModulo
     private function detalleActualizado(Solicitud $solicitud, int $id, string $mensaje): Respuesta
     {
         $cuenta = $this->usuarios->obtener($solicitud, $id);
-        $respuesta = $this->pantalla($solicitud, 'sistema/usuario', $this->datosFormulario($solicitud) + ['cuenta' => $cuenta, 'valores' => ['nombre' => $cuenta['nombre'], 'rol' => $cuenta['roles'][0] ?? '', 'unidades' => $cuenta['unidades']]], $this->meta($cuenta['nombre']));
+        $respuesta = $this->pantalla($solicitud, 'sistema/usuario', $this->datosFormulario($solicitud) + ['sesionesActivas' => $this->usuarios->sesionesActivas($id), 'cuenta' => $cuenta, 'valores' => ['nombre' => $cuenta['nombre'], 'rol' => $cuenta['roles'][0] ?? '', 'unidades' => $cuenta['unidades']]], $this->meta($cuenta['nombre']));
         return $this->conToast($respuesta, 'success', $mensaje);
     }
 
@@ -137,7 +162,7 @@ final class ControladorUsuarios extends ControladorModulo
             'rol' => preg_replace('/[^a-z_]/', '', (string) ($solicitud->consulta['rol'] ?? '')) ?? '',
         ];
         $pagina = $this->enteroConsulta($solicitud, 'pagina', 1) ?? 1;
-        return $this->usuarios->listar($solicitud, $filtros, $pagina) + ['filtros' => $filtros, 'pagina' => $pagina, 'roles' => $this->usuarios->rolesAsignables($solicitud), 'actorId' => AutorizacionRecurso::usuario($solicitud)->id];
+        return $this->usuarios->listar($solicitud, $filtros, $pagina) + ['filtros' => $filtros, 'pagina' => $pagina, 'roles' => $this->usuarios->rolesAsignables($solicitud), 'actorId' => AutorizacionRecurso::usuario($solicitud)->id, 'esSuperadministrador' => AutorizacionRecurso::usuario($solicitud)->esSuperadministrador()];
     }
 
     /** @return array<string,mixed> */

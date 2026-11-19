@@ -192,6 +192,55 @@ final class ServicioUsuarios
         });
     }
 
+    /** Sesiones abiertas de una cuenta, para el detalle del usuario (ASVS V7.4.5). */
+    public function sesionesActivas(int $id): int
+    {
+        return (int) $this->bd->valor(
+            'SELECT COUNT(*) FROM sesiones WHERE usuario_id = :id AND revocada_en IS NULL AND expira_absoluta_en > UTC_TIMESTAMP(3)',
+            ['id' => $id]
+        );
+    }
+
+    /**
+     * Cierra todas las sesiones de una cuenta sin desactivarla (ASVS V7.4.5): por ejemplo, ante un equipo perdido. La
+     * persona puede volver a ingresar. Nadie lo hace sobre su propia cuenta: para eso está Mi cuenta.
+     */
+    public function cerrarSesiones(Solicitud $solicitud, int $id, string $motivo): int
+    {
+        $this->obtener($solicitud, $id);
+        if ($id === AutorizacionRecurso::usuario($solicitud)->id) {
+            throw new ErrorValidacion(['motivo' => 'Para tus propias sesiones usa Mi cuenta.']);
+        }
+        $motivo = self::motivo($motivo);
+        $cerradas = $this->bd->ejecutar('UPDATE sesiones SET revocada_en = UTC_TIMESTAMP(3) WHERE usuario_id = :id AND revocada_en IS NULL', ['id' => $id]);
+        $this->auditoria->registrar($solicitud, 'sesion.revocar_usuario', 'exito', new RecursoAuditado('usuarios', $id), ['cerradas' => $cerradas], null, null, $motivo);
+        return $cerradas;
+    }
+
+    /**
+     * Cierra las sesiones de todos los usuarios menos la de quien lo hace (ASVS V7.4.5; runbook «Incidente de
+     * seguridad»). Solo el superadministrador.
+     */
+    public function cerrarTodasLasSesiones(Solicitud $solicitud, ?string $huellaActual, string $motivo): int
+    {
+        if (!AutorizacionRecurso::usuario($solicitud)->esSuperadministrador()) {
+            throw new ErrorHttp(403);
+        }
+        $motivo = self::motivo($motivo);
+        $cerradas = $this->bd->ejecutar('UPDATE sesiones SET revocada_en = UTC_TIMESTAMP(3) WHERE revocada_en IS NULL AND id <> :actual', ['actual' => $huellaActual ?? '']);
+        $this->auditoria->registrar($solicitud, 'sesion.revocar_todas', 'exito', null, ['cerradas' => $cerradas], null, null, $motivo);
+        return $cerradas;
+    }
+
+    private static function motivo(string $motivo): string
+    {
+        $motivo = trim($motivo);
+        if (mb_strlen($motivo) < 5 || mb_strlen($motivo) > 500) {
+            throw new ErrorValidacion(['motivo' => 'Indica el motivo (entre 5 y 500 caracteres).']);
+        }
+        return $motivo;
+    }
+
     /** Reenvía la invitación de una cuenta que aún no la activó; el enlace anterior deja de valer. */
     public function reenviarInvitacion(Solicitud $solicitud, int $id): void
     {

@@ -1,4 +1,4 @@
-# Lista ASVS 5.0.0 nivel 2 — KORA 0.9.0
+# Lista ASVS 5.0.0 nivel 2 — KORA 0.9.1
 
 > Archivo generado por `php herramientas/generar-asvs.php` a partir del texto oficial (`docs/seguridad/fuentes/`) y del estado de `docs/seguridad/asvs-estado.csv`. No se edita a mano: se cambia el estado y se regenera. Una prueba unitaria (`ListaAsvsTest`) falla si falta un requisito o si este archivo no coincide con su fuente.
 
@@ -23,18 +23,18 @@
 | V1 Encoding and Sanitization | 18 | 0 | 0 | 0 | 9 | 27 |
 | V2 Validation and Business Logic | 11 | 0 | 0 | 0 | 0 | 11 |
 | V3 Web Frontend Security | 13 | 0 | 4 | 0 | 2 | 19 |
-| V4 API and Web Service | 1 | 1 | 2 | 0 | 6 | 10 |
+| V4 API and Web Service | 2 | 0 | 2 | 0 | 6 | 10 |
 | V5 File Handling | 8 | 0 | 0 | 1 | 0 | 9 |
 | V6 Authentication | 26 | 1 | 0 | 1 | 7 | 35 |
-| V7 Session Management | 15 | 1 | 0 | 0 | 2 | 18 |
+| V7 Session Management | 16 | 0 | 0 | 0 | 2 | 18 |
 | V8 Authorization | 7 | 0 | 0 | 0 | 0 | 7 |
-| V11 Cryptography | 12 | 1 | 0 | 0 | 1 | 14 |
+| V11 Cryptography | 13 | 0 | 0 | 0 | 1 | 14 |
 | V12 Secure Communication | 1 | 1 | 4 | 0 | 3 | 9 |
 | V13 Configuration | 9 | 0 | 2 | 2 | 0 | 13 |
 | V14 Data Protection | 8 | 1 | 0 | 0 | 0 | 9 |
-| V15 Secure Coding and Architecture | 10 | 2 | 1 | 0 | 0 | 13 |
+| V15 Secure Coding and Architecture | 12 | 0 | 1 | 0 | 0 | 13 |
 | V16 Security Logging and Error Handling | 15 | 1 | 0 | 0 | 0 | 16 |
-| **Total** | **154** | **9** | **13** | **4** | **30** | **210** |
+| **Total** | **159** | **4** | **13** | **4** | **30** | **210** |
 
 - **V9, fuera de alcance:** No hay tokens autocontenidos (JWT): las sesiones son de referencia en la base (ADR-006).
 - **V10, fuera de alcance:** No hay OAuth ni OIDC: la autenticación es propia (contraseña y TOTP).
@@ -126,7 +126,7 @@
 | Requisito | Nivel | Texto oficial | Estado | Evidencia o justificación |
 |---|---|---|---|---|
 | V4.1.1 | 1 | Verify that every HTTP response with a message body contains a Content-Type header field that matches the actual content of the response, including the charset parameter to specify safe character encoding (e.g., UTF-8… | Cumple | Respuesta fija Content-Type con charset UTF-8 (app/Nucleo/Respuesta.php); los estáticos los tipa el servidor. |
-| V4.1.2 | 2 | Verify that only user-facing endpoints (intended for manual web-browser access) automatically redirect from HTTP to HTTPS, while other services or endpoints do not implement transparent redirects. This is to avoid a s… | Parcial | public/.htaccess redirige todo a HTTPS, incluidos /health/live y /health/ready. Pendiente: excluir los extremos de monitoreo de la redirección y responder 403 por HTTP. |
+| V4.1.2 | 2 | Verify that only user-facing endpoints (intended for manual web-browser access) automatically redirect from HTTP to HTTPS, while other services or endpoints do not implement transparent redirects. This is to avoid a s… | Cumple | Solo las páginas de usuario se redirigen a HTTPS. /health y /api responden 403 por HTTP en lugar de redirigir (public/.htaccess y .htaccess), así un monitor o un cliente mal configurado falla a la vista. Verificado en MAMP con un host externo. |
 | V4.1.3 | 2 | Verify that any HTTP header field used by the application and set by an intermediary layer, such as a load balancer, a web proxy, or a backend-for-frontend service, cannot be overridden by the end-user. Example header… | Staging | La aplicación usa REMOTE_ADDR e ignora X-Forwarded-For. Verificar detrás del proxy de Hostinger (4.8, ítem 16). |
 | V4.2.1 | 2 | Verify that all application components (including load balancers, firewalls, and application servers) determine boundaries of incoming HTTP messages using the appropriate mechanism for the HTTP version to prevent HTTP… | Staging | Depende de LiteSpeed y del proxy de Hostinger; se verifica con el proveedor (4.8, ítem 16). |
 | V4.3.1 | 2 | Verify that a query allowlist, depth limiting, amount limiting, or query cost analysis is used to prevent GraphQL or data layer expression Denial of Service (DoS) as a result of expensive, nested queries. | No aplica | No hay GraphQL. |
@@ -207,7 +207,7 @@
 | V7.4.2 | 1 | Verify that the application terminates all active sessions when a user account is disabled or deleted (such as an employee leaving the company). | Cumple | Desactivar una cuenta cierra todas sus sesiones (ServicioUsuarios). |
 | V7.4.3 | 2 | Verify that the application gives the option to terminate all other active sessions after a successful change or removal of any authentication factor (including password change via reset or recovery and, if present, a… | Cumple | Al cambiar la contraseña se ofrece cerrar las demás sesiones (ServicioCuentas::cambiarContrasena); la recuperación las cierra todas. |
 | V7.4.4 | 2 | Verify that all pages that require authentication have easy and visible access to logout functionality. | Cumple | «Salir» en el menú de perfil de todas las páginas autenticadas. |
-| V7.4.5 | 2 | Verify that application administrators are able to terminate active sessions for an individual user or for all users. | Parcial | Un administrador cierra las sesiones de un usuario desactivando la cuenta; cerrar las de todos se hace por SQL (runbook de incidente de seguridad). Pendiente: acción explícita en la interfaz. |
+| V7.4.5 | 2 | Verify that application administrators are able to terminate active sessions for an individual user or for all users. | Cumple | Sistema > Usuarios: el administrador cierra las sesiones de una persona sin desactivarla, y el superadministrador las de todos menos la suya. Con motivo, reautenticación y auditoría (CierreSesionesTest). |
 | V7.5.1 | 2 | Verify that the application requires full re-authentication before allowing modifications to sensitive account attributes which may affect authentication such as email address, phone number, MFA configuration, or othe… | Cumple | Cambios de contraseña, 2FA y códigos exigen reautenticación de los últimos 5 min (RAC-026). |
 | V7.5.2 | 2 | Verify that users are able to view and (having authenticated again with at least one factor) terminate any or all currently active sessions. | Cumple | Mi cuenta lista las sesiones activas y permite cerrar las demás con reautenticación. |
 | V7.6.1 | 2 | Verify that session lifetime and termination between Relying Parties (RPs) and Identity Providers (IdPs) behave as documented, requiring re-authentication as necessary such as when the maximum time between IdP authent… | No aplica | No hay proveedores de identidad. |
@@ -229,7 +229,7 @@
 
 | Requisito | Nivel | Texto oficial | Estado | Evidencia o justificación |
 |---|---|---|---|---|
-| V11.1.1 | 2 | Verify that there is a documented policy for management of cryptographic keys and a cryptographic key lifecycle that follows a key management standard such as NIST SP 800-57. This should include ensuring that keys are… | Parcial | Ciclo de vida de las claves en el runbook de rotación y el ADR de cifrado (llavero con versiones). Pendiente: el recifrado automático (seguridad.recifrar), sin el cual la clave anterior debe quedarse en el llavero. |
+| V11.1.1 | 2 | Verify that there is a documented policy for management of cryptographic keys and a cryptographic key lifecycle that follows a key management standard such as NIST SP 800-57. This should include ensuring that keys are… | Cumple | Ciclo de vida de las claves en el runbook de rotación: llavero con versiones, recifrado con cli/recifrar.php o el trabajo seguridad.recifrar (RecifradoTest) y retiro de la clave anterior cuando no queda nada pendiente. |
 | V11.1.2 | 2 | Verify that a cryptographic inventory is performed, maintained, regularly updated, and includes all cryptographic keys, algorithms, and certificates used by the application. It must also document where keys can and ca… | Cumple | Inventario criptográfico en la sección «Inventario criptográfico» de docs/seguridad/asvs.md. |
 | V11.2.1 | 2 | Verify that industry-validated implementations (including libraries and hardware-accelerated implementations) are used for cryptographic operations. | Cumple | libsodium, OpenSSL y password_hash de PHP; sin criptografía propia. |
 | V11.2.2 | 2 | Verify that the application is designed with crypto agility such that random number, authenticated encryption, MAC, or hashing algorithms, key lengths, rounds, ciphers and modes can be reconfigured, upgraded, or swapp… | Cumple | Llavero con versión en cada sobre cifrado: se puede cambiar de clave o de algoritmo sin perder lo anterior. |
@@ -295,9 +295,9 @@
 | Requisito | Nivel | Texto oficial | Estado | Evidencia o justificación |
 |---|---|---|---|---|
 | V15.1.1 | 1 | Verify that application documentation defines risk based remediation time frames for 3rd party component versions with vulnerabilities and for updating libraries in general, to minimize the risk from these components. | Cumple | Plazos de actualización de dependencias definidos en RS-015; composer audit y npm audit en cada push. |
-| V15.1.2 | 2 | Verify that an inventory catalog, such as software bill of materials (SBOM), is maintained of all third-party libraries in use, including verifying that components come from pre-defined, trusted, and continually maint… | Parcial | Inventario en composer.lock y package-lock.json, con versiones exactas. Pendiente: generar un SBOM (CycloneDX) por versión. |
+| V15.1.2 | 2 | Verify that an inventory catalog, such as software bill of materials (SBOM), is maintained of all third-party libraries in use, including verifying that components come from pre-defined, trusted, and continually maint… | Cumple | SBOM CycloneDX 1.5 por versión (herramientas/generar-sbom.php), incluido en cada paquete como sbom.cdx.json y verificado en la CI (SbomTest). |
 | V15.1.3 | 2 | Verify that the application documentation identifies functionality which is time-consuming or resource-demanding. This must include how to prevent a loss of availability due to overusing this functionality and how to … | Cumple | Funciones costosas documentadas (importaciones, exportaciones, tableros) y enviadas a la cola o a la caché (docs/rendimiento). |
-| V15.2.1 | 1 | Verify that the application only contains components which have not breached the documented update and remediation time frames. | Parcial | Las dependencias de ejecución no tienen avisos. Las de desarrollo (sharp, esbuild, eslint) tienen avisos y no se despliegan. Pendiente: actualizarlas en la I8 o en la siguiente versión. |
+| V15.2.1 | 1 | Verify that the application only contains components which have not breached the documented update and remediation time frames. | Cumple | composer audit y npm audit (también las dependencias de desarrollo) sin avisos: sharp 0.35.5, esbuild 0.28.2 y eslint 9.39.5. RS-015 fija los plazos. |
 | V15.2.2 | 2 | Verify that the application has implemented defenses against loss of availability due to functionality which is time-consuming or resource-demanding, based on the documented security decisions and strategies for this. | Cumple | Cola durable con presupuesto de tiempo, límites de filas y de tasa, y caché con protección de estampida. |
 | V15.2.3 | 2 | Verify that the production environment only includes functionality that is required for the application to function, and does not expose extraneous functionality such as test code, sample snippets, and development fun… | Cumple | El paquete no lleva pruebas, documentación ni herramientas. Las demostraciones de la vitrina (cola y respuesta lenta) responden 404 en producción. |
 | V15.3.1 | 1 | Verify that the application only returns the required subset of fields from a data object. For example, it should not return an entire data object, as some individual fields should not be accessible to users. | Cumple | Las vistas y el JSON de salud devuelven solo los campos necesarios. |
