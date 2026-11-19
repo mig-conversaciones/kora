@@ -1,4 +1,4 @@
-# Lista ASVS 5.0.0 nivel 2 — KORA 0.9.1
+# Lista ASVS 5.0.0 nivel 2 — KORA 0.9.2
 
 > Archivo generado por `php herramientas/generar-asvs.php` a partir del texto oficial (`docs/seguridad/fuentes/`) y del estado de `docs/seguridad/asvs-estado.csv`. No se edita a mano: se cambia el estado y se regenera. Una prueba unitaria (`ListaAsvsTest`) falla si falta un requisito o si este archivo no coincide con su fuente.
 

@@ -26,7 +26,9 @@ php herramientas/generar-sbom.php sbom.cdx.json
 # De docs/ solo viajan las guías: son la ayuda en línea (RDOC-009).
 find docs -mindepth 1 -maxdepth 1 ! -name guias -exec rm -rf {} +
 rm -rf node_modules referencias tests .github herramientas almacenamiento
-rm -f .env .env.* phpunit.xml phpstan.neon* .php-cs-fixer* package-lock.json composer.lock.bak
+# .env.example se conserva (sin secretos): el instalador de Hostinger arma el .env desde él.
+find . -maxdepth 1 -name ".env*" ! -name ".env.example" -exec rm -f {} +
+rm -f phpunit.xml phpstan.neon* .php-cs-fixer* package-lock.json composer.lock.bak
 echo "${VERSION#v}" > VERSION
 git -C "$RAIZ" rev-parse HEAD > COMMIT
 

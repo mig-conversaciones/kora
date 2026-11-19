@@ -2,6 +2,23 @@
 
 Formato basado en *Keep a Changelog*, con versionado semántico (RNF-015).
 
+## [0.9.2] — Instalación en Hostinger sin SSH
+
+### Agregado
+
+- **Instalador de Hostinger** (`scripts/instalar_hostinger.sh`), con las fases preparar, desplegar y actualizar. Se ejecuta con tareas cron de hPanel en cuentas sin SSH, y cada fase corre una sola vez.
+  - Genera el `.env` con claves nuevas en el servidor, que nunca se imprimen.
+  - Verifica el SHA-256 del paquete.
+  - Crea un envoltorio de PHP para la CLI, porque el PHP de Hostinger deshabilita `proc_open`.
+  - Publica `public_html` como enlace a `current/public`, con un directorio puente de respaldo.
+  - La CI lo ensaya completo.
+- **Flujo «Publicar versión»:** cada etiqueta `vX.Y.Z` arma el paquete y lo publica como release de GitHub, con su SHA-256 y su SBOM.
+- **Guía:** `docs/operacion/hostinger.md`, con los pasos para `produccion.herramientascab.com`.
+
+### Cambiado
+
+- **Copia previa en la web:** si el proceso no puede lanzar `mysqldump` (`proc_open` deshabilitado), usa la copia completa más reciente de 24 h o pide tomar una antes (RDL-004).
+
 ## [0.9.1] — Pendientes de desarrollo de la I8 (sin publicar)
 
 ### Agregado

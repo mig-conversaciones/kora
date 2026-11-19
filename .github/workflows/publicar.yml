@@ -1,0 +1,41 @@
+# Publicación de una versión de KORA (ROB-001): al subir una etiqueta vX.Y.Z se arma el paquete con
+# scripts/empaquetar.sh (dependencias de producción, activos construidos, manifiesto SHA-256 y SBOM) y se publica como
+# release de GitHub. El servidor de Hostinger lo descarga y lo verifica con scripts/instalar_hostinger.sh.
+name: Publicar versión
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+permissions:
+  contents: write
+
+jobs:
+  paquete:
+    name: Paquete y release
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, mbstring, intl, sodium, zip, fileinfo, openssl
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Versión coherente con la etiqueta
+        run: test "$(cat VERSION)" = "${GITHUB_REF_NAME#v}"
+      - name: Paquete
+        run: |
+          bash scripts/empaquetar.sh "$GITHUB_REF_NAME" "kora-$GITHUB_REF_NAME.tar.gz"
+          sha256sum "kora-$GITHUB_REF_NAME.tar.gz" > "kora-$GITHUB_REF_NAME.tar.gz.sha256"
+          tar -xzOf "kora-$GITHUB_REF_NAME.tar.gz" ./sbom.cdx.json > "kora-$GITHUB_REF_NAME.sbom.cdx.json"
+      - name: Release de GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          awk -v v="${GITHUB_REF_NAME#v}" '$0 ~ "^## \\[" v "\\]" { dentro = 1; next } dentro && /^## \[/ { exit } dentro { print }' CHANGELOG.md > notas.md
+          gh release create "$GITHUB_REF_NAME" --title "KORA $GITHUB_REF_NAME" --notes-file notas.md \
+            "kora-$GITHUB_REF_NAME.tar.gz" "kora-$GITHUB_REF_NAME.tar.gz.sha256" "kora-$GITHUB_REF_NAME.sbom.cdx.json"

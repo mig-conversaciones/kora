@@ -138,7 +138,8 @@ jobs:
           grep -qx './manifiesto.sha256' /tmp/kora-v1.lista
           grep -qx './docs/guias/primeros-pasos.md' /tmp/kora-v1.lista
           grep -qx './sbom.cdx.json' /tmp/kora-v1.lista
-          ! grep -qE '^\./(\.env|referencias/|tests/|almacenamiento/|docs/(adr|ia|seguridad|uat)/)' /tmp/kora-v1.lista
+          ! grep -qE '^\./(\.env$|referencias/|tests/|almacenamiento/|docs/(adr|ia|seguridad|uat)/)' /tmp/kora-v1.lista
+          grep -qx './.env.example' /tmp/kora-v1.lista
       - name: Estructura compartida, .env de staging y llaves del custodio
         run: |
           mkdir -p $RAIZ_APP/releases $RAIZ_APP/respaldos
@@ -184,6 +185,23 @@ jobs:
           php $RAIZ_APP/current/cli/verificar_integridad.php
           echo "// alterado" >> $RAIZ_APP/current/cli/humo.php
           ! php $RAIZ_APP/current/cli/verificar_integridad.php
+      - name: Instalador de Hostinger sin SSH (preparar y desplegar en una base nueva)
+        run: |
+          mariadb -h127.0.0.1 -uroot -praiz_ci -e "CREATE DATABASE kora_hostinger CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL ON kora_hostinger.* TO 'kora_app'@'%';"
+          export HOME=/tmp/hogar KORA_DOMINIO=ci.kora.invalid KORA_PAQUETE_LOCAL=/tmp/kora-v1.tar.gz KORA_SIN_PUBLICAR=1
+          APP=$HOME/domains/ci.kora.invalid/kora
+          bash scripts/instalar_hostinger.sh preparar v0.9.9 "$(cat /tmp/custodio.publica)"
+          stat -c '%a' $APP/compartido/.env | grep -qx 600
+          test "$(grep -c '=COMPLETAR$' $APP/compartido/.env)" -eq 6
+          # Claves distintas y generadas en el servidor.
+          test "$(grep '^CLAVE_HMAC_PII=' $APP/compartido/.env | cut -d= -f2)" != "$(grep '^CLAVE_HMAC_CODIGOS=' $APP/compartido/.env | cut -d= -f2)"
+          ! grep -q REEMPLAZAR $APP/compartido/.env
+          # Lo que completa el titular en hPanel.
+          sed -i 's#^BD_NOMBRE=COMPLETAR#BD_NOMBRE=kora_hostinger#; s#^BD_USUARIO=COMPLETAR#BD_USUARIO=kora_app#; s#^BD_CONTRASENA=COMPLETAR#BD_CONTRASENA=clave_ci#; s#^CORREO_USUARIO=COMPLETAR#CORREO_USUARIO=ci#; s#^CORREO_CONTRASENA=COMPLETAR#CORREO_CONTRASENA=ci#; s#^CORREO_REMITENTE=COMPLETAR#CORREO_REMITENTE=ci@kora.invalid#; s#^CORREO_TRANSPORTE=.*#CORREO_TRANSPORTE=archivo#' $APP/compartido/.env
+          bash scripts/instalar_hostinger.sh desplegar v0.9.9
+          test -L $APP/current
+          mariadb -h127.0.0.1 -ukora_app -pclave_ci kora_hostinger -N -e "SELECT COUNT(*) FROM roles" | grep -qvx 0
+          bash scripts/instalar_hostinger.sh desplegar v0.9.9 | grep -q 'ya se ejecutó'
       - name: Anotar el fallo con las últimas líneas del registro
         if: failure()
         run: |

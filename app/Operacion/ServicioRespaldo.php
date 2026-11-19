@@ -67,7 +67,25 @@ final class ServicioRespaldo
             $this->registro?->info('respaldo.omitido', ['tipo' => $tipo, 'motivo' => 'copias sin configurar fuera de producción']);
             return null;
         }
+        if (!self::procesosDisponibles()) {
+            // PHP web de Hostinger: proc_open está deshabilitado y mysqldump no se puede lanzar desde la solicitud. La
+            // copia la hace la CLI (cron diario, despliegue, trabajador); aquí vale la completa más reciente de 24 h.
+            $reciente = $this->bd->valor(
+                "SELECT identificador FROM respaldos WHERE estado = 'completado' AND eliminado_en IS NULL AND creado_en >= UTC_TIMESTAMP(3) - INTERVAL 24 HOUR ORDER BY id DESC LIMIT 1"
+            );
+            if ($reciente === null) {
+                throw new RuntimeException('No hay una copia de las últimas 24 h y este proceso no puede tomarla: ejecuta «scripts/backup.sh manual» y vuelve a intentarlo (RDL-004).');
+            }
+            $this->registro?->info('respaldo.copia_reciente', ['tipo' => $tipo, 'motivo' => $motivo, 'copia' => $reciente]);
+            return (string) $reciente;
+        }
         return $this->crear($tipo, $motivo)['identificador'];
+    }
+
+    /** mysqldump y mysql se lanzan con proc_open, que el PHP web de algunos hostings deshabilita (disable_functions). */
+    public static function procesosDisponibles(): bool
+    {
+        return function_exists('proc_open');
     }
 
     public function baseActiva(): string
