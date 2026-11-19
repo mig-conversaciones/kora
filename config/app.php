@@ -29,6 +29,9 @@ use App\Nucleo\Funcionalidades;
 use App\Nucleo\Registro;
 use App\Nucleo\Sesion;
 use App\Nucleo\Vista;
+use App\Operacion\MonitorCertificado;
+use App\Operacion\ServicioRespaldo;
+use App\Operacion\VerificadorIntegridad;
 use App\Politicas\Autorizador;
 use App\Politicas\PoliticaAlcanceUnidad;
 use App\Politicas\PoliticaRecaudos;
@@ -56,7 +59,7 @@ use App\Trabajos\LimpiezaPeriodica;
 
 $https = str_starts_with(Entorno::texto('APP_URL'), 'https://');
 // Última migración que este código espera; /health/ready y la salida del mantenimiento la comparan (06-04).
-$versionEsquema = '012';
+$versionEsquema = '014';
 $cola = static fn (): array => require RAIZ . '/config/cola.php';
 $seguridad = static fn (): array => require RAIZ . '/config/seguridad.php';
 $claveBinaria = static fn (string $variable): string => (string) base64_decode(Entorno::texto($variable), true);
@@ -140,6 +143,37 @@ return [
             $c->obtener(BaseDatos::class),
             RAIZ . '/almacenamiento/adjuntos',
         ),
+        // Copias cifradas con la llave pública del custodio (RDL-003, RS-019; ADR-021).
+        ServicioRespaldo::class => static fn (Contenedor $c): ServicioRespaldo => new ServicioRespaldo(
+            $c->obtener(BaseDatos::class),
+            [
+                'directorio' => Entorno::texto('RESPALDO_DIRECTORIO', '') !== '' ? Entorno::texto('RESPALDO_DIRECTORIO') : RAIZ . '/almacenamiento/respaldos',
+                'almacenamiento' => RAIZ . '/almacenamiento',
+                'mysqldump' => Entorno::texto('RESPALDO_MYSQLDUMP', 'mysqldump'),
+                'mysql' => Entorno::texto('RESPALDO_MYSQL', 'mysql'),
+                'llave_publica' => Entorno::texto('RESPALDO_LLAVE_PUBLICA', ''),
+                'destino_externo' => Entorno::texto('RESPALDO_DESTINO_EXTERNO', ''),
+                'diarias' => Entorno::entero('RESPALDO_DIARIAS', 30),
+                'mensuales' => Entorno::entero('RESPALDO_MENSUALES', 12),
+                'umbral_importacion' => Entorno::entero('RESPALDO_IMPORTACION_FILAS', 500),
+                'entorno' => Entorno::texto('APP_ENTORNO', 'produccion'),
+                'bd' => [
+                    'host' => Entorno::texto('BD_HOST', '127.0.0.1'),
+                    'puerto' => Entorno::entero('BD_PUERTO', 3306),
+                    'usuario' => Entorno::texto('BD_USUARIO'),
+                    'contrasena' => Entorno::texto('BD_CONTRASENA', ''),
+                    'nombre' => Entorno::texto('BD_NOMBRE'),
+                ],
+            ],
+            $c->obtener(Registro::class),
+        ),
+        // Integridad de la versión activa y del .env (RS-012, RS-022): el manifiesto es obligatorio fuera del entorno local.
+        VerificadorIntegridad::class => static fn (): VerificadorIntegridad => new VerificadorIntegridad(
+            RAIZ,
+            RAIZ . '/.env',
+            RAIZ . '/almacenamiento/estado',
+            Entorno::texto('APP_ENTORNO', 'produccion') !== 'local',
+        ),
         // Libros de importación en almacenamiento privado, fuera de public/ (RF-084, RS-011).
         ServicioCargaArchivos::class => static fn (): ServicioCargaArchivos => new ServicioCargaArchivos(RAIZ . '/almacenamiento/importaciones'),
         ServicioExportacion::class => static fn (Contenedor $c): ServicioExportacion => new ServicioExportacion(
@@ -203,6 +237,9 @@ return [
             RAIZ . '/almacenamiento/registros',
             Entorno::texto('APP_ZONA_HORARIA', 'America/Bogota'),
             Entorno::texto('CORREO_ALERTAS', '') !== '',
+            Entorno::texto('APP_URL'),
+            Entorno::entero('SSL_AVISO_DIAS', 15),
+            new MonitorCertificado(),
         ),
         ServicioCorreo::class => static fn (Contenedor $c): ServicioCorreo => new ServicioCorreo(
             $c->obtener(BaseDatos::class),
@@ -225,6 +262,7 @@ return [
             Entorno::texto('TOKEN_MONITOREO'),
             $versionEsquema,
             $cola()['alertas'],
+            $c->obtener(ServicioRespaldo::class),
         ),
         ControladorExportaciones::class => static fn (Contenedor $c): ControladorExportaciones => new ControladorExportaciones(
             $c->obtener(Vista::class),

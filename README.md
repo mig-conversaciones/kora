@@ -9,7 +9,7 @@ Gestión de la producción, la trazabilidad y los tableros de mando del Centro A
 - Tailwind CSS 3.4.
 - MySQL 5.7 en desarrollo local (MAMP) y MariaDB 10.6 o superior en producción (Hostinger Cloud); ver [ADR-002](docs/adr/002-mariadb-sql-portable.md).
 
-**Estado:** iteración 6, «Tableros e indicadores», terminada; sigue la I7, «Rendimiento y operación». Ver el [CHANGELOG](CHANGELOG.md) y los runbooks de [cola, cron y mantenimiento](docs/runbooks/cola-cron-mantenimiento.md), [acceso y cuentas](docs/runbooks/acceso-y-cuentas.md), [maestros y finanzas](docs/runbooks/maestros-y-finanzas.md), [operación productiva](docs/runbooks/operacion-productiva.md), [importaciones y recaudos](docs/runbooks/importaciones-y-recaudos.md) y [tableros y exportaciones](docs/runbooks/tableros-y-exportaciones.md).
+**Estado:** iteración 7, «Rendimiento y operación», terminada; sigue la I8, «Endurecimiento, UAT y salida». Las pruebas de carga con k6 y la prueba de restauración en staging esperan el entorno y la autorización del titular. Ver el [CHANGELOG](CHANGELOG.md), el [inventario de runbooks](docs/runbooks/README.md) y los runbooks de [cola, cron y mantenimiento](docs/runbooks/cola-cron-mantenimiento.md), [acceso y cuentas](docs/runbooks/acceso-y-cuentas.md), [maestros y finanzas](docs/runbooks/maestros-y-finanzas.md), [operación productiva](docs/runbooks/operacion-productiva.md), [importaciones y recaudos](docs/runbooks/importaciones-y-recaudos.md) y [tableros y exportaciones](docs/runbooks/tableros-y-exportaciones.md).
 
 ## Puesta en marcha local con MAMP
 
@@ -68,6 +68,11 @@ El sistema de diseño está en `/sistema-diseno`. El prototipo original sigue di
 | `php cli/cola.php <acción>` (estado, fallidos, reintentar, cancelar, descartar) | Diagnóstico y administración de la cola, auditada (RF-Q-014) |
 | `php cli/mantenimiento.php <acción> --motivo="…"` (estado, activar, desactivar, drenaje) | Modo mantenimiento sin panel (RF-MAN-012) |
 | `php cli/correo.php prueba` | Encola un correo de prueba; en local queda en `almacenamiento/correos/*.eml` |
+| `php cli/respaldo.php <acción>` (llaves, crear, listar, verificar, restaurar, podar, simulacro) | Copias cifradas para la llave pública del custodio y prueba de restauración con acta (RDL-003 a RDL-005) |
+| `php cli/humo.php` / `php cli/limpiar_cache.php` / `php cli/registrar_despliegue.php` | Pruebas de humo, vaciado de la caché y registro de despliegues (ROB-001, ROB-013) |
+| `php cli/verificar_integridad.php [--registrar-env]` | Versión activa frente a su manifiesto, y permisos y huella del `.env` (RS-022) |
+| `php cli/generar_dataset.php --base=kora_carga --escala=3a --preparar` | Dataset sintético de 3 años para medir consultas y carga; nunca en producción (RNF-PERF-016) |
+| `scripts/empaquetar.sh`, `scripts/desplegar.sh`, `scripts/rollback.sh`, `scripts/backup.sh` | Operación en Hostinger (Linux): paquete con manifiesto, despliegue atómico, reversión y copia diaria ([runbook](docs/runbooks/despliegue-reversion.md)) |
 | `php herramientas/composer.phar verificar` | PSR-12, PHPStan nivel 6 y PHPUnit (pruebas unitarias e integración contra `kora_pruebas`) |
 | `npm run marca` | Deriva logos, símbolo y favicon de `referencias/KORA_kit_identidad` a `public/marca/` (ADR-016); solo cuando cambia el kit |
 | `npm run construir` | Tailwind, minificado, huellas, `manifest.json`, fuentes y favicons, con presupuesto de peso |
@@ -83,11 +88,14 @@ El sistema de diseño está en `/sistema-diseno`. El prototipo original sigue di
 ## Estructura
 
 ```
-app/            Nucleo (enrutador, contenedor, vista, BD, migrador), Intermediarios, Controladores, Servicios, Vistas
+app/            Nucleo (enrutador, contenedor, vista, BD, migrador), Intermediarios, Controladores, Servicios, Vistas,
+                Importacion, Tableros, Operacion (copias, integridad, dataset), Trabajos, Cola
 config/         app, base_datos, rutas, htmx, menu, seguridad, funcionalidades, mantenimiento
 public/         index.php (controlador frontal), .htaccess, assets con huella, favicon y manifest
-cli/            migrar, verificar_entorno, sembrar, usuarios, auditoria, trabajador_cron, programador, cola, mantenimiento, correo, cron_local
-bd/migraciones/ 001 a 009 (.sql y .down.sql); bd/semillas/ 001 y 002
+cli/            migrar, verificar_entorno, sembrar, usuarios, auditoria, trabajador_cron, programador, cola, mantenimiento, correo, cron_local,
+                respaldo, humo, limpiar_cache, registrar_despliegue, verificar_integridad, generar_dataset
+scripts/        empaquetar, desplegar, rollback, backup, restaurar, verificar_integridad (Linux)
+bd/migraciones/ 001 a 014 (.sql y .down.sql); bd/semillas/ 001 y 002
 recursos/       Fuentes de CSS (tokens, Tailwind) y JS (retroalimentacion-ui.js, componentes-alpine.js)
 herramientas/   construir-activos.mjs, verificar-contraste.mjs, composer.phar (no versionado)
 almacenamiento/ Privado: caché, registros JSON, estado, adjuntos y exportaciones (bloqueado para la web)

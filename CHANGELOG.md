@@ -2,6 +2,58 @@
 
 Formato basado en *Keep a Changelog*, con versionado semántico (RNF-015).
 
+## [0.8.0] — Iteración 7 «Rendimiento y operación» (sin publicar)
+
+### Agregado
+
+- **Copias de seguridad cifradas** (RDL-003 a RDL-005, RS-019):
+  - `cli/respaldo.php` hace la copia: mysqldump coherente y ZIP del almacenamiento privado, cifrados en sobre con libsodium para la llave pública del custodio.
+  - Manifiesto SHA-256, registro en la tabla `respaldos` y retención de 30 diarias y 12 mensuales.
+  - `scripts/backup.sh` añade el rsync externo y `scripts/restaurar.sh` la restauración.
+  - Simulacro de restauración con cifras de control, cadena de auditoría y acta.
+- **Copia previa (RDL-004)** antes de cada despliegue con migraciones y antes de aplicar o revertir una importación de 500 filas o más (`RESPALDO_IMPORTACION_FILAS`). En producción no hay cambio de riesgo sin llave configurada.
+- **Despliegue por versiones** (ROB-001 a ROB-005, ROB-013):
+  - `scripts/empaquetar.sh` arma el paquete con manifiesto.
+  - `scripts/desplegar.sh` despliega con mantenimiento y drenaje opcionales, copia previa, cambio atómico de `current`, pruebas de humo y registro.
+  - `scripts/rollback.sh` revierte.
+  - Nuevas CLI: `cli/humo.php`, `cli/limpiar_cache.php` y `cli/registrar_despliegue.php`.
+  - Eventos de auditoría `sistema.desplegar` y `sistema.revertir`.
+- **CI (trabajo `operacion`):** en cada push ensaya, en Linux con MariaDB 10.6, dos despliegues, una reversión de 10 minutos o menos, el simulacro de restauración y la detección de un archivo alterado.
+- **Dataset sintético** (RNF-PERF-016, RDL-009): `cli/generar_dataset.php` genera 3 años del centro y un segundo centro para el aislamiento, con la cadena de auditoría sellada y las cuentas de k6.
+- **Medición del rendimiento** (RNF-PERF-007 a RNF-PERF-009):
+  - inventario de consultas con EXPLAIN, consultas por solicitud y costo en escritura (`tests/carga/inventario_consultas.php`);
+  - tiempos locales por flujo (`tests/carga/medir_local.php`);
+  - observador opcional de consultas en `BaseDatos`.
+- **Pruebas de carga** (RNF-PERF-015): `tests/carga/escenarios.js` con k6 (smoke, sostenida, pico, ráfaga y resistencia), umbrales por flujo y detección de fugas de alcance; `tests/carga/validar_resultados.php` para la validación de negocio.
+- **Trabajos nuevos:**
+  - `cache.precalentar`, los días hábiles a las 06:30 (RNF-PERF-012);
+  - `seguridad.verificar_integridad`, a las 03:15, que compara la versión activa con su manifiesto y vigila los permisos y la huella del `.env` (RS-012, RS-022).
+- **Aviso de vencimiento del certificado TLS** a 15 días (ROB-014).
+- **Detalle de `/health/ready`** para el superadministrador: OPcache y horas desde la última copia diaria (RNF-PERF-014).
+- **Documentación:**
+  - ADR-021;
+  - inventario de consultas e índices, estrategia de caché, plan de carga e informe local de la versión;
+  - los diez runbooks de RGO-004 con su inventario;
+  - acta del ensayo local de restauración.
+
+### Cambiado
+
+- **Consultas por solicitud dentro de los máximos de RNF-PERF-009:**
+  - Permisos efectivos en caché bajo `permisos:{ulid}:v{version_permisos}` (4.6.2): las consultas fijas de cada solicitud bajan de 6 a 3.
+  - Tablero central: de 22 a 14 en frío y de 11 a 5 en caliente.
+- **Rendimiento de los tableros:**
+  - las opciones del filtro de producto se leen en una consulta y se cachean;
+  - el estado de la información se lee en una consulta;
+  - las unidades, la versión de datos y los parámetros se leen una vez por solicitud.
+- **Migración 014:** índices de los listados de salidas, recepciones y recaudos. El orden sale del índice, sin *filesort*.
+- **Auditoría:** el nombre del actor pasa a una subconsulta escalar. La página baja de 51 a 4 ms en el dataset de 3 años.
+- **Caché de archivos:** ante un almacenamiento no disponible, pasa al cálculo directo sin avisos ni errores.
+
+### Corregido
+
+- **N+1 en la rotación (IND_12)** del tablero técnico: 1.019 consultas en frío en el dataset de 3 años; ahora son 13.
+- **N+1 en la bandeja de clasificación de recaudos:** una consulta por recaudo para la venta de referencia (210 en total); ahora son 8.
+
 ## [0.7.0] — Iteración 6 «Tableros e indicadores» (sin publicar)
 
 ### Agregado

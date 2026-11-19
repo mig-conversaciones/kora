@@ -87,3 +87,91 @@ jobs:
         run: npm run contraste
       - name: Construcción con presupuesto de peso (RNF-019, RNF-PERF-020)
         run: npm run construir
+
+  operacion:
+    # Ensayo de operación en Linux real (I7): empaquetado con manifiesto, despliegue con enlace atómico y mantenimiento,
+    # reversión, simulacro de restauración con cifras de control y verificación de integridad (ROB-001 a ROB-005,
+    # ROB-013, RDL-004, RDL-005, RS-022). Es el equivalente en la CI del ensayo que se repite en staging.
+    name: Despliegue, reversión y restauración (MariaDB 10.6)
+    runs-on: ubuntu-24.04
+    services:
+      bd:
+        image: mariadb:10.6
+        env:
+          MARIADB_ROOT_PASSWORD: raiz_ci
+          MARIADB_DATABASE: kora
+          MARIADB_USER: kora_app
+          MARIADB_PASSWORD: clave_ci
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -praiz_ci"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      RAIZ_APP: /tmp/kora
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, mbstring, intl, sodium, zip, fileinfo, openssl, opcache
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Cliente de MariaDB (mariadb-dump, como en Hostinger)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq mariadb-client
+      - name: Base aislada para el simulacro de restauración
+        run: |
+          mariadb -h127.0.0.1 -uroot -praiz_ci -e "CREATE DATABASE kora_restauracion CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL ON kora_restauracion.* TO 'kora_app'@'%';"
+      - name: Paquetes de dos versiones (ROB-001, paso 7)
+        run: |
+          bash scripts/empaquetar.sh v0.8.0-ci1 /tmp/kora-v1.tar.gz
+          bash scripts/empaquetar.sh v0.8.0-ci2 /tmp/kora-v2.tar.gz
+          tar -tzf /tmp/kora-v1.tar.gz | grep -qx './manifiesto.sha256'
+          ! tar -tzf /tmp/kora-v1.tar.gz | grep -qE '^\./(\.env|referencias/|tests/|almacenamiento/)'
+      - name: Estructura compartida, .env de staging y llaves del custodio
+        run: |
+          mkdir -p $RAIZ_APP/releases $RAIZ_APP/respaldos
+          mkdir -p $RAIZ_APP/compartido/almacenamiento/{cache,registros,estado,importaciones,exportaciones,adjuntos,latidos,bloqueos,correos}
+          php -r '$p = sodium_crypto_box_keypair(); file_put_contents("/tmp/custodio.par", base64_encode($p)); file_put_contents("/tmp/custodio.publica", base64_encode(sodium_crypto_box_publickey($p)));'
+          ENV=$RAIZ_APP/compartido/.env
+          cp .env.example $ENV
+          sed -i "s#^APP_ENTORNO=.*#APP_ENTORNO=staging#; s#^APP_URL=.*#APP_URL=https://staging.kora.invalid#; s#^BD_NOMBRE=.*#BD_NOMBRE=kora#; s#^BD_USUARIO=.*#BD_USUARIO=kora_app#; s#^BD_CONTRASENA=.*#BD_CONTRASENA=clave_ci#; s#^CORREO_TRANSPORTE=.*#CORREO_TRANSPORTE=archivo#" $ENV
+          sed -i "s#^RESPALDO_MYSQLDUMP=.*#RESPALDO_MYSQLDUMP=mariadb-dump#; s#^RESPALDO_MYSQL=.*#RESPALDO_MYSQL=mariadb#; s#^RESPALDO_DIRECTORIO=.*#RESPALDO_DIRECTORIO=$RAIZ_APP/respaldos#; s#^RESPALDO_LLAVE_PUBLICA=.*#RESPALDO_LLAVE_PUBLICA=$(cat /tmp/custodio.publica)#" $ENV
+          sed -i "s#REEMPLAZAR_CON_32_BYTES_EN_BASE64#$(php -r 'echo base64_encode(random_bytes(32));')#g; s#REEMPLAZAR_CON_64_CARACTERES_HEX#$(php -r 'echo bin2hex(random_bytes(32));')#" $ENV
+          chmod 600 $ENV
+      - name: Primer despliegue (base vacía, sin copia previa)
+        run: |
+          bash scripts/desplegar.sh v0.8.0-ci1 /tmp/kora-v1.tar.gz
+          php $RAIZ_APP/current/cli/sembrar.php
+          test "$(readlink $RAIZ_APP/current)" = "releases/v0.8.0-ci1"
+      - name: Segundo despliegue con mantenimiento, drenaje y copia previa (ROB-005, RDL-004)
+        run: |
+          php $RAIZ_APP/current/cli/trabajador_cron.php
+          bash scripts/desplegar.sh v0.8.0-ci2 /tmp/kora-v2.tar.gz --con-mantenimiento
+          test "$(readlink $RAIZ_APP/current)" = "releases/v0.8.0-ci2"
+          php $RAIZ_APP/current/cli/mantenimiento.php estado | grep -q inactivo
+          mariadb -h127.0.0.1 -ukora_app -pclave_ci kora -N -e "SELECT COUNT(*) FROM despliegues WHERE resultado = 'exito'" | grep -qx 2
+          mariadb -h127.0.0.1 -ukora_app -pclave_ci kora -N -e "SELECT COUNT(*) FROM respaldos WHERE tipo = 'predespliegue' AND estado = 'completado'" | grep -qx 1
+          mariadb -h127.0.0.1 -ukora_app -pclave_ci kora -N -e "SELECT COUNT(*) FROM eventos_auditoria WHERE accion = 'sistema.desplegar'" | grep -qx 2
+      - name: Reversión en 10 minutos o menos (ROB-004)
+        run: |
+          php $RAIZ_APP/current/cli/trabajador_cron.php
+          INICIO=$(date +%s)
+          bash scripts/rollback.sh
+          DURACION=$(( $(date +%s) - INICIO ))
+          echo "Reversión en ${DURACION} s"
+          test "$(readlink $RAIZ_APP/current)" = "releases/v0.8.0-ci1"
+          test "$DURACION" -le 600
+          mariadb -h127.0.0.1 -ukora_app -pclave_ci kora -N -e "SELECT COUNT(*) FROM eventos_auditoria WHERE accion = 'sistema.revertir'" | grep -qx 1
+      - name: Simulacro de restauración con cifras de control y cadena (RDL-005)
+        run: |
+          php $RAIZ_APP/current/cli/respaldo.php simulacro --identidad=/tmp/custodio.par --base-destino=kora_restauracion --acta=/tmp/acta-restauracion.md
+          cat /tmp/acta-restauracion.md >> "$GITHUB_STEP_SUMMARY"
+          php $RAIZ_APP/current/cli/respaldo.php listar
+      - name: Integridad de la versión activa (RS-022)
+        run: |
+          php $RAIZ_APP/current/cli/verificar_integridad.php
+          echo "// alterado" >> $RAIZ_APP/current/cli/humo.php
+          ! php $RAIZ_APP/current/cli/verificar_integridad.php

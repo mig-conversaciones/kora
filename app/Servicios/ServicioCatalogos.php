@@ -28,6 +28,9 @@ final class ServicioCatalogos
     ) {
     }
 
+    /** @var array<int,array{filas:list<array<string,mixed>>,leida:float}> */
+    private array $unidadesLeidas = [];
+
     public static function centro(Solicitud $solicitud): int
     {
         $centro = AutorizacionRecurso::alcance($solicitud)->centroId;
@@ -45,13 +48,23 @@ final class ServicioCatalogos
 
     // ---------------------------------------------------------------- Unidades productivas (RF-016)
 
-    /** @return list<array<string,mixed>> */
+    /**
+     * Unidades del centro. Una solicitud suele pedirlas para el filtro y para la tabla: se leen una vez (válidas 1 s,
+     * de modo que el trabajador, que vive más, no conserva un catálogo viejo) y las activas se filtran en PHP.
+     *
+     * @return list<array<string,mixed>>
+     */
     public function unidades(int $centroId, bool $soloActivas = false): array
     {
-        return $this->bd->consultar(
-            'SELECT * FROM unidades_productivas WHERE centro_id = :centro' . ($soloActivas ? ' AND activa = 1' : '') . " ORDER BY codigo = 'SIN', nombre",
-            ['centro' => $centroId]
-        );
+        $memoria = $this->unidadesLeidas[$centroId] ?? null;
+        if ($memoria === null || microtime(true) - $memoria['leida'] >= 1.0) {
+            $memoria = ['filas' => $this->bd->consultar(
+                "SELECT * FROM unidades_productivas WHERE centro_id = :centro ORDER BY codigo = 'SIN', nombre",
+                ['centro' => $centroId]
+            ), 'leida' => microtime(true)];
+            $this->unidadesLeidas[$centroId] = $memoria;
+        }
+        return $soloActivas ? array_values(array_filter($memoria['filas'], static fn (array $u): bool => (int) $u['activa'] === 1)) : $memoria['filas'];
     }
 
     /**
@@ -113,6 +126,7 @@ final class ServicioCatalogos
         }
         $nuevos = ['nombre' => $nombre, 'prefijo_lote' => $prefijo, 'tipo' => $tipo, 'activa' => $activa];
         $this->bd->transaccion(function (BaseDatos $bd) use ($solicitud, $id, $centro, $actual, $nuevos): void {
+            $this->unidadesLeidas = [];
             $bd->ejecutar('UPDATE unidades_productivas SET nombre = :nombre, prefijo_lote = :prefijo_lote, tipo = :tipo, activa = :activa WHERE id = :id', $nuevos + ['id' => $id]);
             $this->auditoria->registrar($solicitud, 'unidades.actualizar', 'exito', new RecursoAuditado('unidades_productivas', $id, $id), [], self::extraer($actual, array_keys($nuevos)), $nuevos);
             $this->versiones->incrementar($centro);

@@ -29,6 +29,12 @@ final class ServicioIndicadores
     /** Código SGAC de la leche cruda (RF-077). */
     public const LECHE = '5013170101';
 
+    /** @var array<string,array<string,array{valor:?string,vigente_desde:?string}>> parámetros vigentes ya leídos en la solicitud */
+    private array $parametrosLeidos = [];
+
+    /** @var array<string,list<array<string,mixed>>> unidades del alcance ya leídas en la solicitud */
+    private array $unidadesLeidas = [];
+
     public function __construct(private readonly BaseDatos $bd, private readonly ServicioParametros $parametros)
     {
     }
@@ -259,26 +265,28 @@ final class ServicioIndicadores
      */
     public function estadoInformacion(AlcanceDatos $alcance): array
     {
-        [$condicion, $p] = $alcance->condicionSql('r');
-        $recaudos = $this->bd->fila(
-            "SELECT MIN(r.fecha_pago) AS desde, MAX(r.fecha_pago) AS hasta, COUNT(*) AS n, SUM(r.unidad_id IS NULL) AS sin_unidad
-               FROM recaudos r WHERE {$condicion} AND r.archivado_en IS NULL",
-            $p
+        // Una sola ida y vuelta: tres agregados independientes como tablas derivadas (RNF-PERF-009).
+        [$cr, $pr] = self::sufijar($alcance->condicionSql('r'), 'r');
+        [$cs, $ps] = self::sufijar($alcance->condicionSql('s'), 's');
+        [$cc, $pc] = self::sufijar($alcance->condicionSql('c'), 'c');
+        $fila = $this->bd->fila(
+            "SELECT r.desde AS r_desde, r.hasta AS r_hasta, r.n AS r_n, r.sin_unidad AS r_sin_unidad,
+                    s.desde AS s_desde, s.hasta AS s_hasta, s.n AS s_n, s.sin_recepcion AS s_sin_recepcion, s.sin_proceso AS s_sin_proceso,
+                    c.corte
+               FROM (SELECT MIN(r.fecha_pago) AS desde, MAX(r.fecha_pago) AS hasta, COUNT(*) AS n, SUM(r.unidad_id IS NULL) AS sin_unidad
+                       FROM recaudos r WHERE {$cr} AND r.archivado_en IS NULL) r
+              CROSS JOIN (SELECT MIN(s.fecha) AS desde, MAX(s.fecha) AS hasta, COUNT(*) AS n, SUM(s.recepcion_id IS NULL) AS sin_recepcion,
+                                 SUM(s.canal = 'AUTOCONSUMO' AND s.proceso_id IS NULL) AS sin_proceso
+                            FROM salidas s WHERE {$cs} AND s.archivado_en IS NULL) s
+              CROSS JOIN (SELECT MAX(c.fecha_corte) AS corte FROM cortes_hato c WHERE {$cc} AND c.vigente = 1) c",
+            $pr + $ps + $pc
         ) ?? [];
-        [$condicion, $p] = $alcance->condicionSql('s');
-        $salidas = $this->bd->fila(
-            "SELECT MIN(s.fecha) AS desde, MAX(s.fecha) AS hasta, COUNT(*) AS n, SUM(s.recepcion_id IS NULL) AS sin_recepcion,
-                    SUM(s.canal = 'AUTOCONSUMO' AND s.proceso_id IS NULL) AS sin_proceso
-               FROM salidas s WHERE {$condicion} AND s.archivado_en IS NULL",
-            $p
-        ) ?? [];
-        [$condicion, $p] = $alcance->condicionSql('c');
-        $corte = $this->bd->valor("SELECT MAX(c.fecha_corte) FROM cortes_hato c WHERE {$condicion} AND c.vigente = 1", $p);
+        $corte = $fila['corte'] ?? null;
         return [
-            'recaudos_desde' => $recaudos['desde'] ?? null, 'recaudos_hasta' => $recaudos['hasta'] ?? null, 'recaudos' => (int) ($recaudos['n'] ?? 0),
-            'recaudos_sin_unidad' => (int) ($recaudos['sin_unidad'] ?? 0),
-            'salidas_desde' => $salidas['desde'] ?? null, 'salidas_hasta' => $salidas['hasta'] ?? null, 'salidas' => (int) ($salidas['n'] ?? 0),
-            'salidas_sin_recepcion' => (int) ($salidas['sin_recepcion'] ?? 0), 'entregas_sin_proceso' => (int) ($salidas['sin_proceso'] ?? 0),
+            'recaudos_desde' => $fila['r_desde'] ?? null, 'recaudos_hasta' => $fila['r_hasta'] ?? null, 'recaudos' => (int) ($fila['r_n'] ?? 0),
+            'recaudos_sin_unidad' => (int) ($fila['r_sin_unidad'] ?? 0),
+            'salidas_desde' => $fila['s_desde'] ?? null, 'salidas_hasta' => $fila['s_hasta'] ?? null, 'salidas' => (int) ($fila['s_n'] ?? 0),
+            'salidas_sin_recepcion' => (int) ($fila['s_sin_recepcion'] ?? 0), 'entregas_sin_proceso' => (int) ($fila['s_sin_proceso'] ?? 0),
             'corte_hato' => $corte === null ? null : (string) $corte,
         ];
     }
@@ -291,34 +299,29 @@ final class ServicioIndicadores
      */
     public function opcionesProducto(AlcanceDatos $alcance, int $vigencia): array
     {
-        $ids = [];
+        [$cr, $pr] = self::sufijar($alcance->condicionSql('r'), 'r');
+        [$cs, $ps] = self::sufijar($alcance->condicionSql('s'), 's');
+        $periodo = ['inicio_r' => sprintf('%04d-01-01', $vigencia), 'fin_r' => sprintf('%04d-12-31', $vigencia),
+            'inicio_s' => sprintf('%04d-01-01', $vigencia), 'fin_s' => sprintf('%04d-12-31', $vigencia)];
         $conceptos = [];
-        foreach ([['recaudos', 'r', 'fecha_pago', 'concepto_fuente'], ['salidas', 's', 'fecha', 'nombre_producto_fuente']] as [$tabla, $alias, $fecha, $texto]) {
-            [$condicion, $p] = $alcance->condicionSql($alias);
-            $p += ['inicio' => sprintf('%04d-01-01', $vigencia), 'fin' => sprintf('%04d-12-31', $vigencia)];
-            foreach ($this->bd->consultar(
-                "SELECT DISTINCT {$alias}.producto_id AS id, IF({$alias}.producto_id IS NULL, {$alias}.{$texto}, NULL) AS concepto
-                   FROM {$tabla} {$alias}
-                  WHERE {$condicion} AND {$alias}.archivado_en IS NULL AND {$alias}.{$fecha} BETWEEN :inicio AND :fin LIMIT 500",
-                $p
-            ) as $fila) {
-                if ($fila['id'] !== null) {
-                    $ids[(int) $fila['id']] = true;
-                } elseif ($fila['concepto'] !== null && trim((string) $fila['concepto']) !== '') {
-                    $conceptos[(string) $fila['concepto']] = true;
-                }
-            }
-        }
         $opciones = [];
-        if ($ids !== []) {
-            $marcadores = [];
-            $pp = [];
-            foreach (array_keys($ids) as $i => $id) {
-                $marcadores[] = ":p{$i}";
-                $pp["p{$i}"] = $id;
-            }
-            foreach ($this->bd->consultar('SELECT id, nombre FROM productos WHERE id IN (' . implode(', ', $marcadores) . ') ORDER BY nombre', $pp) as $fila) {
-                $opciones['p' . $fila['id']] = (string) $fila['nombre'];
+        foreach ($this->bd->consultar(
+            "SELECT x.id, x.concepto, p.nombre
+               FROM ((SELECT DISTINCT r.producto_id AS id, IF(r.producto_id IS NULL, r.concepto_fuente, NULL) AS concepto
+                        FROM recaudos r WHERE {$cr} AND r.archivado_en IS NULL AND r.fecha_pago BETWEEN :inicio_r AND :fin_r LIMIT 500)
+                     UNION
+                     (SELECT DISTINCT s.producto_id AS id, IF(s.producto_id IS NULL, s.nombre_producto_fuente, NULL) AS concepto
+                        FROM salidas s WHERE {$cs} AND s.archivado_en IS NULL AND s.fecha BETWEEN :inicio_s AND :fin_s LIMIT 500)) x
+               LEFT JOIN productos p ON p.id = x.id
+              ORDER BY p.nombre",
+            $pr + $ps + $periodo
+        ) as $fila) {
+            if ($fila['id'] !== null) {
+                if ($fila['nombre'] !== null) {
+                    $opciones['p' . $fila['id']] = (string) $fila['nombre'];
+                }
+            } elseif ($fila['concepto'] !== null && trim((string) $fila['concepto']) !== '') {
+                $conceptos[(string) $fila['concepto']] = true;
             }
         }
         ksort($conceptos, SORT_NATURAL | SORT_FLAG_CASE);
@@ -338,6 +341,19 @@ final class ServicioIndicadores
         if ($alcance->estaVacio()) {
             return [];
         }
+        // Todas las unidades del alcance se leen una vez por solicitud; el filtro de una unidad se aplica en PHP.
+        $llave = $alcance->huella();
+        if (!isset($this->unidadesLeidas[$llave])) {
+            $this->unidadesLeidas[$llave] = $this->leerUnidades($alcance);
+        }
+        return $soloUnidad === null
+            ? $this->unidadesLeidas[$llave]
+            : array_values(array_filter($this->unidadesLeidas[$llave], static fn (array $u): bool => (int) $u['id'] === $soloUnidad));
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function leerUnidades(AlcanceDatos $alcance): array
+    {
         $p = ['centro' => $alcance->centroId];
         $condicion = '';
         if (!$alcance->todoElCentro) {
@@ -347,10 +363,6 @@ final class ServicioIndicadores
                 $p["u{$i}"] = $u;
             }
             $condicion = ' AND id IN (' . implode(', ', $marcadores) . ')';
-        }
-        if ($soloUnidad !== null) {
-            $condicion .= ' AND id = :solo';
-            $p['solo'] = $soloUnidad;
         }
         return $this->bd->consultar(
             "SELECT id, codigo, nombre, tipo FROM unidades_productivas WHERE centro_id = :centro AND activa = 1 AND codigo <> 'SIN'{$condicion} ORDER BY id",
@@ -509,15 +521,33 @@ final class ServicioIndicadores
               LIMIT 1000",
             $p
         );
+        // Salidas de todos los lotes en una consulta con IN (sin N+1, 4.6.1 «Salidas por lote»; RNF-PERF-009). Cada
+        // salida cuenta solo si coincide en producto y medida con su lote, como en el cálculo por lote anterior.
+        $porLote = [];
+        if ($recepciones !== []) {
+            $marcadores = [];
+            $parametros = ['corte' => $corte];
+            foreach ($recepciones as $i => $r) {
+                $marcadores[] = ':r' . $i;
+                $parametros['r' . $i] = (int) $r['id'];
+            }
+            $todas = $this->bd->consultar(
+                'SELECT recepcion_id, producto_id, medida, fecha, cantidad FROM salidas
+                  WHERE recepcion_id IN (' . implode(', ', $marcadores) . ') AND archivado_en IS NULL AND fecha <= :corte
+                  ORDER BY recepcion_id, fecha, id',
+                $parametros
+            );
+            foreach ($todas as $s) {
+                $porLote[(int) $s['recepcion_id']][] = $s;
+            }
+        }
         $lotes = [];
         $sumaDias = 0;
         $cerrados = 0;
         foreach ($recepciones as $r) {
-            $salidas = $this->bd->consultar(
-                'SELECT fecha, cantidad FROM salidas
-                  WHERE recepcion_id = :r AND producto_id = :p AND medida = :m AND archivado_en IS NULL AND fecha <= :corte
-                  ORDER BY fecha, id',
-                ['r' => (int) $r['id'], 'p' => (int) $r['producto_id'], 'm' => (string) $r['medida'], 'corte' => $corte]
+            $salidas = array_filter(
+                $porLote[(int) $r['id']] ?? [],
+                static fn (array $s): bool => (int) $s['producto_id'] === (int) $r['producto_id'] && (string) $s['medida'] === (string) $r['medida']
             );
             $total = Entrada::aUnidades((string) $r['cantidad'], 3);
             $vendido = 0;
@@ -619,8 +649,29 @@ final class ServicioIndicadores
 
     private function parametro(int $centroId, string $clave, ?string $fecha): ?float
     {
-        $valor = $this->parametros->vigentes($centroId, $fecha)[$clave]['valor'] ?? null;
+        // Una sola lectura por centro y fecha en la solicitud: los indicadores piden varios parámetros (RNF-PERF-009).
+        $llave = $centroId . '|' . ($fecha ?? '');
+        $this->parametrosLeidos[$llave] ??= $this->parametros->vigentes($centroId, $fecha);
+        $valor = $this->parametrosLeidos[$llave][$clave]['valor'] ?? null;
         return $valor === null ? null : (float) $valor;
+    }
+
+    /**
+     * Renombra los parámetros de una condición de alcance con un sufijo, para usar varias en una misma consulta (los
+     * marcadores con nombre no se pueden repetir con sentencias preparadas nativas).
+     *
+     * @param array{0:string,1:array<string,int>} $condicion
+     * @return array{0:string,1:array<string,int>}
+     */
+    private static function sufijar(array $condicion, string $sufijo): array
+    {
+        [$sql, $parametros] = $condicion;
+        $renombrados = [];
+        foreach ($parametros as $nombre => $valor) {
+            $renombrados["{$nombre}_{$sufijo}"] = $valor;
+        }
+        $sql = (string) preg_replace('/:(alcance_[a-z0-9_]+)\b/', ':$1_' . $sufijo, $sql);
+        return [$sql, $renombrados];
     }
 
     /** Porcentaje a/b × 100 sobre decimales exactos; null si b es 0 (2.10: nada de infinitos). */

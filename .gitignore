@@ -52,3 +52,6 @@ Thumbs.db
 
 # Informe JUnit de la CI
 /junit.xml
+
+# Cuentas sintéticas de k6 (contraseña en claro): nunca se versionan (Anexo H.3)
+/tests/carga/usuarios.json

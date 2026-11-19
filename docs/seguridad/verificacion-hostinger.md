@@ -24,3 +24,14 @@ Estado al cierre de la I0: el desarrollo es local (MAMP). Los ítems que depende
 | HTTPS forzado | No (excepción para localhost en `public/.htaccess`) | Sí |
 | opcache | No cargado | Obligatorio |
 | `.user.ini` | Ignorado (mod_php) | Interpretado por LiteSpeed |
+
+## Ítems 13 a 18 del 4.8 (I7, «Rendimiento y operación»)
+
+| # | Verificación | Qué quedó listo en la I7 | Estado en Hostinger |
+|---|---|---|---|
+| 13 | Copias diarias del plan, más la copia propia cifrada fuera de Hostinger (RDL-003) | Se agregaron estas piezas: `cli/respaldo.php` con sobre de libsodium y llave pública del custodio, `scripts/backup.sh` con rsync externo y retención 30+12, el registro en la tabla `respaldos` y la copia previa en despliegues e importaciones masivas | Pendiente: el cron de las 02:30, el destino externo (`RESPALDO_DESTINO_EXTERNO`), el par del custodio y comprobar que `mysqldump` esté en el PATH |
+| 14 | Monitoreo externo de `/health/live` y `/health/ready` con token (ROB-012) | Comprobaciones de salud y avisos del certificado a 15 días en el programador. La configuración del monitor está en [runbooks/README](../runbooks/README.md#monitoreo-externo-rob-012) | Pendiente: elegir el servicio y simular una caída en staging |
+| 15 | OPcache activo y prueba del cambio de versión con la caché de rutas reales (RNF-PERF-014) | Con sesión de superadministrador, `/health/ready` informa si OPcache está activo. `verificar_entorno` lo exige fuera de local. El cambio atómico de `current` está ensayado en la CI | Pendiente: probar el cambio de `current` con LiteSpeed y OPcache |
+| 16 | Firewall de aplicaciones y protección contra bots; IP real del cliente detrás del proxy | Sin cambios en la I7 | Pendiente |
+| 17 | Prueba de restauración completa en staging (RDL-005) | `cli/respaldo.php simulacro` con acta, ensayado en local (2026-11-19, conforme) y en la CI en cada push | Pendiente: la prueba trimestral en staging con la llave del custodio |
+| 18 | Autorización escrita para las pruebas de carga en staging (RNF-PERF-015) | Scripts k6, dataset, validación de negocio y plantilla del informe (`tests/carga/`) | **Pendiente: bloquea la medición de RNF-PERF-003 a RNF-PERF-006** |

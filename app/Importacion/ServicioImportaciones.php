@@ -13,6 +13,7 @@ use App\Nucleo\ErrorHttp;
 use App\Nucleo\ErrorValidacion;
 use App\Nucleo\GeneradorUlid;
 use App\Nucleo\Solicitud;
+use App\Operacion\ServicioRespaldo;
 use App\Servicios\AutorizacionRecurso;
 use App\Servicios\RecursoAuditado;
 use App\Servicios\ServicioAuditoria;
@@ -44,6 +45,7 @@ final class ServicioImportaciones
         private readonly DespachadorCola $despachador,
         private readonly ServicioAuditoria $auditoria,
         private readonly ServicioVersionDatos $versiones,
+        private readonly ServicioRespaldo $respaldo,
     ) {
     }
 
@@ -350,6 +352,16 @@ final class ServicioImportaciones
             return;
         }
         $pendientes = (int) $this->bd->valor("SELECT COUNT(*) FROM filas_importacion WHERE lote_id = :l AND estado = 'valida'", ['l' => $loteId]);
+        // Copia previa de la importación masiva (RDL-004), una sola vez aunque el trabajo se reintente.
+        if ($lote['respaldo_previo'] === null) {
+            try {
+                $copia = $this->respaldo->copiaPrevia('preimportacion', "Antes de aplicar el lote {$lote['ulid']}", $pendientes);
+            } catch (\Throwable $error) {
+                $this->terminar($loteId, 'fallido', ['error' => 'No se aplicó: falló la copia previa de la base (RDL-004). ' . mb_substr($error->getMessage(), 0, 200)]);
+                return;
+            }
+            $this->bd->ejecutar('UPDATE lotes_importacion SET respaldo_previo = :r WHERE id = :id', ['r' => $copia ?? 'valores-anteriores-por-fila', 'id' => $loteId]);
+        }
         $bloque = $pendientes <= self::FILAS_UNA_TRANSACCION ? max(1, $pendientes) : self::BLOQUE;
         $hechas = 0;
         do {
@@ -376,10 +388,10 @@ final class ServicioImportaciones
             && FuenteImportacion::comparable($cifras['archivo']['suma'] ?? '0') === FuenteImportacion::comparable($cifras['aplicado']['suma']);
         $this->bd->ejecutar(
             "UPDATE lotes_importacion SET estado = 'aplicado', aplicado_en = UTC_TIMESTAMP(3), filas_nuevas = :n, filas_actualizadas = :a, filas_sin_cambios = :s,
-                    cifras_control = :c, respaldo_previo = :r WHERE id = :id",
+                    cifras_control = :c WHERE id = :id",
             [
                 'n' => $conteo['crear'] ?? 0, 'a' => $conteo['actualizar'] ?? 0, 's' => $conteo['sin_cambios'] ?? 0,
-                'c' => json_encode($cifras, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE), 'r' => 'valores-anteriores-por-fila', 'id' => $loteId,
+                'c' => json_encode($cifras, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE), 'id' => $loteId,
             ]
         );
         $this->versiones->incrementar((int) $lote['centro_id']);
@@ -482,6 +494,8 @@ final class ServicioImportaciones
             throw new ErrorDefinitivo('Aparecieron dependencias después de solicitar la reversión.');
         }
         $usuario = (int) ($lote['revertido_por'] ?? $lote['creado_por']);
+        // Copia previa de la reversión masiva (RDL-004): si falla, el trabajo se reintenta sin tocar los datos.
+        $copia = $this->respaldo->copiaPrevia('preimportacion', "Antes de revertir el lote {$lote['ulid']}", (int) $lote['filas_nuevas'] + (int) $lote['filas_actualizadas']);
         $this->bd->transaccion(function (BaseDatos $bd) use ($loteId, $fuente, $usuario, $lote): void {
             foreach ($bd->consultar("SELECT * FROM filas_importacion WHERE lote_id = :l AND estado = 'aplicada' AND accion IN ('crear', 'actualizar') ORDER BY fila DESC", ['l' => $loteId]) as $fila) {
                 if ($fila['accion'] === 'crear') {
@@ -495,7 +509,7 @@ final class ServicioImportaciones
         });
         $this->versiones->incrementar((int) $lote['centro_id']);
         $this->despachador->encolar('calidad.recalcular', [], ['actor_id' => $usuario, 'centro_id' => (int) $lote['centro_id'], 'clave_idempotencia' => 'calidad-tras-reversion-' . $lote['ulid']]);
-        $this->notificar($lote, 'Importación revertida', "{$fuente->nombre()}: los registros del lote se archivaron y los actualizados recuperaron sus valores anteriores.");
+        $this->notificar($lote, 'Importación revertida', "{$fuente->nombre()}: los registros del lote se archivaron y los actualizados recuperaron sus valores anteriores." . ($copia === null ? '' : " Copia previa: {$copia}."));
     }
 
     // ---------------------------------------------------------------- Consulta

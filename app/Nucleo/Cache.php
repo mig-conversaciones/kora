@@ -33,8 +33,10 @@ final class Cache
             return $entrada['valor'];
         }
         $this->metrica($clave, 'fallo');
-        $bloqueo = fopen($ruta . '.lock', 'c');
+        // Sin almacenamiento (permisos, disco lleno): cálculo directo, sin avisos ni errores (4.6.2, «Fallback acotado»).
+        $bloqueo = @fopen($ruta . '.lock', 'c');
         if ($bloqueo === false) {
+            $this->metrica($clave, 'sin_almacenamiento');
             return $calcular();
         }
         try {
@@ -77,7 +79,7 @@ final class Cache
         foreach ($archivos as $archivo) {
             $entrada = $this->leer($archivo);
             if ($entrada === null || $entrada['expira'] + self::GRACIA_SEGUNDOS < time()) {
-                $eliminados += unlink($archivo) ? 1 : 0;
+                $eliminados += @unlink($archivo) ? 1 : 0;
                 continue;
             }
             $vigentes[$archivo] = (int) filemtime($archivo);
@@ -100,7 +102,7 @@ final class Cache
         if (!is_file($ruta)) {
             return null;
         }
-        $contenido = file_get_contents($ruta);
+        $contenido = @file_get_contents($ruta);
         $datos = $contenido === false ? null : json_decode($contenido, true);
         return is_array($datos) && isset($datos['expira']) && array_key_exists('valor', $datos) ? $datos : null;
     }
@@ -109,12 +111,12 @@ final class Cache
     private function escribirAtomico(string $ruta, array $datos): void
     {
         $temporal = $ruta . '.' . bin2hex(random_bytes(6)) . '.tmp';
-        if (file_put_contents($temporal, json_encode($datos, JSON_THROW_ON_ERROR), LOCK_EX) === false) {
+        if (@file_put_contents($temporal, json_encode($datos, JSON_THROW_ON_ERROR), LOCK_EX) === false) {
             return;
         }
-        chmod($temporal, 0600);
-        if (!rename($temporal, $ruta)) {
-            unlink($temporal);
+        @chmod($temporal, 0600);
+        if (!@rename($temporal, $ruta)) {
+            @unlink($temporal);
         }
     }
 
@@ -123,7 +125,7 @@ final class Cache
         $hash = hash('sha256', $clave);
         $directorio = $this->directorio . '/' . substr($hash, 0, 2);
         if (!is_dir($directorio)) {
-            mkdir($directorio, 0700, true);
+            @mkdir($directorio, 0700, true);
         }
         return $directorio . '/' . $hash . '.json';
     }

@@ -46,6 +46,7 @@ final class ServicioGestionRecaudos
             ['c' => $alcance->centroId]
         );
         $contexto = new ContextoImportacion($this->bd, $alcance->centroId, AutorizacionRecurso::usuario($solicitud)->id, [], $alcance, []);
+        $ventas = $this->ventasPorFactura($alcance->centroId, $filas);
         foreach ($filas as &$fila) {
             $sugerencias = [];
             $codigo = Normalizador::unidad($fila['unidad_fuente']);
@@ -55,7 +56,7 @@ final class ServicioGestionRecaudos
             if (($producto = $contexto->homologar($fila['concepto_fuente'] === null ? null : (string) $fila['concepto_fuente'])) !== null) {
                 $sugerencias['producto_id'] = ['valor' => $producto, 'razon' => 'Producto homologado'];
             }
-            $venta = $this->ventaDeReferencia($alcance->centroId, $fila);
+            $venta = self::ventaDeReferencia($ventas, $fila);
             if ($venta !== null) {
                 $sugerencias['unidad_id'] ??= ['valor' => (int) $venta['unidad_id'], 'razon' => 'Venta con la misma prefactura o factura'];
                 if ($venta['producto_id'] !== null) {
@@ -229,18 +230,53 @@ final class ServicioGestionRecaudos
     }
 
     /**
+     * Ventas de referencia de la bandeja en una consulta (sin N+1, RNF-PERF-009): la primera venta directa de cada
+     * prefactura o factura que aparece en los recaudos por clasificar.
+     *
+     * @param list<array<string,mixed>> $recaudos
+     * @return array<string,array<string,mixed>>
+     */
+    private function ventasPorFactura(int $centro, array $recaudos): array
+    {
+        $claves = [];
+        foreach ($recaudos as $recaudo) {
+            foreach ([$recaudo['prefactura'], $recaudo['factura_electronica']] as $clave) {
+                if ($clave !== null && $clave !== '') {
+                    $claves[(string) $clave] = true;
+                }
+            }
+        }
+        if ($claves === []) {
+            return [];
+        }
+        $marcadores = [];
+        $parametros = ['c' => $centro];
+        foreach (array_keys($claves) as $i => $clave) {
+            $marcadores[] = ':f' . $i;
+            $parametros['f' . $i] = (string) $clave;
+        }
+        $ventas = [];
+        foreach ($this->bd->consultar(
+            'SELECT factura, unidad_id, producto_id FROM salidas
+              WHERE centro_id = :c AND factura IN (' . implode(', ', $marcadores) . ") AND archivado_en IS NULL AND canal = 'VENTA_DIRECTA'
+              ORDER BY id",
+            $parametros
+        ) as $venta) {
+            $ventas[(string) $venta['factura']] ??= $venta;
+        }
+        return $ventas;
+    }
+
+    /**
+     * @param array<string,array<string,mixed>> $ventas
      * @param array<string,mixed> $recaudo
      * @return array<string,mixed>|null
      */
-    private function ventaDeReferencia(int $centro, array $recaudo): ?array
+    private static function ventaDeReferencia(array $ventas, array $recaudo): ?array
     {
         foreach ([$recaudo['prefactura'], $recaudo['factura_electronica']] as $clave) {
-            if ($clave === null || $clave === '') {
-                continue;
-            }
-            $venta = $this->bd->fila("SELECT unidad_id, producto_id FROM salidas WHERE centro_id = :c AND factura = :f AND archivado_en IS NULL AND canal = 'VENTA_DIRECTA' LIMIT 1", ['c' => $centro, 'f' => $clave]);
-            if ($venta !== null) {
-                return $venta;
+            if ($clave !== null && $clave !== '' && isset($ventas[(string) $clave])) {
+                return $ventas[(string) $clave];
             }
         }
         return null;

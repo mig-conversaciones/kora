@@ -59,10 +59,14 @@ final class ServicioConsultaAuditoria
             $condiciones[] = '(e.ocurrido_en < :cursor_fecha OR (e.ocurrido_en = :cursor_fecha2 AND e.id < :cursor_id))';
             $parametros += ['cursor_fecha' => $m[1], 'cursor_fecha2' => $m[1], 'cursor_id' => (int) $m[2]];
         }
+        // El nombre del actor va en una subconsulta escalar, no en un LEFT JOIN: con la tabla de usuarios pequeña, MySQL
+        // 5.7 elegía un join buffer que rompe el orden del índice y ordenaba con tabla temporal todas las filas del rango.
+        // Así la página se lee en el orden de idx_auditoria_fecha y la subconsulta solo corre para sus 51 filas.
         $filas = $this->bd->consultar(
             'SELECT e.id, e.evento_id, e.ocurrido_en, e.actor_id, e.actor_rol, e.accion, e.recurso, e.recurso_id, e.unidad_id, e.resultado, e.origen,
-                    e.ip_tratada, e.motivo, e.valores_antes, e.valores_despues, e.metadatos, e.secuencia_sello, u.nombre AS actor_nombre
-               FROM eventos_auditoria e LEFT JOIN usuarios u ON u.id = e.actor_id
+                    e.ip_tratada, e.motivo, e.valores_antes, e.valores_despues, e.metadatos, e.secuencia_sello,
+                    (SELECT u.nombre FROM usuarios u WHERE u.id = e.actor_id) AS actor_nombre
+               FROM eventos_auditoria e
               WHERE ' . implode(' AND ', $condiciones) . '
               ORDER BY e.ocurrido_en DESC, e.id DESC LIMIT ' . ($porPagina + 1),
             $parametros

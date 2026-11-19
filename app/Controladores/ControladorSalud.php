@@ -8,6 +8,7 @@ use App\Nucleo\BaseDatos;
 use App\Nucleo\ErrorHttp;
 use App\Nucleo\Respuesta;
 use App\Nucleo\Solicitud;
+use App\Operacion\ServicioRespaldo;
 use App\Servicios\ServicioMantenimiento;
 use App\Servicios\ServicioMonitorCola;
 use Throwable;
@@ -28,6 +29,7 @@ final class ControladorSalud
         private readonly string $tokenMonitoreo,
         private readonly string $versionEsquemaEsperada,
         private readonly array $alertas,
+        private readonly ?ServicioRespaldo $respaldo = null,
     ) {
     }
 
@@ -56,10 +58,28 @@ final class ControladorSalud
         ];
         $mantenimiento = $this->mantenimiento->activo();
         $listo = !$mantenimiento && !in_array(false, $comprobaciones, true);
+        $cuerpo = ['estado' => $listo ? 'listo' : 'no_listo', 'mantenimiento' => $mantenimiento, 'comprobaciones' => $comprobaciones];
+        if ($esSuperadministrador) {
+            // Detalle solo con sesión de superadministrador, nunca para el monitor externo (RNF-PERF-014, RDL-003).
+            $opcache = function_exists('opcache_get_status') ? @opcache_get_status(false) : false;
+            $cuerpo['detalle'] = [
+                'opcache' => is_array($opcache) && ($opcache['opcache_enabled'] ?? false) === true,
+                'horas_desde_ultima_copia_diaria' => $this->comprobarValor(fn (): ?float => $this->respaldo?->horasDesdeUltimaDiaria()),
+            ];
+        }
         return Respuesta::json(
-            ['estado' => $listo ? 'listo' : 'no_listo', 'mantenimiento' => $mantenimiento, 'comprobaciones' => $comprobaciones],
+            $cuerpo,
             $listo ? 200 : 503
         )->conCabecera('Cache-Control', 'no-store');
+    }
+
+    private function comprobarValor(callable $lectura): mixed
+    {
+        try {
+            return $lectura();
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     private function comprobar(callable $prueba): bool

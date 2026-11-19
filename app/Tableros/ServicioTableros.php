@@ -39,6 +39,17 @@ final class ServicioTableros
             + ['estado' => $this->indicadores->estadoInformacion($alcance)]);
     }
 
+    /**
+     * Opciones del filtro de producto del alcance y la vigencia, con la misma invalidación que los agregados.
+     *
+     * @return array<string,string>
+     */
+    public function opcionesProducto(AlcanceDatos $alcance, int $vigencia): array
+    {
+        $clave = sprintf('opciones_producto:%d:%s:%d:v%d:c%d', $alcance->centroId, $alcance->huella(), $vigencia, $this->versiones->actual($alcance->centroId), self::CALCULO);
+        return $this->cache->recordar($clave, self::TTL_SEGUNDOS, fn (): array => $this->indicadores->opcionesProducto($alcance, $vigencia));
+    }
+
     /** @return array<string,mixed> IND_003, IND_08, IND_12 e IND_17 de una unidad */
     public function unidad(AlcanceDatos $alcance, int $unidadId, FiltrosTablero $f, bool $incluirPractica): array
     {

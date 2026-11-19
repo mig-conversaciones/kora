@@ -1,0 +1,103 @@
+{
+    "version": "0.8.0",
+    "base": "kora_carga",
+    "repeticiones": 30,
+    "flujos": [
+        {
+            "flujo": "Tablero central (centro)",
+            "ruta": "\/tableros\/central?vigencia=2026",
+            "objetivo_fria": 1200,
+            "objetivo_caliente": 500,
+            "fria": {
+                "p50": 155.8,
+                "p95": 171.6,
+                "p99": 176.5,
+                "n": 30
+            },
+            "caliente": {
+                "p50": 20.4,
+                "p95": 32.3,
+                "p99": 39.6,
+                "n": 30
+            }
+        },
+        {
+            "flujo": "Tablero central (líder de GAN)",
+            "ruta": "\/tableros\/central?vigencia=2026",
+            "objetivo_fria": 1200,
+            "objetivo_caliente": 500,
+            "fria": {
+                "p50": 100.2,
+                "p95": 128.2,
+                "p99": 150.7,
+                "n": 30
+            },
+            "caliente": {
+                "p50": 20.5,
+                "p95": 29.4,
+                "p99": 37.7,
+                "n": 30
+            }
+        },
+        {
+            "flujo": "Tablero técnico GAN",
+            "ruta": "\/tableros\/unidad\/GAN?vigencia=2026",
+            "objetivo_fria": 1200,
+            "objetivo_caliente": 500,
+            "fria": {
+                "p50": 85.1,
+                "p95": 104.1,
+                "p99": 108.2,
+                "n": 30
+            },
+            "caliente": {
+                "p50": 31.3,
+                "p95": 45.9,
+                "p99": 47.5,
+                "n": 30
+            }
+        },
+        {
+            "flujo": "Fragmento de filtro (IND_002 en unidades)",
+            "ruta": "\/tableros\/central\/procesos?vigencia=2026&modo=unidades",
+            "objetivo_fria": 800,
+            "objetivo_caliente": 350,
+            "fria": {
+                "p50": 81.1,
+                "p95": 93.4,
+                "p99": 94,
+                "n": 30
+            },
+            "caliente": {
+                "p50": 10.4,
+                "p95": 13.3,
+                "p99": 29.1,
+                "n": 30
+            }
+        },
+        {
+            "flujo": "Listado de salidas (centro)",
+            "ruta": "\/produccion\/salidas?pagina=3",
+            "objetivo_fria": 600,
+            "objetivo_caliente": 600,
+            "caliente": {
+                "p50": 24.5,
+                "p95": 43.5,
+                "p99": 50.9,
+                "n": 30
+            }
+        },
+        {
+            "flujo": "Listado de recaudos",
+            "ruta": "\/recaudos",
+            "objetivo_fria": 600,
+            "objetivo_caliente": 600,
+            "caliente": {
+                "p50": 22.9,
+                "p95": 42.1,
+                "p99": 44,
+                "n": 30
+            }
+        }
+    ]
+}

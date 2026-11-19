@@ -43,7 +43,7 @@ final class ControladorTableros extends ControladorModulo
         $datos = [
             'filtros' => $f,
             'unidades' => $unidades,
-            'productos' => $this->indicadores->opcionesProducto($alcance, $f->vigencia),
+            'productos' => $this->tableros->opcionesProducto($alcance, $f->vigencia),
             'modo' => $this->modo($solicitud),
             'tablero' => $f->esValido() && !$alcance->estaVacio() ? $this->tableros->central($alcance, $f) : null,
             'rutaCentral' => '/tableros/central' . self::consulta($f->aConsulta()),

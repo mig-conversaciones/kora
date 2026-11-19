@@ -1,0 +1,1290 @@
+{
+    "version": "0.8.0",
+    "motor": "5.7.24",
+    "base": "kora_carga",
+    "fecha": "2026-11-19T10:28:58+00:00",
+    "conteos": {
+        "salidas": 39611,
+        "recaudos": 9900,
+        "recepciones_lote": 9900,
+        "gastos_ejecutados": 2640,
+        "eventos_auditoria": 825004,
+        "trabajos": 0
+    },
+    "escritura_1000_salidas_ms": 33.7,
+    "indices_salidas": [
+        "PRIMARY",
+        "uq_salidas_clave",
+        "uq_salidas_externo",
+        "idx_salidas_tablero",
+        "idx_salidas_recepcion",
+        "idx_salidas_proceso",
+        "idx_salidas_factura",
+        "fk_salidas_unidad",
+        "fk_salidas_recepcion",
+        "fk_salidas_producto",
+        "fk_salidas_lote"
+    ],
+    "escenarios": [
+        {
+            "escenario": "Tablero central (centro)",
+            "tipo": "tablero",
+            "maximo": 15,
+            "ruta": "/tableros/central?vigencia=2026",
+            "medidas": {
+                "fria": {
+                    "estado_http": 200,
+                    "consultas": 6,
+                    "ms": 224.3
+                },
+                "caliente": {
+                    "estado_http": 200,
+                    "consultas": 5,
+                    "ms": 24.1
+                }
+            }
+        },
+        {
+            "escenario": "Tablero central (centro, filtro de fechas, HTMX)",
+            "tipo": "filtro",
+            "maximo": 15,
+            "ruta": "/tableros/central?vigencia=2026&desde=2026-03-01&hasta=2026-06-30",
+            "medidas": {
+                "fria": {
+                    "estado_http": 200,
+                    "consultas": 6,
+                    "ms": 95.3
+                },
+                "caliente": {
+                    "estado_http": 200,
+                    "consultas": 5,
+                    "ms": 42.8
+                }
+            }
+        },
+        {
+            "escenario": "Tablero central (líder de GAN)",
+            "tipo": "tablero",
+            "maximo": 15,
+            "ruta": "/tableros/central?vigencia=2026",
+            "medidas": {
+                "fria": {
+                    "estado_http": 200,
+                    "consultas": 6,
+                    "ms": 89.1
+                },
+                "caliente": {
+                    "estado_http": 200,
+                    "consultas": 5,
+                    "ms": 22.2
+                }
+            }
+        },
+        {
+            "escenario": "Tablero técnico GAN (líder de GAN)",
+            "tipo": "tablero",
+            "maximo": 15,
+            "ruta": "/tableros/unidad/GAN?vigencia=2026",
+            "medidas": {
+                "fria": {
+                    "estado_http": 200,
+                    "consultas": 5,
+                    "ms": 50
+                },
+                "caliente": {
+                    "estado_http": 200,
+                    "consultas": 5,
+                    "ms": 45.2
+                }
+            }
+        },
+        {
+            "escenario": "Listado de salidas (centro)",
+            "tipo": "listado",
+            "maximo": 10,
+            "ruta": "/produccion/salidas",
+            "medidas": {
+                "fria": {
+                    "estado_http": 200,
+                    "consultas": 8,
+                    "ms": 76.7
+                },
+                "caliente": {
+                    "estado_http": 200,
+                    "consultas": 8,
+                    "ms": 83.7
+                }
+            }
+        },
+        {
+            "escenario": "Listado de salidas, página 5 (líder de GAN)",
+            "tipo": "listado",
+            "maximo": 10,
+            "ruta": "/produccion/salidas?pagina=5",
+            "medidas": {
+                "fria": {
+                    "estado_http": 200,
+                    "consultas": 8,
+                    "ms": 67.8
+                },
+                "caliente": {
+                    "estado_http": 200,
+                    "consultas": 8,
+                    "ms": 75.7
+                }
+            }
+        },
+        {
+            "escenario": "Listado de recepciones (centro)",
+            "tipo": "listado",
+            "maximo": 10,
+            "ruta": "/produccion/recepciones",
+            "medidas": {
+                "fria": {
+                    "estado_http": 200,
+                    "consultas": 7,
+                    "ms": 77
+                },
+                "caliente": {
+                    "estado_http": 200,
+                    "consultas": 7,
+                    "ms": 31.2
+                }
+            }
+        },
+        {
+            "escenario": "Listado de recaudos (Grupo de Recaudo)",
+            "tipo": "listado",
+            "maximo": 10,
+            "ruta": "/recaudos",
+            "medidas": {
+                "fria": {
+                    "estado_http": 200,
+                    "consultas": 7,
+                    "ms": 35.2
+                },
+                "caliente": {
+                    "estado_http": 200,
+                    "consultas": 7,
+                    "ms": 27
+                }
+            }
+        },
+        {
+            "escenario": "Bandeja de clasificación de recaudos",
+            "tipo": "listado",
+            "maximo": 10,
+            "ruta": "/recaudos/clasificar",
+            "medidas": {
+                "fria": {
+                    "estado_http": 200,
+                    "consultas": 8,
+                    "ms": 31.7
+                },
+                "caliente": {
+                    "estado_http": 200,
+                    "consultas": 8,
+                    "ms": 24.8
+                }
+            }
+        },
+        {
+            "escenario": "Listado de gastos (centro)",
+            "tipo": "listado",
+            "maximo": 10,
+            "ruta": "/finanzas/gastos?vigencia=2026",
+            "medidas": {
+                "fria": {
+                    "estado_http": 200,
+                    "consultas": 6,
+                    "ms": 49.9
+                },
+                "caliente": {
+                    "estado_http": 200,
+                    "consultas": 6,
+                    "ms": 38.7
+                }
+            }
+        },
+        {
+            "escenario": "Formulario de salida nueva (líder de GAN)",
+            "tipo": "formulario",
+            "maximo": 6,
+            "ruta": "/produccion/salidas/nueva",
+            "medidas": {
+                "fria": {
+                    "estado_http": 200,
+                    "consultas": 5,
+                    "ms": 57
+                },
+                "caliente": {
+                    "estado_http": 200,
+                    "consultas": 5,
+                    "ms": 45.5
+                }
+            }
+        },
+        {
+            "escenario": "Reclamo de la cola (predeterminada)",
+            "tipo": "infraestructura",
+            "maximo": null,
+            "ruta": "—",
+            "medidas": {
+                "fria": {
+                    "estado_http": 0,
+                    "consultas": 2,
+                    "ms": 23.6
+                }
+            }
+        },
+        {
+            "escenario": "Recuperación de reservas vencidas",
+            "tipo": "infraestructura",
+            "maximo": null,
+            "ruta": "—",
+            "medidas": {
+                "fria": {
+                    "estado_http": 0,
+                    "consultas": 2,
+                    "ms": 0.4
+                }
+            }
+        },
+        {
+            "escenario": "Auditoría, primera página",
+            "tipo": "infraestructura",
+            "maximo": null,
+            "ruta": "—",
+            "medidas": {
+                "fria": {
+                    "estado_http": 0,
+                    "consultas": 1,
+                    "ms": 53.4
+                }
+            }
+        },
+        {
+            "escenario": "Auditoría por acción",
+            "tipo": "infraestructura",
+            "maximo": null,
+            "ruta": "—",
+            "medidas": {
+                "fria": {
+                    "estado_http": 0,
+                    "consultas": 1,
+                    "ms": 14.3
+                }
+            }
+        }
+    ],
+    "planes": {
+        "c01e1c1df2dd": {
+            "sql": "SELECT id, usuario_id, datos, nivel_autenticacion, ultima_actividad_en, expira_absoluta_en, reautenticada_en, TIMESTAMPDIFF(SECOND, ultima_actividad_en, UTC_TIMESTAMP(3)) AS inactiva_segundos, TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(3), expira_absoluta_en) AS restante_absoluta FROM sesiones WHERE id = :id AND revocada_en IS NULL",
+            "escenarios": [
+                "Tablero central (centro)",
+                "Tablero central (centro, filtro de fechas, HTMX)",
+                "Tablero central (líder de GAN)",
+                "Tablero técnico GAN (líder de GAN)",
+                "Listado de salidas (centro)",
+                "Listado de salidas, página 5 (líder de GAN)",
+                "Listado de recepciones (centro)",
+                "Listado de recaudos (Grupo de Recaudo)",
+                "Bandeja de clasificación de recaudos",
+                "Listado de gastos (centro)",
+                "Formulario de salida nueva (líder de GAN)"
+            ],
+            "ms_max": 0.21,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "sesiones",
+                    "partitions": null,
+                    "type": "const",
+                    "possible_keys": "PRIMARY",
+                    "key": "PRIMARY",
+                    "key_len": "256",
+                    "ref": "const",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": null
+                }
+            ]
+        },
+        "79756d7ffaf7": {
+            "sql": "SELECT * FROM usuarios WHERE id = :id AND estado = 'activo' AND anonimizado_en IS NULL",
+            "escenarios": [
+                "Tablero central (centro)",
+                "Tablero central (centro, filtro de fechas, HTMX)",
+                "Tablero central (líder de GAN)",
+                "Tablero técnico GAN (líder de GAN)",
+                "Listado de salidas (centro)",
+                "Listado de salidas, página 5 (líder de GAN)",
+                "Listado de recepciones (centro)",
+                "Listado de recaudos (Grupo de Recaudo)",
+                "Bandeja de clasificación de recaudos",
+                "Listado de gastos (centro)",
+                "Formulario de salida nueva (líder de GAN)"
+            ],
+            "ms_max": 0.2,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "usuarios",
+                    "partitions": null,
+                    "type": "const",
+                    "possible_keys": "PRIMARY",
+                    "key": "PRIMARY",
+                    "key_len": "8",
+                    "ref": "const",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": null
+                }
+            ]
+        },
+        "3acd2068749e": {
+            "sql": "SELECT id, codigo, nombre, tipo FROM unidades_productivas WHERE centro_id = :centro AND activa = 1 AND codigo <> 'SIN' ORDER BY id",
+            "escenarios": [
+                "Tablero central (centro)",
+                "Tablero central (centro, filtro de fechas, HTMX)"
+            ],
+            "ms_max": 0.98,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "unidades_productivas",
+                    "partitions": null,
+                    "type": "index",
+                    "possible_keys": "uq_unidades_codigo,uq_unidades_centro_id",
+                    "key": "PRIMARY",
+                    "key_len": "4",
+                    "ref": null,
+                    "rows": 15,
+                    "filtered": 8.000000953674316,
+                    "Extra": "Using where"
+                }
+            ]
+        },
+        "79393a87ec86": {
+            "sql": "SELECT version FROM versiones_datos WHERE centro_id = :centro",
+            "escenarios": [
+                "Tablero central (centro)",
+                "Tablero central (centro, filtro de fechas, HTMX)",
+                "Tablero central (líder de GAN)",
+                "Tablero técnico GAN (líder de GAN)"
+            ],
+            "ms_max": 0.13,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "versiones_datos",
+                    "partitions": null,
+                    "type": "const",
+                    "possible_keys": "PRIMARY",
+                    "key": "PRIMARY",
+                    "key_len": "4",
+                    "ref": "const",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": null
+                }
+            ]
+        },
+        "f22ce79fe81e": {
+            "sql": "SELECT x.id, x.concepto, p.nombre FROM ((SELECT DISTINCT r.producto_id AS id, IF(r.producto_id IS NULL, r.concepto_fuente, NULL) AS concepto FROM recaudos r WHERE r.centro_id = :alcance_centro_r AND r.archivado_en IS NULL AND r.fecha_pago BETWEEN :inicio_r AND :fin_r LIMIT 500) UNION (SELECT DISTINCT s.producto_id AS id, IF(s.producto_id IS NULL, s.nombre_producto_fuente, NULL) AS concepto FROM salidas s WHERE s.centro_id = :alcance_centro_s AND s.archivado_en IS NULL AND s.fecha BETWEEN :inicio_s AND :fin_s LIMIT 500)) x LEFT JOIN productos p ON p.id = x.id ORDER BY p.nombre",
+            "escenarios": [
+                "Tablero central (centro)",
+                "Tablero central (centro, filtro de fechas, HTMX)"
+            ],
+            "ms_max": 173.89,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "PRIMARY",
+                    "table": "<derived2>",
+                    "partitions": null,
+                    "type": "ALL",
+                    "possible_keys": null,
+                    "key": null,
+                    "key_len": null,
+                    "ref": null,
+                    "rows": 271,
+                    "filtered": 100,
+                    "Extra": "Using temporary; Using filesort"
+                },
+                {
+                    "id": 1,
+                    "select_type": "PRIMARY",
+                    "table": "p",
+                    "partitions": null,
+                    "type": "eq_ref",
+                    "possible_keys": "PRIMARY",
+                    "key": "PRIMARY",
+                    "key_len": "4",
+                    "ref": "x.id",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": null
+                },
+                {
+                    "id": 2,
+                    "select_type": "DERIVED",
+                    "table": "r",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "uq_recaudos_clave,idx_recaudos_tablero,idx_recaudos_clasificacion,idx_recaudos_prefactura,idx_recaudos_factura",
+                    "key": "uq_recaudos_clave",
+                    "key_len": "4",
+                    "ref": "const",
+                    "rows": 4920,
+                    "filtered": 1.1110000610351562,
+                    "Extra": "Using where; Using temporary"
+                },
+                {
+                    "id": 3,
+                    "select_type": "UNION",
+                    "table": "s",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "uq_salidas_clave,uq_salidas_externo,idx_salidas_tablero,idx_salidas_factura,fk_salidas_unidad,fk_salidas_recepcion",
+                    "key": "uq_salidas_clave",
+                    "key_len": "4",
+                    "ref": "const",
+                    "rows": 19599,
+                    "filtered": 1.1110000610351562,
+                    "Extra": "Using where; Using temporary"
+                },
+                {
+                    "id": null,
+                    "select_type": "UNION RESULT",
+                    "table": "<union2,3>",
+                    "partitions": null,
+                    "type": "ALL",
+                    "possible_keys": null,
+                    "key": null,
+                    "key_len": null,
+                    "ref": null,
+                    "rows": null,
+                    "filtered": null,
+                    "Extra": "Using temporary"
+                }
+            ]
+        },
+        "c9ba161ca1a6": {
+            "sql": "UPDATE sesiones SET ultima_actividad_en = UTC_TIMESTAMP(3) WHERE id = :id AND revocada_en IS NULL",
+            "escenarios": [
+                "Tablero central (centro)",
+                "Tablero central (centro, filtro de fechas, HTMX)",
+                "Tablero central (líder de GAN)",
+                "Tablero técnico GAN (líder de GAN)",
+                "Listado de salidas (centro)",
+                "Listado de salidas, página 5 (líder de GAN)",
+                "Listado de recepciones (centro)",
+                "Listado de recaudos (Grupo de Recaudo)",
+                "Bandeja de clasificación de recaudos",
+                "Listado de gastos (centro)",
+                "Formulario de salida nueva (líder de GAN)"
+            ],
+            "ms_max": 1.1,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "UPDATE",
+                    "table": "sesiones",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "PRIMARY",
+                    "key": "PRIMARY",
+                    "key_len": "256",
+                    "ref": "const",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": "Using where"
+                }
+            ]
+        },
+        "e4e08f8b49a2": {
+            "sql": "SELECT id, codigo, nombre, tipo FROM unidades_productivas WHERE centro_id = :centro AND activa = 1 AND codigo <> 'SIN' AND id IN (:u0) ORDER BY id",
+            "escenarios": [
+                "Tablero central (líder de GAN)",
+                "Tablero técnico GAN (líder de GAN)"
+            ],
+            "ms_max": 0.12,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "unidades_productivas",
+                    "partitions": null,
+                    "type": "const",
+                    "possible_keys": "PRIMARY,uq_unidades_codigo,uq_unidades_centro_id",
+                    "key": "PRIMARY",
+                    "key_len": "4",
+                    "ref": "const",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": null
+                }
+            ]
+        },
+        "4fecac1fc628": {
+            "sql": "SELECT x.id, x.concepto, p.nombre FROM ((SELECT DISTINCT r.producto_id AS id, IF(r.producto_id IS NULL, r.concepto_fuente, NULL) AS concepto FROM recaudos r WHERE r.centro_id = :alcance_centro_r AND r.unidad_id IN (:alcance_unidad_0_r) AND r.archivado_en IS NULL AND r.fecha_pago BETWEEN :inicio_r AND :fin_r LIMIT 500) UNION (SELECT DISTINCT s.producto_id AS id, IF(s.producto_id IS NULL, s.nombre_producto_fuente, NULL) AS concepto FROM salidas s WHERE s.centro_id = :alcance_centro_s AND s.unidad_id IN (:alcance_unidad_0_s) AND s.archivado_en IS NULL AND s.fecha BETWEEN :inicio_s AND :fin_s LIMIT 500)) x LEFT JOIN productos p ON p.id = x.id ORDER BY p.nombre",
+            "escenarios": [
+                "Tablero central (líder de GAN)"
+            ],
+            "ms_max": 38.36,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "PRIMARY",
+                    "table": "<derived2>",
+                    "partitions": null,
+                    "type": "ALL",
+                    "possible_keys": null,
+                    "key": null,
+                    "key_len": null,
+                    "ref": null,
+                    "rows": 38,
+                    "filtered": 100,
+                    "Extra": "Using temporary; Using filesort"
+                },
+                {
+                    "id": 1,
+                    "select_type": "PRIMARY",
+                    "table": "p",
+                    "partitions": null,
+                    "type": "eq_ref",
+                    "possible_keys": "PRIMARY",
+                    "key": "PRIMARY",
+                    "key_len": "4",
+                    "ref": "x.id",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": null
+                },
+                {
+                    "id": 2,
+                    "select_type": "DERIVED",
+                    "table": "r",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "uq_recaudos_clave,idx_recaudos_tablero,idx_recaudos_clasificacion,idx_recaudos_prefactura,idx_recaudos_factura,fk_recaudos_unidad",
+                    "key": "fk_recaudos_unidad",
+                    "key_len": "5",
+                    "ref": "const",
+                    "rows": 3075,
+                    "filtered": 0.5555000305175781,
+                    "Extra": "Using where; Using temporary"
+                },
+                {
+                    "id": 3,
+                    "select_type": "UNION",
+                    "table": "s",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "uq_salidas_clave,uq_salidas_externo,idx_salidas_tablero,idx_salidas_factura,fk_salidas_unidad,fk_salidas_recepcion",
+                    "key": "uq_salidas_clave",
+                    "key_len": "4",
+                    "ref": "const",
+                    "rows": 19599,
+                    "filtered": 0.11110001057386398,
+                    "Extra": "Using where; Using temporary"
+                },
+                {
+                    "id": null,
+                    "select_type": "UNION RESULT",
+                    "table": "<union2,3>",
+                    "partitions": null,
+                    "type": "ALL",
+                    "possible_keys": null,
+                    "key": null,
+                    "key_len": null,
+                    "ref": null,
+                    "rows": null,
+                    "filtered": null,
+                    "Extra": "Using temporary"
+                }
+            ]
+        },
+        "efb7b68666ec": {
+            "sql": "SELECT s.* FROM salidas s WHERE s.centro_id = :alcance_centro AND s.archivado_en IS NULL ORDER BY s.fecha DESC, s.id DESC LIMIT 26 OFFSET 0",
+            "escenarios": [
+                "Listado de salidas (centro)"
+            ],
+            "ms_max": 43.37,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "s",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "uq_salidas_clave,uq_salidas_externo,idx_salidas_tablero,idx_salidas_factura,fk_salidas_unidad,fk_salidas_recepcion",
+                    "key": "uq_salidas_clave",
+                    "key_len": "4",
+                    "ref": "const",
+                    "rows": 19599,
+                    "filtered": 10,
+                    "Extra": "Using index condition; Using where; Using filesort"
+                }
+            ]
+        },
+        "aa1519f4b6fa": {
+            "sql": "SELECT id, nombre FROM productos WHERE centro_id = :c",
+            "escenarios": [
+                "Listado de salidas (centro)",
+                "Listado de salidas, página 5 (líder de GAN)",
+                "Listado de recaudos (Grupo de Recaudo)"
+            ],
+            "ms_max": 0.57,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "productos",
+                    "partitions": null,
+                    "type": "ALL",
+                    "possible_keys": "uq_productos_codigo,idx_productos_derivados",
+                    "key": null,
+                    "key_len": null,
+                    "ref": null,
+                    "rows": 33,
+                    "filtered": 100,
+                    "Extra": "Using where"
+                }
+            ]
+        },
+        "1886f6603227": {
+            "sql": "SELECT id, numero_interno FROM recepciones_lote WHERE id IN (8651,6106,8724,7222,7033,6177,8684,6291,8776,7185,7099,7020,6716,6494,6080,8892,8506,8368,7787,7594)",
+            "escenarios": [
+                "Listado de salidas (centro)"
+            ],
+            "ms_max": 1.82,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "recepciones_lote",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "PRIMARY",
+                    "key": "PRIMARY",
+                    "key_len": "8",
+                    "ref": null,
+                    "rows": 20,
+                    "filtered": 100,
+                    "Extra": "Using where"
+                }
+            ]
+        },
+        "72fc8b0f8aa1": {
+            "sql": "SELECT id, codigo FROM procesos_autoconsumo WHERE id IN (13,16)",
+            "escenarios": [
+                "Listado de salidas (centro)"
+            ],
+            "ms_max": 0.36,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "procesos_autoconsumo",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "PRIMARY",
+                    "key": "PRIMARY",
+                    "key_len": "8",
+                    "ref": null,
+                    "rows": 2,
+                    "filtered": 100,
+                    "Extra": "Using where"
+                }
+            ]
+        },
+        "242c744c1637": {
+            "sql": "SELECT * FROM unidades_productivas WHERE centro_id = :centro ORDER BY codigo = 'SIN', nombre",
+            "escenarios": [
+                "Listado de salidas (centro)",
+                "Listado de salidas, página 5 (líder de GAN)",
+                "Listado de recepciones (centro)",
+                "Listado de recaudos (Grupo de Recaudo)",
+                "Bandeja de clasificación de recaudos",
+                "Listado de gastos (centro)"
+            ],
+            "ms_max": 0.42,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "unidades_productivas",
+                    "partitions": null,
+                    "type": "ALL",
+                    "possible_keys": "uq_unidades_codigo,uq_unidades_centro_id",
+                    "key": null,
+                    "key_len": null,
+                    "ref": null,
+                    "rows": 15,
+                    "filtered": 80,
+                    "Extra": "Using where; Using filesort"
+                }
+            ]
+        },
+        "27b1e697d1a9": {
+            "sql": "SELECT s.* FROM salidas s WHERE s.centro_id = :alcance_centro AND s.unidad_id IN (:alcance_unidad_0) AND s.archivado_en IS NULL ORDER BY s.fecha DESC, s.id DESC LIMIT 26 OFFSET 100",
+            "escenarios": [
+                "Listado de salidas, página 5 (líder de GAN)"
+            ],
+            "ms_max": 48.03,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "s",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "uq_salidas_clave,uq_salidas_externo,idx_salidas_tablero,idx_salidas_factura,fk_salidas_unidad,fk_salidas_recepcion",
+                    "key": "uq_salidas_clave",
+                    "key_len": "4",
+                    "ref": "const",
+                    "rows": 19599,
+                    "filtered": 1.0000001192092896,
+                    "Extra": "Using index condition; Using where; Using filesort"
+                }
+            ]
+        },
+        "1d0faf5126c8": {
+            "sql": "SELECT id, numero_interno FROM recepciones_lote WHERE id IN (8506,8313,8283,8279,8211,8154,8061,7432,7264,6540,8718,8417,7968,6747,6718,6716,8164,6404,6193,8776,8697,8515)",
+            "escenarios": [
+                "Listado de salidas, página 5 (líder de GAN)"
+            ],
+            "ms_max": 0.88,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "recepciones_lote",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "PRIMARY",
+                    "key": "PRIMARY",
+                    "key_len": "8",
+                    "ref": null,
+                    "rows": 22,
+                    "filtered": 100,
+                    "Extra": "Using where"
+                }
+            ]
+        },
+        "fe41a3ebf87f": {
+            "sql": "SELECT id, codigo FROM procesos_autoconsumo WHERE id IN (13)",
+            "escenarios": [
+                "Listado de salidas, página 5 (líder de GAN)"
+            ],
+            "ms_max": 0.12,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "procesos_autoconsumo",
+                    "partitions": null,
+                    "type": "const",
+                    "possible_keys": "PRIMARY",
+                    "key": "PRIMARY",
+                    "key_len": "8",
+                    "ref": "const",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": null
+                }
+            ]
+        },
+        "cc77aab2554d": {
+            "sql": "SELECT r.* FROM recepciones_lote r WHERE r.centro_id = :alcance_centro AND r.archivado_en IS NULL ORDER BY r.fecha_recepcion DESC, r.id DESC LIMIT 26 OFFSET 0",
+            "escenarios": [
+                "Listado de recepciones (centro)"
+            ],
+            "ms_max": 47.28,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "r",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "uq_recepciones_lote_producto,uq_recepciones_centro_id,idx_recepciones_tablero,idx_recepciones_producto",
+                    "key": "uq_recepciones_lote_producto",
+                    "key_len": "4",
+                    "ref": "const",
+                    "rows": 5010,
+                    "filtered": 10,
+                    "Extra": "Using index condition; Using where; Using filesort"
+                }
+            ]
+        },
+        "5269ffc2dba3": {
+            "sql": "SELECT recepcion_id, COUNT(*) AS salidas, SUM(cantidad) AS entregado, MAX(fecha) AS ultima FROM salidas WHERE recepcion_id IN (:id0, :id1, :id2, :id3, :id4, :id5, :id6, :id7, :id8, :id9, :id10, :id11, :id12, :id13, :id14, :id15, :id16, :id17, :id18, :id19, :id20, :id21, :id22, :id23, :id24) AND archivado_en IS NULL GROUP BY recepcion_id",
+            "escenarios": [
+                "Listado de recepciones (centro)"
+            ],
+            "ms_max": 2.69,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "salidas",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "idx_salidas_recepcion,fk_salidas_recepcion",
+                    "key": "idx_salidas_recepcion",
+                    "key_len": "9",
+                    "ref": null,
+                    "rows": 94,
+                    "filtered": 10,
+                    "Extra": "Using index condition; Using where"
+                }
+            ]
+        },
+        "9e7c68bd7f69": {
+            "sql": "SELECT r.id, p.nombre, p.codigo_sgac, p.es_derivado_lacteo FROM recepciones_lote r JOIN productos p ON p.id = r.producto_id WHERE r.id IN (:id0, :id1, :id2, :id3, :id4, :id5, :id6, :id7, :id8, :id9, :id10, :id11, :id12, :id13, :id14, :id15, :id16, :id17, :id18, :id19, :id20, :id21, :id22, :id23, :id24)",
+            "escenarios": [
+                "Listado de recepciones (centro)"
+            ],
+            "ms_max": 0.29,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "r",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "PRIMARY,fk_recepciones_producto",
+                    "key": "PRIMARY",
+                    "key_len": "8",
+                    "ref": null,
+                    "rows": 25,
+                    "filtered": 100,
+                    "Extra": "Using where"
+                },
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "p",
+                    "partitions": null,
+                    "type": "eq_ref",
+                    "possible_keys": "PRIMARY",
+                    "key": "PRIMARY",
+                    "key_len": "4",
+                    "ref": "kora_carga.r.producto_id",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": null
+                }
+            ]
+        },
+        "1ff92162680e": {
+            "sql": "SELECT rc.* FROM recaudos rc WHERE rc.centro_id = :alcance_centro AND rc.archivado_en IS NULL ORDER BY rc.fecha_pago DESC, rc.id DESC LIMIT 26 OFFSET 0",
+            "escenarios": [
+                "Listado de recaudos (Grupo de Recaudo)"
+            ],
+            "ms_max": 8.48,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "rc",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "uq_recaudos_clave,idx_recaudos_tablero,idx_recaudos_clasificacion,idx_recaudos_prefactura,idx_recaudos_factura",
+                    "key": "uq_recaudos_clave",
+                    "key_len": "4",
+                    "ref": "const",
+                    "rows": 4920,
+                    "filtered": 10,
+                    "Extra": "Using index condition; Using where; Using filesort"
+                }
+            ]
+        },
+        "535193e9f735": {
+            "sql": "SELECT id, codigo_sgac, nombre, medida FROM productos WHERE centro_id = :c AND archivado_en IS NULL ORDER BY nombre",
+            "escenarios": [
+                "Listado de recaudos (Grupo de Recaudo)",
+                "Bandeja de clasificación de recaudos"
+            ],
+            "ms_max": 0.19,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "productos",
+                    "partitions": null,
+                    "type": "ALL",
+                    "possible_keys": "uq_productos_codigo,idx_productos_derivados",
+                    "key": null,
+                    "key_len": null,
+                    "ref": null,
+                    "rows": 33,
+                    "filtered": 10,
+                    "Extra": "Using where; Using filesort"
+                }
+            ]
+        },
+        "57448f64e692": {
+            "sql": "SELECT id, fecha_pago, valor, concepto_fuente, unidad_fuente, unidad_id, producto_id, prefactura, factura_electronica, estado_clasificacion, version FROM recaudos WHERE centro_id = :c AND archivado_en IS NULL AND estado_clasificacion IN ('pendiente', 'ambiguo') ORDER BY fecha_pago, id LIMIT 200",
+            "escenarios": [
+                "Bandeja de clasificación de recaudos"
+            ],
+            "ms_max": 0.91,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "recaudos",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "uq_recaudos_clave,idx_recaudos_tablero,idx_recaudos_clasificacion,idx_recaudos_prefactura,idx_recaudos_factura",
+                    "key": "idx_recaudos_clasificacion",
+                    "key_len": "5",
+                    "ref": null,
+                    "rows": 272,
+                    "filtered": 10,
+                    "Extra": "Using index condition; Using where; Using filesort"
+                }
+            ]
+        },
+        "ad1835c5ace7": {
+            "sql": "SELECT id, codigo, prefijo_lote FROM unidades_productivas WHERE centro_id = :c",
+            "escenarios": [
+                "Bandeja de clasificación de recaudos"
+            ],
+            "ms_max": 0.11,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "unidades_productivas",
+                    "partitions": null,
+                    "type": "ALL",
+                    "possible_keys": "uq_unidades_codigo,uq_unidades_centro_id",
+                    "key": null,
+                    "key_len": null,
+                    "ref": null,
+                    "rows": 15,
+                    "filtered": 80,
+                    "Extra": "Using where"
+                }
+            ]
+        },
+        "5cbe57dba30f": {
+            "sql": "SELECT factura, unidad_id, producto_id FROM salidas WHERE centro_id = :c AND factura IN (:f0, :f1, :f2, :f3, :f4, :f5, :f6, :f7, :f8, :f9, :f10, :f11, :f12, :f13, :f14, :f15, :f16, :f17, :f18, :f19, :f20, :f21, :f22, :f23, :f24, :f25, :f26, :f27, :f28, :f29, :f30, :f31, :f32, :f33, :f34, :f35, :f36, :f37, :f38, :f39, :f40, :f41, :f42, :f43, :f44, :f45, :f46, :f47, :f48, :f49, :f50, :f51, :f52, :f53, :f54, :f55, :f56, :f57, :f58, :f59, :f60, :f61, :f62, :f63, :f64, :f65, :f66, :f67, :f68, :f69, :f70, :f71, :f72, :f73, :f74, :f75, :f76, :f77, :f78, :f79, :f80, :f81, :f82, :f83, :f84, :f85, :f86, :f87, :f88, :f89, :f90, :f91, :f92, :f93, :f94, :f95, :f96, :f97, :f98, :f99, :f100, :f101, :f102, :f103, :f104, :f105, :f106, :f107, :f108, :f109, :f110, :f111, :f112, :f113, :f114, :f115, :f116, :f117, :f118, :f119, :f120, :f121, :f122, :f123, :f124, :f125, :f126, :f127, :f128, :f129, :f130, :f131, :f132, :f133, :f134, :f135, :f136, :f137, :f138, :f139, :f140, :f141, :f142, :f143, :f144, :f145, :f146, :f147, :f148, :f149, :f150, :f151, :f152, :f153, :f154, :f155, :f156, :f157, :f158, :f159, :f160, :f161, :f162, :f163, :f164, :f165, :f166, :f167, :f168, :f169, :f170, :f171, :f172, :f173, :f174, :f175, :f176, :f177, :f178, :f179, :f180, :f181, :f182, :f183, :f184, :f185, :f186, :f187, :f188, :f189, :f190, :f191, :f192, :f193, :f194, :f195, :f196, :f197, :f198, :f199) AND archivado_en IS NULL AND canal = 'VENTA_DIRECTA' ORDER BY id",
+            "escenarios": [
+                "Bandeja de clasificación de recaudos"
+            ],
+            "ms_max": 7.1,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "salidas",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "uq_salidas_clave,uq_salidas_externo,idx_salidas_tablero,idx_salidas_factura,fk_salidas_unidad,fk_salidas_recepcion",
+                    "key": "idx_salidas_factura",
+                    "key_len": "167",
+                    "ref": null,
+                    "rows": 1200,
+                    "filtered": 5,
+                    "Extra": "Using index condition; Using where; Using filesort"
+                }
+            ]
+        },
+        "59acac7f5eda": {
+            "sql": "SELECT * FROM categorias_gasto WHERE centro_id = :centro ORDER BY id",
+            "escenarios": [
+                "Listado de gastos (centro)"
+            ],
+            "ms_max": 0.8,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "categorias_gasto",
+                    "partitions": null,
+                    "type": "index",
+                    "possible_keys": "uq_categorias_codigo",
+                    "key": "PRIMARY",
+                    "key_len": "2",
+                    "ref": null,
+                    "rows": 6,
+                    "filtered": 50,
+                    "Extra": "Using where"
+                }
+            ]
+        },
+        "062f6cd5c749": {
+            "sql": "SELECT g.* FROM gastos_ejecutados g WHERE g.centro_id = :alcance_centro AND g.archivado_en IS NULL AND g.fecha >= :desde AND g.fecha < :hasta ORDER BY g.fecha DESC, g.id DESC LIMIT 26 OFFSET 0",
+            "escenarios": [
+                "Listado de gastos (centro)"
+            ],
+            "ms_max": 3.31,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "g",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "idx_gastos_listado",
+                    "key": "idx_gastos_listado",
+                    "key_len": "4",
+                    "ref": "const",
+                    "rows": 2400,
+                    "filtered": 1.110888957977295,
+                    "Extra": "Using index condition; Using filesort"
+                }
+            ]
+        },
+        "1db83df577ee": {
+            "sql": "SELECT r.id, r.numero_interno, r.fecha_recepcion, r.cantidad, r.medida, r.unidad_id, r.precio_sugerido, p.nombre AS producto_nombre, r.cantidad - COALESCE((SELECT SUM(s.cantidad) FROM salidas s WHERE s.recepcion_id = r.id AND s.archivado_en IS NULL), 0) AS saldo FROM recepciones_lote r JOIN productos p ON p.id = r.producto_id WHERE r.centro_id = :alcance_centro AND r.unidad_id IN (:alcance_unidad_0) AND r.archivado_en IS NULL HAVING saldo > 0 OR r.id = :incluir ORDER BY r.fecha_recepcion DESC, r.id DESC LIMIT 200",
+            "escenarios": [
+                "Formulario de salida nueva (líder de GAN)"
+            ],
+            "ms_max": 38.77,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "PRIMARY",
+                    "table": "p",
+                    "partitions": null,
+                    "type": "ALL",
+                    "possible_keys": "PRIMARY",
+                    "key": null,
+                    "key_len": null,
+                    "ref": null,
+                    "rows": 33,
+                    "filtered": 100,
+                    "Extra": "Using temporary; Using filesort"
+                },
+                {
+                    "id": 1,
+                    "select_type": "PRIMARY",
+                    "table": "r",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "uq_recepciones_lote_producto,uq_recepciones_centro_id,idx_recepciones_tablero,idx_recepciones_producto,fk_recepciones_producto",
+                    "key": "idx_recepciones_tablero",
+                    "key_len": "16",
+                    "ref": null,
+                    "rows": 3220,
+                    "filtered": 10,
+                    "Extra": "Using index condition; Using where; Using join buffer (Block Nested Loop)"
+                },
+                {
+                    "id": 2,
+                    "select_type": "DEPENDENT SUBQUERY",
+                    "table": "s",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "idx_salidas_recepcion",
+                    "key": "idx_salidas_recepcion",
+                    "key_len": "9",
+                    "ref": "kora_carga.r.id",
+                    "rows": 4,
+                    "filtered": 10,
+                    "Extra": "Using where"
+                }
+            ]
+        },
+        "17507a62f5aa": {
+            "sql": "SELECT p.id, p.codigo, p.vigencia, p.unidad_id, p.producto_texto, p.medida FROM procesos_autoconsumo p WHERE p.centro_id = :alcance_centro AND p.unidad_id IN (:alcance_unidad_0) AND p.archivado_en IS NULL AND p.vigencia >= :desde ORDER BY p.vigencia DESC, p.codigo",
+            "escenarios": [
+                "Formulario de salida nueva (líder de GAN)"
+            ],
+            "ms_max": 0.38,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "p",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "uq_procesos_codigo,fk_procesos_unidad",
+                    "key": "fk_procesos_unidad",
+                    "key_len": "8",
+                    "ref": "const,const",
+                    "rows": 3,
+                    "filtered": 5.555555820465088,
+                    "Extra": "Using index condition; Using where; Using filesort"
+                }
+            ]
+        },
+        "cbd14fcc9677": {
+            "sql": "UPDATE trabajos SET estado = 'reservado', reservado_por = :token, intentos = intentos + 1, bloqueado_hasta = UTC_TIMESTAMP(3) + INTERVAL :reserva SECOND, iniciado_en = COALESCE(iniciado_en, UTC_TIMESTAMP(3)) WHERE cola = :cola AND estado = 'pendiente' AND disponible_en <= UTC_TIMESTAMP(3) ORDER BY prioridad, disponible_en, id LIMIT 10",
+            "escenarios": [
+                "Reclamo de la cola (predeterminada)"
+            ],
+            "ms_max": 0.65,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "UPDATE",
+                    "table": "trabajos",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "idx_trabajos_reclamo,idx_trabajos_vencidos,idx_trabajos_limpieza",
+                    "key": "idx_trabajos_reclamo",
+                    "key_len": "123",
+                    "ref": "const,const",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": "Using where; Using temporary"
+                }
+            ]
+        },
+        "a835f713c6bb": {
+            "sql": "SELECT * FROM trabajos WHERE reservado_por = :token AND estado = 'reservado'",
+            "escenarios": [
+                "Reclamo de la cola (predeterminada)"
+            ],
+            "ms_max": 0.14,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "trabajos",
+                    "partitions": null,
+                    "type": "ref",
+                    "possible_keys": "idx_trabajos_vencidos,idx_trabajos_limpieza",
+                    "key": "idx_trabajos_vencidos",
+                    "key_len": "1",
+                    "ref": "const",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": "Using where"
+                }
+            ]
+        },
+        "ed4664320535": {
+            "sql": "SELECT id, reservado_por FROM trabajos WHERE estado = 'reservado' AND bloqueado_hasta < UTC_TIMESTAMP(3) AND intentos >= max_intentos LIMIT 100",
+            "escenarios": [
+                "Recuperación de reservas vencidas"
+            ],
+            "ms_max": 0.12,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "trabajos",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "idx_trabajos_vencidos,idx_trabajos_limpieza",
+                    "key": "idx_trabajos_vencidos",
+                    "key_len": "9",
+                    "ref": null,
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": "Using index condition; Using where"
+                }
+            ]
+        },
+        "1076299de923": {
+            "sql": "UPDATE trabajos SET estado = 'pendiente', reservado_por = NULL, bloqueado_hasta = NULL, disponible_en = UTC_TIMESTAMP(3), mensaje_error = 'Reserva vencida: el trabajo se reintentará.' WHERE estado = 'reservado' AND bloqueado_hasta < UTC_TIMESTAMP(3) AND intentos < max_intentos",
+            "escenarios": [
+                "Recuperación de reservas vencidas"
+            ],
+            "ms_max": 0.1,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "UPDATE",
+                    "table": "trabajos",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "idx_trabajos_vencidos,idx_trabajos_limpieza",
+                    "key": "idx_trabajos_vencidos",
+                    "key_len": "9",
+                    "ref": "const,const",
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": "Using where; Using temporary"
+                }
+            ]
+        },
+        "c0abf7bf3ebc": {
+            "sql": "SELECT e.id, e.evento_id, e.ocurrido_en, e.actor_id, e.actor_rol, e.accion, e.recurso, e.recurso_id, e.unidad_id, e.resultado, e.origen, e.ip_tratada, e.motivo, e.valores_antes, e.valores_despues, e.metadatos, e.secuencia_sello, u.nombre AS actor_nombre FROM eventos_auditoria e LEFT JOIN usuarios u ON u.id = e.actor_id WHERE e.ocurrido_en >= :desde AND e.ocurrido_en < :hasta + INTERVAL 1 DAY ORDER BY e.ocurrido_en DESC, e.id DESC LIMIT 51",
+            "escenarios": [
+                "Auditoría, primera página"
+            ],
+            "ms_max": 50.83,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "e",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "idx_auditoria_fecha",
+                    "key": "idx_auditoria_fecha",
+                    "key_len": "7",
+                    "ref": null,
+                    "rows": 11176,
+                    "filtered": 100,
+                    "Extra": "Using index condition; Using temporary; Using filesort"
+                },
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "u",
+                    "partitions": null,
+                    "type": "ALL",
+                    "possible_keys": "PRIMARY",
+                    "key": null,
+                    "key_len": null,
+                    "ref": null,
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": "Using where; Using join buffer (Block Nested Loop)"
+                }
+            ]
+        },
+        "27805ce2df2d": {
+            "sql": "SELECT e.id, e.evento_id, e.ocurrido_en, e.actor_id, e.actor_rol, e.accion, e.recurso, e.recurso_id, e.unidad_id, e.resultado, e.origen, e.ip_tratada, e.motivo, e.valores_antes, e.valores_despues, e.metadatos, e.secuencia_sello, u.nombre AS actor_nombre FROM eventos_auditoria e LEFT JOIN usuarios u ON u.id = e.actor_id WHERE e.ocurrido_en >= :desde AND e.ocurrido_en < :hasta + INTERVAL 1 DAY AND e.accion LIKE :accion ORDER BY e.ocurrido_en DESC, e.id DESC LIMIT 51",
+            "escenarios": [
+                "Auditoría por acción"
+            ],
+            "ms_max": 13.86,
+            "plan": [
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "e",
+                    "partitions": null,
+                    "type": "range",
+                    "possible_keys": "idx_auditoria_fecha,idx_auditoria_accion",
+                    "key": "idx_auditoria_fecha",
+                    "key_len": "7",
+                    "ref": null,
+                    "rows": 11176,
+                    "filtered": 30.40134048461914,
+                    "Extra": "Using index condition; Using where; Using temporary; Using filesort"
+                },
+                {
+                    "id": 1,
+                    "select_type": "SIMPLE",
+                    "table": "u",
+                    "partitions": null,
+                    "type": "ALL",
+                    "possible_keys": "PRIMARY",
+                    "key": null,
+                    "key_len": null,
+                    "ref": null,
+                    "rows": 1,
+                    "filtered": 100,
+                    "Extra": "Using where; Using join buffer (Block Nested Loop)"
+                }
+            ]
+        }
+    }
+}

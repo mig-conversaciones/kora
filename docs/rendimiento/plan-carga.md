@@ -1,6 +1,8 @@
 # Plan de carga (RNF-PERF-001)
 
-**Estado:** borrador para validar con la contraparte (S-07 y S-08) y con el titular de la cuenta (S-10). Las pruebas k6 se ejecutan en la I7 en el entorno de pruebas; en la I6 no se midió ninguna cifra.
+**Estado:** perfil por validar con la contraparte (S-07 y S-08). Desde la I7 los scripts están listos (`tests/carga/`): el generador del dataset, k6, la validación de negocio y el informe. Las pruebas k6 siguen **PENDIENTES DE EJECUCIÓN** hasta que existan el entorno de staging y la autorización escrita del titular (S-10, ítem 18 del 4.8).
+
+La I7 sí midió en local, sin concurrencia, el número de consultas y el tiempo de servidor por flujo: ver [consultas-indices.md](consultas-indices.md) y el [informe de la versión](../../tests/carga/resultados/0.8.0-local/informe.md). Esas cifras orientan, pero no demuestran el SLO (RNF-PERF-018).
 
 ## Perfil del año 1
 
@@ -53,3 +55,28 @@ Errores inesperados: menos del 0,5 %.
 - **Caché caliente:** con la misma clave.
 - **Etiquetas de k6 por ruta:** `/tableros/central`, `/tableros/central/procesos` y `/tableros/unidad/GAN`.
 - **Consultas:** el inventario de consultas de `ServicioIndicadores` usa los índices `idx_*_tablero` del Anexo B. Hay que verificarlo con `EXPLAIN` en el entorno de pruebas.
+
+## Ejecución (I7)
+
+Ver [`tests/carga/README.md`](../../tests/carga/README.md). En resumen:
+
+1. En staging, generar el dataset y las cuentas:
+
+   ```sh
+   php cli/generar_dataset.php --base=<base>_carga --escala=3a --preparar --cuentas=30 --usuarios-k6=…
+   ```
+
+2. Registrar las cifras de control:
+
+   ```sh
+   php tests/carga/validar_resultados.php --registrar
+   ```
+
+3. Desde un equipo externo, ejecutar `k6 run … tests/carga/escenarios.js` con el escenario `smoke`, luego `sostenida`, `pico` y `rafaga`, y `resistencia` solo si está autorizada.
+4. Validar las cifras de control, la idempotencia, la cadena de auditoría y el vaciado de la cola:
+
+   ```sh
+   php tests/carga/validar_resultados.php
+   ```
+
+5. Completar `tests/carga/resultados/<versión>/informe.md` (H.5).

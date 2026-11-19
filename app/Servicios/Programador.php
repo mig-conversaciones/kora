@@ -7,6 +7,7 @@ namespace App\Servicios;
 use App\Cola\DespachadorCola;
 use App\Nucleo\BaseDatos;
 use App\Nucleo\Registro;
+use App\Operacion\MonitorCertificado;
 use DateTimeImmutable;
 use DateTimeZone;
 use Throwable;
@@ -24,7 +25,10 @@ use Throwable;
  *   - Limpieza horaria y diaria a la 01:00 (trabajo mantenimiento.limpieza, RF-Q-015, RDL-010).
  *   - Verificación de la cadena a la 01:30 y exportación del lote del día anterior a las 02:00 (RAU-004, RAU-005). [I2]
  *   - Rotación del registro técnico: 30 días (diaria, RAU-008).
- * La verificación de integridad, el precalentamiento de la caché y el archivo se agregan en su iteración.
+ *   - Verificación de integridad a las 03:15 (trabajo seguridad.verificar_integridad, RS-022). [I7]
+ *   - Vencimiento del certificado TLS, diario desde las 03:20, con aviso a 15 días (ROB-014). [I7]
+ *   - Precalentamiento de los tableros los días hábiles a las 06:30 (trabajo cache.precalentar, RNF-PERF-012). [I7]
+ * El archivo de la auditoría de más de 2 años (RAU-006) se agrega en su iteración.
  */
 final class Programador
 {
@@ -40,6 +44,9 @@ final class Programador
         private readonly string $directorioRegistros,
         private readonly string $zonaHoraria,
         private readonly bool $hayBuzonOperaciones,
+        private readonly string $urlPublica = '',
+        private readonly int $avisoSslDias = 15,
+        private readonly ?MonitorCertificado $certificado = null,
     ) {
     }
 
@@ -83,6 +90,19 @@ final class Programador
             $ayerUtc = $ahora->setTimezone(new DateTimeZone('UTC'))->modify('-1 day')->format('Y-m-d');
             $resumen['exportar_lote'] = $this->despachador->encolar('auditoria.exportar_lote', ['fecha' => $ayerUtc])['ulid'];
             $estado['exportar_lote'] = $dia;
+        }
+
+        if ($minutoDelDia >= 195 && ($estado['verificar_integridad'] ?? '') !== $dia) {
+            $resumen['verificar_integridad'] = $this->despachador->encolar('seguridad.verificar_integridad', ['fecha' => $dia])['ulid'];
+            $estado['verificar_integridad'] = $dia;
+        }
+        if ($minutoDelDia >= 200 && ($estado['certificado'] ?? '') !== $dia) {
+            $resumen['certificado_dias'] = $this->vigilarCertificado();
+            $estado['certificado'] = $dia;
+        }
+        if ((int) $local->format('N') <= 5 && $minutoDelDia >= 390 && ($estado['precalentar'] ?? '') !== $dia) {
+            $resumen['precalentar'] = $this->despachador->encolar('cache.precalentar', ['fecha' => $dia])['ulid'];
+            $estado['precalentar'] = $dia;
         }
 
         $this->escribirJson('programador.json', $estado);
@@ -212,6 +232,23 @@ final class Programador
         } catch (Throwable $error) {
             $this->registro->error('alerta.notificacion_fallida', ['condicion' => $condicion, 'clase' => $error::class]);
         }
+    }
+
+    /**
+     * Días de vigencia del certificado del dominio público (ROB-014); avisa con SSL_AVISO_DIAS de anticipación. Solo con
+     * HTTPS: en el MAMP local no hay certificado que vigilar.
+     */
+    public function vigilarCertificado(): ?int
+    {
+        $host = (string) parse_url($this->urlPublica, PHP_URL_HOST);
+        if ($this->certificado === null || !str_starts_with($this->urlPublica, 'https://') || $host === '') {
+            return null;
+        }
+        $dias = $this->certificado->diasRestantes($host);
+        if (MonitorCertificado::requiereAviso($dias, $this->avisoSslDias)) {
+            $this->notificar('certificado_por_vencer', "Al certificado TLS de {$host} le quedan {$dias} días. Sigue el runbook «SSL expirado».");
+        }
+        return $dias;
     }
 
     /** @return array{trabajo:string,duplicado:bool} */

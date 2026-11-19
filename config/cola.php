@@ -8,8 +8,8 @@ declare(strict_types=1);
  *
  * Tipos registrados: correo, limpieza y demostración (I1); verificación y exportación de la auditoría (I2);
  * recálculo de la bandeja de calidad (I4); validación, aplicación y reversión de importaciones (I5); exportaciones
- * XLSX, CSV y PDF (I6). Los demás tipos de la v1 (caché, seguridad, capacitación) se registran en la iteración que
- * entrega su manejador; un tipo no registrado nunca se encola (ErrorDefinitivo).
+ * XLSX, CSV y PDF (I6); precalentamiento de la caché y verificación de integridad (I7). Los tipos de capacitación se
+ * registran en la iteración que entrega su manejador; un tipo no registrado nunca se encola (ErrorDefinitivo).
  */
 
 use App\Nucleo\Entorno;
@@ -20,10 +20,12 @@ use App\Trabajos\ExportarLoteAuditoria;
 use App\Trabajos\ExportarPdf;
 use App\Trabajos\ExportarXlsx;
 use App\Trabajos\LimpiezaPeriodica;
+use App\Trabajos\PrecalentarCache;
 use App\Trabajos\RecalcularCalidad;
 use App\Trabajos\RevertirImportacion;
 use App\Trabajos\ValidarImportacion;
 use App\Trabajos\VerificarCadena;
+use App\Trabajos\VerificarIntegridad;
 
 $tipo = static fn (string $manejador, string $cola, int $intentos, int $reserva, bool $tecnico = false, int $prioridad = 5): array => [
     'manejador' => $manejador,
@@ -71,6 +73,9 @@ return [
         // I6: exportaciones de tableros y listados (RF-080, RF-081), en la cola de reportes (04-04a).
         'exportacion.xlsx' => $tipo(ExportarXlsx::class, 'reportes', 3, 120),
         'exportacion.pdf' => $tipo(ExportarPdf::class, 'reportes', 3, 180),
+        // I7: precalentamiento de los tableros (días hábiles, 06:30) y verificación de integridad (03:15), tabla D.4.
+        'cache.precalentar' => $tipo(PrecalentarCache::class, 'predeterminada', 3, 300, true, 8),
+        'seguridad.verificar_integridad' => $tipo(VerificarIntegridad::class, 'predeterminada', 3, 300, true, 7),
         // Solo fuera de producción: ejercita progreso, latidos y bloques desde /sistema-diseno.
         'demostracion.progreso' => $tipo(DemostracionProgreso::class, 'predeterminada', 3, 60, false, 5),
     ],

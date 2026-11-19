@@ -17,6 +17,8 @@ final class BaseDatos
     private ?PDO $pdo = null;
     private int $consultas = 0;
     private int $profundidad = 0;
+    /** @var (\Closure(string,array<int|string,scalar|null>,float):void)|null */
+    private ?\Closure $observador = null;
 
     /** @param array{dsn:string,usuario:string,contrasena:string,opciones:array<int,mixed>,inicializacion:list<string>} $config */
     public function __construct(private readonly array $config)
@@ -112,6 +114,17 @@ final class BaseDatos
         return $this->profundidad > 0;
     }
 
+    /**
+     * Observador de consultas para las herramientas de medición (inventario de consultas, RNF-PERF-007): recibe el SQL,
+     * sus parámetros y la duración en milisegundos. No se usa en producción; null lo desactiva.
+     *
+     * @param (\Closure(string,array<int|string,scalar|null>,float):void)|null $observador
+     */
+    public function observar(?\Closure $observador): void
+    {
+        $this->observador = $observador;
+    }
+
     public function totalConsultas(): int
     {
         return $this->consultas;
@@ -132,7 +145,13 @@ final class BaseDatos
             };
             $sentencia->bindValue($marcador, $valor, $tipo);
         }
+        if ($this->observador === null) {
+            $sentencia->execute();
+            return $sentencia;
+        }
+        $inicio = hrtime(true);
         $sentencia->execute();
+        ($this->observador)($sql, $parametros, (hrtime(true) - $inicio) / 1e6);
         return $sentencia;
     }
 }
