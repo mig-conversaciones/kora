@@ -15,6 +15,9 @@ use PDOException;
  */
 final class ConductorColaMysql implements ConductorCola
 {
+    /** Reintentos del reclamo ante un interbloqueo o una espera de bloqueo agotada. */
+    private const REINTENTOS_BLOQUEO = 5;
+
     public function __construct(private readonly BaseDatos $bd, private readonly string $estrategia = 'skip_locked')
     {
     }
@@ -80,7 +83,40 @@ final class ConductorColaMysql implements ConductorCola
             : ['id' => (int) $existente['id'], 'ulid' => (string) $existente['ulid'], 'estado' => (string) $existente['estado'], 'duplicado' => true];
     }
 
+    /**
+     * Reclamo con reintento ante conflictos de bloqueo. Con SKIP LOCKED, dos trabajadores simultáneos pueden
+     * interbloquearse en MariaDB (error 1213: el SELECT bloquea entradas del índice secundario que el UPDATE del otro
+     * necesita); InnoDB revierte a uno de los dos, y lo correcto es repetir la transacción. Tras agotar los reintentos
+     * no se reclama nada en esta vuelta: los trabajos siguen pendientes y los toma la siguiente ejecución.
+     */
     public function reclamar(string $cola, int $cantidad, string $token, int $reservaSegundos, ?array $tiposPermitidos = null): array
+    {
+        for ($intento = 1; ; $intento++) {
+            try {
+                return $this->reclamarUnaVez($cola, $cantidad, $token, $reservaSegundos, $tiposPermitidos);
+            } catch (PDOException $error) {
+                if (!self::esConflictoDeBloqueo($error) || $this->bd->enTransaccion()) {
+                    throw $error;
+                }
+                if ($intento >= self::REINTENTOS_BLOQUEO) {
+                    return [];
+                }
+                usleep(random_int(20_000, 80_000) * $intento);
+            }
+        }
+    }
+
+    /** Interbloqueo (1213) o espera de bloqueo agotada (1205): la transacción se puede repetir. */
+    public static function esConflictoDeBloqueo(PDOException $error): bool
+    {
+        return in_array((int) ($error->errorInfo[1] ?? 0), [1205, 1213], true);
+    }
+
+    /**
+     * @param list<string>|null $tiposPermitidos
+     * @return list<array<string,mixed>>
+     */
+    private function reclamarUnaVez(string $cola, int $cantidad, string $token, int $reservaSegundos, ?array $tiposPermitidos): array
     {
         $cantidad = max(1, min(50, $cantidad));
         [$filtroTipos, $parametrosTipos] = $this->filtroTipos($tiposPermitidos);
