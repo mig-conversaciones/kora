@@ -49,3 +49,6 @@ Thumbs.db
 # facturas). El repositorio es público: estos archivos se conservan solo en el equipo local.
 /referencias/data/
 /referencias/assets/app.bundle.js
+
+# Informe JUnit de la CI
+/junit.xml

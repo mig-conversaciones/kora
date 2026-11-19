@@ -1,4 +1,4 @@
-# Integración continua de KORA (ROB-001). Se detiene en el primer fallo.
+# Integración continua de KORA (ROB-001).
 # Las pruebas de integración y las migraciones corren contra MariaDB 10.6 (producción) y MySQL 5.7 (paridad
 # con el MAMP local), según ADR-002.
 name: CI
@@ -16,7 +16,8 @@ jobs:
     name: PHP (${{ matrix.motor.nombre }})
     runs-on: ubuntu-24.04
     strategy:
-      fail-fast: true
+      # Sin fail-fast: si un motor falla, el otro termina y muestra si el fallo es propio de ese motor.
+      fail-fast: false
       matrix:
         motor:
           - { nombre: 'MariaDB 10.6', imagen: 'mariadb:10.6', skip_locked: 'true', reclamo: 'skip_locked' }
@@ -63,7 +64,10 @@ jobs:
           php cli/migrar.php --revertir=100 --base=kora_pruebas
           php cli/migrar.php --aplicar --base=kora_pruebas
       - name: Pruebas unitarias y de integración
-        run: vendor/bin/phpunit
+        run: vendor/bin/phpunit --log-junit junit.xml
+      - name: Anotar las pruebas fallidas
+        if: failure()
+        run: php .github/anotar-junit.php junit.xml
 
   activos:
     name: Activos y JavaScript
