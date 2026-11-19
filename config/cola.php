@@ -7,17 +7,20 @@ declare(strict_types=1);
  * carga (RNF-PERF-004) y los límites reales del plan Hostinger Cloud.
  *
  * Tipos registrados: correo, limpieza y demostración (I1); verificación y exportación de la auditoría (I2);
- * recálculo de la bandeja de calidad (I4). Los demás tipos de la v1 (importación, exportación, caché, seguridad,
- * capacitación) se registran en la iteración que entrega su manejador; un tipo no registrado nunca se encola
- * (ErrorDefinitivo).
+ * recálculo de la bandeja de calidad (I4); validación, aplicación y reversión de importaciones (I5). Los demás tipos
+ * de la v1 (exportación, caché, seguridad, capacitación) se registran en la iteración que entrega su manejador; un
+ * tipo no registrado nunca se encola (ErrorDefinitivo).
  */
 
 use App\Nucleo\Entorno;
+use App\Trabajos\AplicarImportacion;
 use App\Trabajos\DemostracionProgreso;
 use App\Trabajos\EnviarCorreo;
 use App\Trabajos\ExportarLoteAuditoria;
 use App\Trabajos\LimpiezaPeriodica;
 use App\Trabajos\RecalcularCalidad;
+use App\Trabajos\RevertirImportacion;
+use App\Trabajos\ValidarImportacion;
 use App\Trabajos\VerificarCadena;
 
 $tipo = static fn (string $manejador, string $cola, int $intentos, int $reserva, bool $tecnico = false, int $prioridad = 5): array => [
@@ -59,6 +62,10 @@ return [
         'mantenimiento.limpieza' => $tipo(LimpiezaPeriodica::class, 'predeterminada', 3, 300, true, 9),
         // I4: bandeja de calidad (RF-058). Se encola tras cada importación y desde la bandeja.
         'calidad.recalcular' => $tipo(RecalcularCalidad::class, 'predeterminada', 3, 300, false, 6),
+        // I5: importación asistida (RF-085, RF-088, RF-090), en su propia cola (04-04a).
+        'importacion.validar' => $tipo(ValidarImportacion::class, 'importacion', 3, 120),
+        'importacion.aplicar' => $tipo(AplicarImportacion::class, 'importacion', 5, 120),
+        'importacion.revertir' => $tipo(RevertirImportacion::class, 'importacion', 3, 120),
         // Solo fuera de producción: ejercita progreso, latidos y bloques desde /sistema-diseno.
         'demostracion.progreso' => $tipo(DemostracionProgreso::class, 'predeterminada', 3, 60, false, 5),
     ],

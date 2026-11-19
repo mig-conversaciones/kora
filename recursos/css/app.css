@@ -345,6 +345,7 @@
   .lista-datos dt { font-weight: 600; color: var(--color-texto-secundario); }
   .lista-datos dd { margin: 0; }
   .lista-datos > div { display: contents; }
+  .lista-enlaces { margin: var(--espacio-2) 0 0; padding-left: var(--espacio-4); display: grid; gap: var(--espacio-1); font-size: var(--tamano-sm); }
 
   /* ---------- Operación productiva (I4) ---------- */
   .resumen-lotes { display: flex; flex-wrap: wrap; gap: var(--espacio-2) var(--espacio-6); margin: var(--espacio-3) 0; padding: 0; list-style: none; font-size: var(--tamano-sm); color: var(--color-texto-secundario); }

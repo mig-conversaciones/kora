@@ -15,6 +15,7 @@ use App\Cola\Trabajador;
 use App\Controladores\ControladorSalud;
 use App\Controladores\ControladorSistemaDiseno;
 use App\Controladores\ControladorTrabajos;
+use App\Importacion\ServicioCargaArchivos;
 use App\Intermediarios\Autorizar;
 use App\Intermediarios\CabecerasSeguridad;
 use App\Intermediarios\VerificarCsrf;
@@ -136,6 +137,8 @@ return [
             $c->obtener(BaseDatos::class),
             RAIZ . '/almacenamiento/adjuntos',
         ),
+        // Libros de importación en almacenamiento privado, fuera de public/ (RF-084, RS-011).
+        ServicioCargaArchivos::class => static fn (): ServicioCargaArchivos => new ServicioCargaArchivos(RAIZ . '/almacenamiento/importaciones'),
         ExportarLoteAuditoria::class => static fn (Contenedor $c): ExportarLoteAuditoria => new ExportarLoteAuditoria(
             $c->obtener(BaseDatos::class),
             $c->obtener(Cifrador::class),

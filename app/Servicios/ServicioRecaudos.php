@@ -16,7 +16,8 @@ use PDOException;
  * Recaudos de la Dirección General (RF-029, RF-034, RF-035).
  *   - Consulta filtrada en el servidor por fecha, unidad, producto, pasarela y estados, con paginación y orden por
  *     columnas permitidas. Un filtro de unidad fuera del alcance devuelve un resultado vacío, nunca datos ajenos.
- *   - Registro manual solo para el Grupo de Recaudo (PoliticaRecaudos). La identificación del pagador nunca se guarda
+ *   - Alta manual excepcional (RF-033) solo para el Grupo de Recaudo (PoliticaRecaudos), con la funcionalidad
+ *     recaudos_alta_manual activa, motivo y referencia del soporte. La identificación del pagador nunca se guarda
  *     en claro: HMAC-SHA256 y los últimos 4 dígitos (RF-034). La importación del archivo DG llega en la I5.
  */
 final class ServicioRecaudos
@@ -115,6 +116,15 @@ final class ServicioRecaudos
         if ($identificacion !== '' && (strlen($identificacion) < 5 || strlen($identificacion) > 15)) {
             $errores['identificacion'] = 'La identificación tiene entre 5 y 15 dígitos.';
         }
+        // RF-033: el alta manual es excepcional y exige motivo y referencia del soporte.
+        $motivo = trim((string) ($datos['motivo'] ?? ''));
+        if (mb_strlen($motivo) < 10 || mb_strlen($motivo) > 500) {
+            $errores['motivo'] = 'Explica por qué el recaudo se registra a mano (entre 10 y 500 caracteres).';
+        }
+        $referencia = Entrada::texto($datos['referencia_soporte'] ?? '', 120);
+        if ($referencia === null || $referencia === '') {
+            $errores['referencia_soporte'] = 'Escribe la referencia del soporte (hasta 120 caracteres).';
+        }
         if ($errores !== []) {
             throw new ErrorValidacion($errores);
         }
@@ -137,10 +147,10 @@ final class ServicioRecaudos
         ];
         $usuario = AutorizacionRecurso::usuario($solicitud);
         try {
-            return $this->bd->transaccion(function () use ($solicitud, $alcance, $valores, $privados, $fecha, $usuario): int {
+            return $this->bd->transaccion(function () use ($solicitud, $alcance, $valores, $privados, $fecha, $usuario, $motivo, $referencia): int {
                 $this->periodos->exigirAbierto($alcance->centroId, $fecha);
-                $id = $this->repositorio->insertar($valores + $privados + ['centro_id' => $alcance->centroId, 'origen_tipo' => 'manual'], $usuario->id);
-                $this->auditoria->registrar($solicitud, 'recaudos.crear', 'exito', new RecursoAuditado('recaudos', $id, $valores['unidad_id']), [], null, $valores + ['identificacion_ultimos4' => $privados['identificacion_ultimos4']]);
+                $id = $this->repositorio->insertar($valores + $privados + ['centro_id' => $alcance->centroId, 'origen_tipo' => 'manual', 'origen_archivo' => mb_substr('Soporte: ' . $referencia, 0, 255)], $usuario->id);
+                $this->auditoria->registrar($solicitud, 'recaudos.crear', 'exito', new RecursoAuditado('recaudos', $id, $valores['unidad_id']), ['alta_manual' => true, 'soporte' => $referencia], null, $valores + ['identificacion_ultimos4' => $privados['identificacion_ultimos4']], $motivo);
                 $this->versiones->incrementar($alcance->centroId);
                 return $id;
             });

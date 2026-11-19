@@ -8,6 +8,7 @@ use App\Cola\Trabajador;
 use App\Nucleo\Aplicacion;
 use App\Nucleo\BaseDatos;
 use App\Nucleo\Contenedor;
+use App\Nucleo\Entorno;
 use App\Nucleo\Migrador;
 use App\Servicios\ServicioAuditoria;
 use App\Servicios\ServicioCalidad;
@@ -66,6 +67,7 @@ final class OperacionProductivaTest extends TestCase
 
     protected function tearDown(): void
     {
+        Entorno::establecer('FUNCIONALIDAD_RECAUDOS_ALTA_MANUAL', 'false');
         if (is_file($this->senal)) {
             unlink($this->senal);
         }
@@ -338,12 +340,17 @@ final class OperacionProductivaTest extends TestCase
         // RF-029 (Obs. 2): la Coordinación administrativa consulta, sin acciones de escritura, y el POST responde 403 auditado.
         $vista = $coordinacion->get('/recaudos');
         self::assertSame(200, $vista->estado);
-        self::assertStringNotContainsString('Nuevo registro', $vista->cuerpo);
-        $datos = ['fecha_pago' => $this->fecha(8), 'valor' => '3.045.000', 'tipo_ingreso' => 'Producción', 'pasarela' => 'Wompi', 'unidad_id' => (string) $this->unidad('GAN'), 'concepto_fuente' => 'Leche', 'cupon_pago' => 'CUP-1', 'identificacion' => '1.098.765.432'];
+        self::assertStringNotContainsString('Alta manual', $vista->cuerpo);
+        // RF-033: sin la funcionalidad recaudos_alta_manual, el alta manual no existe (404) ni para el Grupo de Recaudo.
+        self::assertSame(404, $recaudo->get('/recaudos/nuevo')->estado);
+        self::assertStringNotContainsString('Alta manual', $recaudo->get('/recaudos')->cuerpo);
+        Entorno::establecer('FUNCIONALIDAD_RECAUDOS_ALTA_MANUAL', 'true');
+        $datos = ['fecha_pago' => $this->fecha(8), 'valor' => '3.045.000', 'tipo_ingreso' => 'Producción', 'pasarela' => 'Wompi', 'unidad_id' => (string) $this->unidad('GAN'), 'concepto_fuente' => 'Leche', 'cupon_pago' => 'CUP-1', 'identificacion' => '1.098.765.432', 'motivo' => 'Pago en efectivo en la tienda del centro', 'referencia_soporte' => 'Recibo de caja 0042'];
         self::assertSame(403, $coordinacion->postHtmx('/recaudos', $datos)->estado);
         self::assertSame(1, (int) self::$bd->valor("SELECT COUNT(*) FROM eventos_auditoria WHERE accion = 'recaudos.gestionar' AND resultado = 'denegado'"));
 
-        self::assertStringContainsString('Nuevo registro', $recaudo->get('/recaudos')->cuerpo);
+        self::assertStringContainsString('Alta manual', $recaudo->get('/recaudos')->cuerpo);
+        self::assertSame(422, $recaudo->postHtmx('/recaudos', ['motivo' => ''] + $datos)->estado, 'El alta manual exige motivo.');
         $creado = $recaudo->postHtmx('/recaudos', $datos);
         self::assertSame(200, $creado->estado);
         $fila = self::$bd->fila('SELECT valor, identificacion_hmac, identificacion_ultimos4, estado_clasificacion FROM recaudos');

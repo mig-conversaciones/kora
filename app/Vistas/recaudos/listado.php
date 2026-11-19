@@ -31,7 +31,7 @@ $conciliacion = ['sin_conciliar' => 'Sin conciliar', 'conciliado' => 'Conciliado
     <div class="barra-acciones">
         <?= $this->parcial('parciales/barra_filtros', ['ruta' => '/recaudos', 'campos' => $campos]) ?>
         <?php if ($puedeRegistrar): ?>
-            <a class="boton boton-primario" href="<?= $this->e($nuevo) ?>" hx-get="<?= $this->e($nuevo) ?>" hx-target="#panel-modulo" hx-swap="outerHTML" hx-push-url="true">Nuevo registro</a>
+            <a class="boton boton-primario" href="<?= $this->e($nuevo) ?>" hx-get="<?= $this->e($nuevo) ?>" hx-target="#panel-modulo" hx-swap="outerHTML" hx-push-url="true">Alta manual</a>
         <?php endif; ?>
     </div>
     <section class="tarjeta seccion" aria-labelledby="titulo-recaudos">
@@ -41,7 +41,7 @@ $conciliacion = ['sin_conciliar' => 'Sin conciliar', 'conciliado' => 'Conciliado
         <?php else: ?>
             <div class="contenedor-tabla" tabindex="0" role="region" aria-labelledby="titulo-recaudos">
                 <table class="tabla">
-                    <thead><tr><th scope="col">Fecha de pago</th><th scope="col">Unidad</th><th scope="col">Producto o concepto</th><th scope="col">Pasarela</th><th scope="col">Cupón / prefactura</th><th scope="col" class="numero">Valor</th><th scope="col">Clasificación</th><th scope="col">Conciliación</th></tr></thead>
+                    <thead><tr><th scope="col">Fecha de pago</th><th scope="col">Unidad</th><th scope="col">Producto o concepto</th><th scope="col">Pasarela</th><th scope="col">Cupón / prefactura</th><th scope="col" class="numero">Valor</th><th scope="col">Clasificación</th><th scope="col">Conciliación</th><?php if ($puedeGestionar): ?><th scope="col"><span class="sr-only">Acciones</span></th><?php endif; ?></tr></thead>
                     <tbody>
                         <?php foreach ($filas as $r): ?>
                             <?php [$textoEstado, $tono] = $estados[$r['estado_clasificacion']] ?? ['—', 'neutra']; ?>
@@ -54,6 +54,7 @@ $conciliacion = ['sin_conciliar' => 'Sin conciliar', 'conciliado' => 'Conciliado
                                 <td class="numero"><?= $this->e($this->moneda($r['valor'])) ?></td>
                                 <td><span class="insignia insignia-<?= $this->e($tono) ?>"><?= $this->e($textoEstado) ?></span></td>
                                 <td><?= $this->e($conciliacion[$r['estado_conciliacion']] ?? '') ?></td>
+                                <?php if ($puedeGestionar): ?><td><a class="boton boton-pequeno boton-texto" href="<?= $this->e($this->url('/recaudos/' . (int) $r['id'] . '/conciliar')) ?>">Conciliar</a></td><?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

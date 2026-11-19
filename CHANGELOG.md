@@ -2,6 +2,29 @@
 
 Formato basado en *Keep a Changelog*, con versionado semántico (RNF-015).
 
+## [0.6.0] — Iteración 5 «Importación y recaudos» (sin publicar)
+
+### Agregado
+
+- **Importación asistida** (`/importaciones`, RF-083 a RF-094) de las ocho fuentes: catálogo, presupuesto, cupos, recaudos de la DG, base de producción, base de ventas, estado reproductivo y gastos.
+  - Carga segura: solo `.xlsx` de hasta 10 MB, con firma OOXML, sin macros y con protección contra bombas ZIP.
+  - Detección de las hojas y mapeo de columnas por alias; elección de fuentes según el rol.
+  - Validación en *streaming* con OpenSpout en la cola, vista previa sin efectos y reporte de errores en XLSX.
+  - Aplicación reanudable por bloques, con procedencia; idempotencia por hash y claves naturales.
+  - Reversión con motivo y reautenticación; plantillas descargables; historial y acta de carga con cifras de control.
+- **Recaudos:**
+  - Importación de la DG sin datos personales (HMAC y últimos 4 dígitos).
+  - Clasificación uno a uno o en lote, con sugerencias que se confirman.
+  - Conciliación con ventas directas e informe de diferencias por periodo.
+- **Alta manual de recaudos** detrás de la funcionalidad `recaudos_alta_manual`, con motivo y referencia del soporte (RF-033).
+- **Contrato de integración** OpenAPI 3.1 (`docs/api/integracion-ventas.yaml`) y su intercambio equivalente por archivo (RF-095 a RF-097).
+- ADR-019 y runbook de importaciones y recaudos.
+- **Dependencia:** `openspout/openspout` ^4.28.
+
+### Cambiado
+
+- La ruta de alta manual de recaudos de la I4 responde 404 mientras la funcionalidad esté apagada.
+
 ## [0.5.0] — Iteración 4 «Operación productiva» (sin publicar)
 
 ### Agregado

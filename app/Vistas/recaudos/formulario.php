@@ -20,7 +20,8 @@ $campo = fn (array $d): string => $this->parcial('parciales/campo', $d + ['error
 ?>
 <div id="panel-modulo">
     <section class="tarjeta seccion">
-        <h2 class="titulo-tarjeta">Nuevo recaudo</h2>
+        <h2 class="titulo-tarjeta">Alta manual de un recaudo</h2>
+        <p class="texto-advertencia">Excepcional: los recaudos llegan con el archivo de la DG. El registro queda marcado como manual y auditado con su motivo.</p>
         <form class="formulario" hx-post="<?= $this->e($this->url('/recaudos')) ?>" hx-target="#panel-modulo" hx-swap="outerHTML" novalidate>
             <?= $this->parcial('parciales/resumen_errores', ['errores' => $errores]) ?>
             <div class="rejilla-campos">
@@ -34,6 +35,8 @@ $campo = fn (array $d): string => $this->parcial('parciales/campo', $d + ['error
                 <?= $campo(['nombre' => 'cupon_pago', 'etiqueta' => 'Cupón de pago', 'valor' => (string) ($v['cupon_pago'] ?? ''), 'atributos' => 'maxlength="60"']) ?>
                 <?= $campo(['nombre' => 'prefactura', 'etiqueta' => 'Prefactura', 'valor' => (string) ($v['prefactura'] ?? ''), 'atributos' => 'maxlength="40"']) ?>
                 <?= $campo(['nombre' => 'factura_electronica', 'etiqueta' => 'Factura electrónica', 'valor' => (string) ($v['factura_electronica'] ?? ''), 'atributos' => 'maxlength="40"']) ?>
+                <?= $campo(['nombre' => 'referencia_soporte', 'etiqueta' => 'Referencia del soporte', 'valor' => (string) ($v['referencia_soporte'] ?? ''), 'ayuda' => 'Comprobante, extracto o correo que respalda el pago.', 'atributos' => 'maxlength="120" required']) ?>
+                <?= $campo(['nombre' => 'motivo', 'etiqueta' => 'Motivo del alta manual', 'tipo' => 'textarea', 'valor' => (string) ($v['motivo'] ?? ''), 'ayuda' => 'Por qué este recaudo no llega en el archivo de la DG.', 'atributos' => 'maxlength="500" required']) ?>
                 <?= $campo(['nombre' => 'identificacion', 'etiqueta' => 'Identificación del pagador', 'ayuda' => 'No se guarda en claro: solo una huella cifrada y los últimos 4 dígitos.', 'atributos' => 'inputmode="numeric" autocomplete="off" maxlength="20"']) ?>
             </div>
             <div class="grupo-botones">

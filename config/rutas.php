@@ -10,6 +10,7 @@ use App\Controladores\ControladorCsp;
 use App\Controladores\ControladorCuenta;
 use App\Controladores\ControladorFinanzas;
 use App\Controladores\ControladorHato;
+use App\Controladores\ControladorImportaciones;
 use App\Controladores\ControladorInicio;
 use App\Controladores\ControladorMantenimiento;
 use App\Controladores\ControladorProduccion;
@@ -135,8 +136,15 @@ return static function (Enrutador $r): void {
 
     // Recaudos (I4, RF-029, RF-035): consulta según el alcance; escritura solo del Grupo de Recaudo.
     $r->agregar('GET', '/recaudos', [ControladorRecaudos::class, 'listado'], 'recaudos.consultar');
-    $r->agregar('GET', '/recaudos/nuevo', [ControladorRecaudos::class, 'formulario'], 'recaudos.gestionar');
-    $r->agregar('POST', '/recaudos', [ControladorRecaudos::class, 'guardar'], 'recaudos.gestionar');
+    // RF-033: el alta manual solo existe con la funcionalidad recaudos_alta_manual activa (si no, 404).
+    $r->agregar('GET', '/recaudos/nuevo', [ControladorRecaudos::class, 'formulario'], 'recaudos.gestionar', ['funcionalidad' => 'recaudos_alta_manual']);
+    $r->agregar('POST', '/recaudos', [ControladorRecaudos::class, 'guardar'], 'recaudos.gestionar', ['funcionalidad' => 'recaudos_alta_manual']);
+    // I5: clasificación (RF-031) y conciliación (RF-032).
+    $r->agregar('GET', '/recaudos/clasificar', [ControladorRecaudos::class, 'clasificacion'], 'recaudos.clasificar');
+    $r->agregar('POST', '/recaudos/clasificar', [ControladorRecaudos::class, 'clasificar'], 'recaudos.clasificar');
+    $r->agregar('GET', '/recaudos/diferencias', [ControladorRecaudos::class, 'diferencias'], 'recaudos.conciliar');
+    $r->agregar('GET', '/recaudos/{id}/conciliar', [ControladorRecaudos::class, 'conciliacion'], 'recaudos.conciliar');
+    $r->agregar('POST', '/recaudos/{id}/conciliar', [ControladorRecaudos::class, 'conciliar'], 'recaudos.conciliar');
 
     // Bandeja de calidad (I4, RF-058, RF-059).
     $r->agregar('GET', '/calidad', [ControladorCalidad::class, 'bandeja'], 'calidad.consultar');
@@ -144,6 +152,19 @@ return static function (Enrutador $r): void {
     $r->agregar('POST', '/calidad/{id}/vincular-recepcion', [ControladorCalidad::class, 'vincularRecepcion'], 'calidad.gestionar');
     $r->agregar('POST', '/calidad/{id}/asignar-proceso', [ControladorCalidad::class, 'asignarProceso'], 'calidad.gestionar');
     $r->agregar('POST', '/calidad/{id}/aceptar', [ControladorCalidad::class, 'aceptar'], 'calidad.gestionar');
+
+    // Importaciones asistidas (I5, RF-083 a RF-094). El permiso depende de la fuente: lo decide el servicio.
+    $r->agregar('GET', '/importaciones', [ControladorImportaciones::class, 'inicio'], '', ['autenticada' => true]);
+    $r->agregar('POST', '/importaciones/libro', [ControladorImportaciones::class, 'cargar'], '', ['autenticada' => true, 'limite' => 'administracion']);
+    $r->agregar('POST', '/importaciones', [ControladorImportaciones::class, 'crear'], '', ['autenticada' => true]);
+    $r->agregar('GET', '/importaciones/acta', [ControladorImportaciones::class, 'acta'], '', ['autenticada' => true]);
+    $r->agregar('GET', '/importaciones/plantillas/{fuente}', [ControladorImportaciones::class, 'plantilla'], '', ['autenticada' => true]);
+    $r->agregar('GET', '/importaciones/{ulid}', [ControladorImportaciones::class, 'detalle'], '', ['autenticada' => true]);
+    $r->agregar('GET', '/importaciones/{ulid}/estado', [ControladorImportaciones::class, 'estado'], '', ['autenticada' => true]);
+    $r->agregar('GET', '/importaciones/{ulid}/errores', [ControladorImportaciones::class, 'errores'], '', ['autenticada' => true]);
+    $r->agregar('GET', '/importaciones/{ulid}/original', [ControladorImportaciones::class, 'original'], '', ['autenticada' => true]);
+    $r->agregar('POST', '/importaciones/{ulid}/aplicar', [ControladorImportaciones::class, 'aplicar'], '', ['autenticada' => true]);
+    $r->agregar('POST', '/importaciones/{ulid}/revertir', [ControladorImportaciones::class, 'revertir'], '', ['autenticada' => true, 'reautenticacion' => true]);
 
     // Usuarios, roles y auditoría (I3, RF-009 a RF-012, RAU-001).
     $r->agregar('GET', '/sistema/usuarios', [ControladorUsuarios::class, 'listar'], 'usuarios.gestionar');

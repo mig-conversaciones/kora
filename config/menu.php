@@ -28,7 +28,7 @@ return [
             ['texto' => 'Producción y lotes', 'ruta' => '/produccion/recepciones', 'seccion' => '/produccion', 'icono' => 'caja', 'permiso' => ['recepciones.consultar', 'salidas.consultar', 'transformaciones.consultar']],
             ['texto' => 'Hato', 'ruta' => '/hato', 'icono' => 'hoja', 'permiso' => 'hato.consultar'],
             ['texto' => 'Calidad de datos', 'ruta' => '/calidad', 'icono' => 'alerta', 'permiso' => 'calidad.consultar'],
-            ['texto' => 'Importación de BBDD', 'icono' => 'carga', 'iteracion' => 'I5'],
+            ['texto' => 'Importación de BBDD', 'ruta' => '/importaciones', 'icono' => 'carga', 'permiso' => ['asignaciones.importar', 'gastos.importar', 'recaudos.importar', 'procesos.importar', 'recepciones.importar', 'salidas.importar', 'hato.importar', 'catalogo.importar']],
         ],
     ],
     [
