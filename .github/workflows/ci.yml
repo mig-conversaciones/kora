@@ -108,12 +108,18 @@ jobs:
           --health-interval=5s --health-timeout=5s --health-retries=20
     env:
       RAIZ_APP: /tmp/kora
+    defaults:
+      run:
+        # Cada paso deja su salida en un registro: si algo falla, el último paso la publica como anotación, que se lee
+        # sin autenticación por la API de check-runs (los registros de Actions sí la exigen).
+        shell: bash .github/ejecutar-registrado.sh {0}
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: pdo_mysql, mbstring, intl, sodium, zip, fileinfo, openssl, opcache
+          ini-values: opcache.enable_cli=1
           coverage: none
       - uses: actions/setup-node@v4
         with:
@@ -175,3 +181,8 @@ jobs:
           php $RAIZ_APP/current/cli/verificar_integridad.php
           echo "// alterado" >> $RAIZ_APP/current/cli/humo.php
           ! php $RAIZ_APP/current/cli/verificar_integridad.php
+      - name: Anotar el fallo con las últimas líneas del registro
+        if: failure()
+        run: |
+          php -r '$l = @file("/tmp/operacion.log", FILE_IGNORE_NEW_LINES) ?: ["Sin registro."]; $t = implode("\n", array_slice($l, -80));
+            echo "::error title=Trabajo operacion::" . strtr($t, ["%" => "%25", "\r" => "%0D", "\n" => "%0A"]) . "\n";'

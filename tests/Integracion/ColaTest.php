@@ -219,9 +219,9 @@ final class ColaTest extends TestCase
 
     public function testDosTrabajadoresConcurrentesProcesanCadaTrabajoUnaSolaVez(): void
     {
-        $total = 24;
+        $total = 40; // ~8 s de trabajo: el arranque de un proceso (~1 s en la CI) no alcanza a vaciar la cola.
         for ($i = 0; $i < $total; $i++) {
-            $this->despachador()->encolar('demostracion.progreso', ['pasos' => 1, 'ms_por_paso' => 150]);
+            $this->despachador()->encolar('demostracion.progreso', ['pasos' => 1, 'ms_por_paso' => 200]);
         }
         $procesos = [];
         $tuberias = [];
