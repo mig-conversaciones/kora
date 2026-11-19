@@ -92,5 +92,6 @@ if [[ "$MODO" == "--con-mantenimiento" ]]; then
   "$PHP" current/cli/mantenimiento.php desactivar --motivo="Despliegue $VERSION completado"
 fi
 ACTIVA="$(basename "$(readlink current)")"
-ls -1 releases | sort -V | grep -vx "$ACTIVA" | head -n -4 | while read -r antigua; do rm -rf "releases/$antigua"; done
+# Se conservan las 5 últimas; con una sola versión, grep no encuentra nada y no es un error (pipefail).
+ls -1 releases | sort -V | { grep -vx "$ACTIVA" || true; } | head -n -4 | while read -r antigua; do rm -rf "releases/$antigua"; done
 echo "Versión $VERSION activa en $(( $(date +%s) - INICIO )) s (anterior: ${ANTERIOR:-ninguna})."

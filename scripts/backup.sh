@@ -13,7 +13,7 @@ RAIZ_APP="${RAIZ_APP:-$(cd "$(dirname "$0")/../.." && pwd)}"
 APP="$RAIZ_APP/current"
 [[ -d "$APP" ]] || APP="$(cd "$(dirname "$0")/.." && pwd)"
 PHP="${PHP_BIN:-php}"
-leer_env() { grep -E "^$1=" "$APP/.env" | head -n1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'; }
+leer_env() { { grep -E "^$1=" "$APP/.env" || true; } | head -n1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'; }
 
 ID="$("$PHP" "$APP/cli/respaldo.php" crear --tipo="$TIPO" | tail -n1)"
 DIRECTORIO="$("$PHP" "$APP/cli/respaldo.php" directorio)"
