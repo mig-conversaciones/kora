@@ -199,7 +199,7 @@ final class AplicacionTest extends TestCase
             $contenedor->obtener(BaseDatos::class),
             $contenedor->obtener(ServicioAuditoria::class),
             ['senal' => $this->senal] + require RAIZ . '/config/mantenimiento.php',
-            '006',
+            (require RAIZ . '/config/app.php')['version_esquema'],
         ));
         $contenedor->establecer(ServicioMonitorCola::class, new ServicioMonitorCola($contenedor->obtener(BaseDatos::class), $this->latidos));
         return $aplicacion;

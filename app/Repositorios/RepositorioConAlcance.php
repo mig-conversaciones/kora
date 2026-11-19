@@ -94,4 +94,46 @@ abstract class RepositorioConAlcance
             throw new ErrorHttp(409, 'El registro cambió; recarga para ver la versión actual.');
         }
     }
+
+    /**
+     * Archivado lógico con motivo (RDL-003): el registro deja de contar en listados e indicadores, pero se conserva
+     * con su trazabilidad. Usa el mismo bloqueo optimista que la edición.
+     */
+    public function archivar(AlcanceDatos $alcance, int $id, int $version, int $usuarioId, string $motivo): void
+    {
+        $this->obtener($alcance, $id);
+        $filas = $this->bd->ejecutar(
+            sprintf('UPDATE %s SET archivado_en = UTC_TIMESTAMP(3), archivado_por = :usuario_actor, motivo_archivo = :motivo, version = version + 1, actualizado_por = :usuario_actor2
+                      WHERE id = :id_registro AND version = :version_esperada AND archivado_en IS NULL', static::TABLA),
+            ['usuario_actor' => $usuarioId, 'usuario_actor2' => $usuarioId, 'motivo' => $motivo, 'id_registro' => $id, 'version_esperada' => $version]
+        );
+        if ($filas === 0) {
+            throw new ErrorHttp(409, 'El registro cambió o ya estaba archivado; recarga para ver la versión actual.');
+        }
+    }
+
+    /**
+     * Inserción de un registro nuevo. La unidad ya pasó por la política (RecursoUnidad); $valores pasó por la lista
+     * blanca del caso de uso.
+     *
+     * @param array<string,scalar|null> $valores
+     */
+    public function insertar(array $valores, int $usuarioId): int
+    {
+        foreach (array_keys($valores) as $columna) {
+            if (preg_match('/^[a-z_]+$/', $columna) !== 1) {
+                throw new InvalidArgumentException('Columna no permitida.');
+            }
+        }
+        $columnas = array_keys($valores);
+        return $this->bd->insertar(
+            sprintf(
+                'INSERT INTO %s (%s, creado_por, actualizado_por) VALUES (:%s, :usuario_creador, :usuario_actualizador)',
+                static::TABLA,
+                implode(', ', $columnas),
+                implode(', :', $columnas)
+            ),
+            $valores + ['usuario_creador' => $usuarioId, 'usuario_actualizador' => $usuarioId]
+        );
+    }
 }

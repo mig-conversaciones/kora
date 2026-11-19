@@ -15,14 +15,18 @@ use RuntimeException;
  */
 final class MigracionesTest extends TestCase
 {
-    private const TABLAS_I0 = [
+    private const TABLAS_ESPERADAS = [
         'centros', 'unidades_productivas', 'destinos_internos',
         'usuarios', 'roles', 'permisos', 'roles_permisos', 'usuarios_roles', 'usuarios_unidades',
         'sesiones', 'tokens_cuenta', 'codigos_respaldo_2fa', 'limites_tasa', 'claves_idempotencia',
         'eventos_auditoria', 'cadena_auditoria',
         'trabajos', 'trabajos_fallidos', 'estado_circuitos',
         'configuracion_sistema', 'versiones_datos', 'notificaciones', 'archivos_adjuntos',
+        'lotes_importacion', 'filas_importacion',
+        'productos', 'homologaciones_producto', 'categorias_gasto', 'parametros_indicadores',
+        'asignaciones_presupuestales', 'gastos_ejecutados', 'procesos_autoconsumo', 'recaudos', 'periodos_cierre',
     ];
+    private const TOTAL_MIGRACIONES = 9;
 
     private BaseDatos $bd;
     private Migrador $migrador;
@@ -39,15 +43,17 @@ final class MigracionesTest extends TestCase
         self::assertSame([], $this->tablasPresentes());
 
         $aplicadas = $this->migrador->aplicar();
-        self::assertCount(6, $aplicadas);
-        self::assertSame(self::TABLAS_I0, array_values(array_intersect(self::TABLAS_I0, $this->tablasPresentes())));
-        self::assertSame('006_crear_configuracion_notificaciones', $this->migrador->ultimaAplicada());
+        self::assertCount(self::TOTAL_MIGRACIONES, $aplicadas);
+        $esperadas = self::TABLAS_ESPERADAS;
+        sort($esperadas);
+        self::assertSame($esperadas, $this->tablasPresentes(), 'Exactamente las tablas de las migraciones 001 a 009.');
+        self::assertSame('009_crear_finanzas', $this->migrador->ultimaAplicada());
         self::assertSame(1, (int) $this->bd->valor('SELECT COUNT(*) FROM cadena_auditoria'));
 
-        self::assertCount(6, $this->migrador->revertir(6));
+        self::assertCount(self::TOTAL_MIGRACIONES, $this->migrador->revertir(self::TOTAL_MIGRACIONES));
         self::assertSame([], $this->tablasPresentes());
 
-        self::assertCount(6, $this->migrador->aplicar());
+        self::assertCount(self::TOTAL_MIGRACIONES, $this->migrador->aplicar());
         self::assertSame([], $this->migrador->aplicar(), 'Una segunda ejecución no aplica nada.');
     }
 

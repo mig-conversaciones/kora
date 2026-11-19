@@ -28,8 +28,11 @@ use App\Nucleo\Registro;
 use App\Nucleo\Sesion;
 use App\Nucleo\Vista;
 use App\Politicas\Autorizador;
+use App\Politicas\PoliticaAlcanceUnidad;
+use App\Politicas\PoliticaUsuarios;
 use App\Repositorios\RepositorioUsuarios;
 use App\Servicios\Programador;
+use App\Servicios\ServicioAdjuntos;
 use App\Servicios\ServicioAlcance;
 use App\Servicios\ServicioAuditoria;
 use App\Servicios\ServicioCodigosRespaldo;
@@ -48,7 +51,7 @@ use App\Trabajos\LimpiezaPeriodica;
 
 $https = str_starts_with(Entorno::texto('APP_URL'), 'https://');
 // Última migración que este código espera; /health/ready y la salida del mantenimiento la comparan (06-04).
-$versionEsquema = '006';
+$versionEsquema = '009';
 $cola = static fn (): array => require RAIZ . '/config/cola.php';
 $seguridad = static fn (): array => require RAIZ . '/config/seguridad.php';
 $claveBinaria = static fn (string $variable): string => (string) base64_decode(Entorno::texto($variable), true);
@@ -101,8 +104,13 @@ return [
             $c->obtener(Cifrador::class),
             (string) $seguridad()['totp']['emisor'],
         ),
-        // Las políticas por recurso (PoliticaRecaudos, PoliticaHato…) se registran aquí en la iteración de su módulo.
-        Autorizador::class => static fn (): Autorizador => new Autorizador([]),
+        // Políticas por recurso, por prefijo del permiso. Las de recaudos, hato… se agregan en la iteración de su módulo.
+        Autorizador::class => static fn (): Autorizador => new Autorizador([
+            'usuarios' => new PoliticaUsuarios(),
+            'asignaciones' => new PoliticaAlcanceUnidad(),
+            'gastos' => new PoliticaAlcanceUnidad(),
+            'procesos' => new PoliticaAlcanceUnidad(),
+        ]),
         VerificarCsrf::class => static fn (Contenedor $c): VerificarCsrf => new VerificarCsrf(
             $c->obtener(Sesion::class),
             $c->obtener(ServicioAuditoria::class),
@@ -115,6 +123,11 @@ return [
             $c->obtener(ServicioAuditoria::class),
             $c->obtener(Sesion::class),
             (int) $seguridad()['reautenticacion_segundos'],
+        ),
+        // Soportes documentales en almacenamiento privado, fuera de public/ (RF-027, RS-011).
+        ServicioAdjuntos::class => static fn (Contenedor $c): ServicioAdjuntos => new ServicioAdjuntos(
+            $c->obtener(BaseDatos::class),
+            RAIZ . '/almacenamiento/adjuntos',
         ),
         ExportarLoteAuditoria::class => static fn (Contenedor $c): ExportarLoteAuditoria => new ExportarLoteAuditoria(
             $c->obtener(BaseDatos::class),

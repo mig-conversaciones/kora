@@ -236,7 +236,7 @@ final class PlataformaTest extends TestCase
         return new ServicioMantenimiento(self::$bd, $this->auditoria, [
             'senal' => $this->temporal . '/estado/mantenimiento.json',
             'latido_trabajador' => $this->temporal . '/latidos/trabajador.txt',
-        ] + require RAIZ . '/config/mantenimiento.php', '006');
+        ] + require RAIZ . '/config/mantenimiento.php', (require RAIZ . '/config/app.php')['version_esquema']);
     }
 
     private function escribirLatidoDelTrabajadorReal(): void

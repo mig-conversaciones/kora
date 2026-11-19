@@ -20,3 +20,4 @@ Formato del Anexo D (D.5) del SRS. Un ADR aceptado no se edita: se reemplaza por
 | [ADR-014](014-nombres-espanol.md) | Nombres en español, equivalencias con la plantilla y nombre de la aplicación | Aceptado |
 | ADR-015 | Inicio de sesión único con Entra ID y llaves WebAuthn | Propuesto (fuera de la v1) |
 | [ADR-016](016-identidad-visual-kora.md) | Identidad visual KORA (logo, íconos y paleta del sistema) | Aceptado |
+| [ADR-017](017-modulos-de-gestion.md) | Módulos de gestión con montos decimales exactos y reglas de bloqueo que se activan con el esquema | Aceptado |

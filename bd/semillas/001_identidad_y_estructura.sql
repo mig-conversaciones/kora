@@ -1,6 +1,6 @@
 -- Semilla 001: centro, unidades, destinos, roles, permisos y matriz de autorización (RDL-008, RAC-025).
 -- Extraída de la semilla mínima de producción del Anexo B (06-02, B.1). Idempotente: INSERT IGNORE.
--- Las categorías de gasto y los parámetros de indicadores se siembran con sus tablas en la I3 (migración 008).
+-- Las categorías de gasto, los parámetros y los derivados lácteos están en la semilla 002 (I3, migración 008).
 INSERT IGNORE INTO centros (codigo, nombre, regional, codigo_regional)
 VALUES ('9124', 'Centro Agropecuario de Buga', 'Valle', '76');
 

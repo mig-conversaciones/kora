@@ -1,6 +1,6 @@
 # Runbook: acceso, cuentas y auditoría
 
-Se aplica a la plataforma de la I2. Requisitos: RAC-001 a RAC-031, RS-005, RAU-001 a RAU-007 y RF-MAN-001 a RF-MAN-004. Decisiones: ADR-006, ADR-007 y ADR-008.
+Se aplica a la plataforma de la I2 y sus paneles de la I3. Requisitos: RAC-001 a RAC-031, RS-005, RAU-001 a RAU-007 y RF-MAN-001 a RF-MAN-004. Decisiones: ADR-006, ADR-007 y ADR-008.
 
 ## 1. Arranque de una instalación nueva
 
@@ -25,7 +25,9 @@ php cli/usuarios.php invitar --correo=... --nombre="..." --rol=lider_unidad --un
 php cli/usuarios.php invitar --correo=... --nombre="..." --rol=grupo_recaudo
 ```
 
-Roles disponibles: `administrador`, `coordinacion_administrativa`, `grupo_recaudo`, `lider_produccion_centro`, `lider_unidad` (exige unidades) y `coordinacion_academica`. La gestión de usuarios desde la interfaz llega en la I3.
+Roles disponibles: `administrador`, `coordinacion_administrativa`, `grupo_recaudo`, `lider_produccion_centro`, `lider_unidad` (exige unidades) y `coordinacion_academica`.
+
+Desde la I3 la gestión diaria se hace en `/sistema/usuarios`: invitar, cambiar el rol o las unidades, desactivar y reenviar invitaciones. Ver el [runbook de maestros y finanzas](maestros-y-finanzas.md), § 4. La CLI queda para el arranque y la recuperación.
 
 ## 2. Cuenta bloqueada o dispositivo perdido
 
@@ -75,4 +77,7 @@ El programador las revisa cada 5 min y las silencia 30 min por condición. Llega
 |---|---|---|
 | Modo mantenimiento | `/sistema/mantenimiento` | Activar o desactivar con motivo, confirmación y reautenticación (código de la app, válido 5 min) |
 | Colas de trabajos | `/sistema/colas` | Reintentar, cancelar o descartar con motivo |
+| Usuarios | `/sistema/usuarios` | Invitar, asignar rol y unidades (con reautenticación), desactivar y reactivar |
+| Roles y permisos | `/sistema/roles` | Matriz de autorización; conceder o retirar con reautenticación |
+| Auditoría | `/sistema/auditoria` | Consulta filtrada por fecha, acción, resultado y actor, con el estado del sellado |
 | Salud | `/health/ready` | Con la sesión del superadministrador o con `X-Token-Monitoreo` |

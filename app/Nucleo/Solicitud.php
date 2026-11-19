@@ -15,6 +15,7 @@ final class Solicitud
      * @param array<string,mixed> $cuerpo
      * @param array<string,string> $cabeceras nombres en minúsculas
      * @param array<string,string> $cookies
+     * @param array<string,array{nombre:string,ruta:string,tamano:int,error:int}> $archivos subidos, por campo (I3)
      */
     public function __construct(
         public readonly string $metodo,
@@ -24,7 +25,32 @@ final class Solicitud
         public readonly array $cabeceras,
         public readonly array $cookies,
         public readonly string $ip,
+        public readonly array $archivos = [],
     ) {
+    }
+
+    /**
+     * Normaliza $_FILES a un archivo por campo; ignora los campos múltiples (no se usan) y los que no traen
+     * archivo. El tipo declarado por el navegador se descarta: el servidor detecta la firma (RS-011).
+     *
+     * @param array<string,mixed> $archivos
+     * @return array<string,array{nombre:string,ruta:string,tamano:int,error:int}>
+     */
+    public static function normalizarArchivos(array $archivos): array
+    {
+        $resultado = [];
+        foreach ($archivos as $campo => $archivo) {
+            if (!is_array($archivo) || !is_string($archivo['name'] ?? null) || (int) ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+            $resultado[(string) $campo] = [
+                'nombre' => (string) $archivo['name'],
+                'ruta' => (string) ($archivo['tmp_name'] ?? ''),
+                'tamano' => (int) ($archivo['size'] ?? 0),
+                'error' => (int) ($archivo['error'] ?? UPLOAD_ERR_OK),
+            ];
+        }
+        return $resultado;
     }
 
     /**
@@ -47,6 +73,7 @@ final class Solicitud
             $cabeceras,
             $_COOKIE,
             (string) ($_SERVER['REMOTE_ADDR'] ?? ''),
+            self::normalizarArchivos($_FILES),
         );
     }
 

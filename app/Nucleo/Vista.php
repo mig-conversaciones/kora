@@ -99,7 +99,21 @@ final class Vista
         foreach ($this->config['menu'] as $grupo) {
             $entradas = array_values(array_filter(
                 $grupo['entradas'],
-                static fn (array $e): bool => !isset($e['permiso']) || ($usuario !== null && $usuario->tienePermiso((string) $e['permiso']))
+                static function (array $e) use ($usuario): bool {
+                    if (!empty($e['autenticada']) && $usuario === null) {
+                        return false;
+                    }
+                    if (!isset($e['permiso'])) {
+                        return true;
+                    }
+                    // «permiso» puede ser una lista: basta con tener cualquiera de ellos.
+                    foreach ((array) $e['permiso'] as $permiso) {
+                        if ($usuario !== null && $usuario->tienePermiso((string) $permiso)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
             ));
             if ($entradas !== []) {
                 $menu[] = ['grupo' => $grupo['grupo'], 'entradas' => $entradas];
@@ -127,6 +141,25 @@ final class Vista
             return '';
         }
         return htmlspecialchars((string) $valor, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8');
+    }
+
+    /** Pesos colombianos sin decimales y con separador de miles «.» (RUI-009): 3.045.000. */
+    public function moneda(mixed $valor): string
+    {
+        return '$ ' . number_format((float) $valor, 0, ',', '.');
+    }
+
+    /** Número con coma decimal y los decimales indicados, sin ceros de relleno a la derecha más allá del mínimo. */
+    public function decimal(mixed $valor, int $decimales = 2): string
+    {
+        return number_format((float) $valor, $decimales, ',', '.');
+    }
+
+    /** Fecha DATE o DATETIME (AAAA-MM-DD…) en formato DD/MM/AAAA. */
+    public function fecha(mixed $valor): string
+    {
+        $texto = (string) $valor;
+        return preg_match('/^(\d{4})-(\d{2})-(\d{2})/', $texto, $m) === 1 ? "{$m[3]}/{$m[2]}/{$m[1]}" : $texto;
     }
 
     public function url(string $ruta): string

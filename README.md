@@ -9,7 +9,7 @@ Gestión de la producción, la trazabilidad y los tableros de mando del Centro A
 - Tailwind CSS 3.4.
 - MySQL 5.7 en desarrollo local (MAMP) y MariaDB 10.6 o superior en producción (Hostinger Cloud); ver [ADR-002](docs/adr/002-mariadb-sql-portable.md).
 
-**Estado:** iteración 2, «Identidad y acceso», terminada; sigue la I3, «Maestros y finanzas». Ver el [CHANGELOG](CHANGELOG.md) y los runbooks de [cola, cron y mantenimiento](docs/runbooks/cola-cron-mantenimiento.md) y de [acceso y cuentas](docs/runbooks/acceso-y-cuentas.md).
+**Estado:** iteración 3, «Maestros y finanzas», terminada; sigue la I4, «Operación productiva». Ver el [CHANGELOG](CHANGELOG.md) y los runbooks de [cola, cron y mantenimiento](docs/runbooks/cola-cron-mantenimiento.md), [acceso y cuentas](docs/runbooks/acceso-y-cuentas.md) y [maestros y finanzas](docs/runbooks/maestros-y-finanzas.md).
 
 ## Puesta en marcha local con MAMP
 
@@ -52,7 +52,7 @@ Abre **http://localhost/dashboard_laila/**. Para la primera cuenta:
 2. Define la contraseña: al menos 15 caracteres; una frase funciona bien.
 3. Configura la verificación en dos pasos con una aplicación de autenticación.
 
-El sistema de diseño está en `/sistema-diseno`. El prototipo original sigue disponible en `/referencias/`. La operación de cuentas está en el [runbook de acceso y cuentas](docs/runbooks/acceso-y-cuentas.md).
+El sistema de diseño está en `/sistema-diseno`. El prototipo original sigue disponible en `/referencias/`. La operación de cuentas está en el [runbook de acceso y cuentas](docs/runbooks/acceso-y-cuentas.md), y la de catálogos, presupuesto y cierres, en el [de maestros y finanzas](docs/runbooks/maestros-y-finanzas.md).
 
 ## Comandos
 
@@ -60,7 +60,7 @@ El sistema de diseño está en `/sistema-diseno`. El prototipo original sigue di
 |---|---|
 | `php cli/migrar.php --estado` / `--aplicar` / `--revertir=N` [`--base=kora_pruebas`] | Migraciones con checksum (RBD-011) |
 | `php cli/verificar_entorno.php` | Verifica PHP, extensiones, configuración, motor de base de datos y almacenamiento (RNF-018) |
-| `php cli/sembrar.php` | Datos de configuración idempotentes: centro, unidades, roles, permisos y matriz (RDL-008) |
+| `php cli/sembrar.php` | Datos de configuración idempotentes: centro, unidades, roles, permisos y matriz; categorías de gasto, parámetros y factores de derivados (RDL-008) |
 | `php cli/usuarios.php <acción>` (crear-superadministrador, invitar, restablecer-2fa) | Arranque y recuperación de cuentas por SSH (RAC-007, RAC-014) |
 | `php cli/auditoria.php sellar` / `verificar` | Sella la cadena de auditoría o la verifica de punta a punta (RAU-004) |
 | `php cli/cron_local.php` | Simula el cron de hPanel en MAMP: trabajador cada 30 s y programador cada minuto (Ctrl+C para detener) |
@@ -78,7 +78,7 @@ El sistema de diseño está en `/sistema-diseno`. El prototipo original sigue di
 
 - `GET /health/live` es público.
 - `GET /health/ready` exige la cabecera `X-Token-Monitoreo` con el valor de `TOKEN_MONITOREO`; sin ella responde 404.
-- **Modo mantenimiento:** crear `almacenamiento/estado/mantenimiento.json` con `{"activo": true}` hace que todo responda 503 con aviso, salvo las rutas exceptuadas. La CLI y el panel para activarlo llegan en la I1 y la I2.
+- **Modo mantenimiento:** se activa desde `/sistema/mantenimiento` o con `php cli/mantenimiento.php`. La señal `almacenamiento/estado/mantenimiento.json` hace que todo responda 503 con aviso, salvo las rutas exceptuadas.
 
 ## Estructura
 
@@ -86,11 +86,11 @@ El sistema de diseño está en `/sistema-diseno`. El prototipo original sigue di
 app/            Nucleo (enrutador, contenedor, vista, BD, migrador), Intermediarios, Controladores, Servicios, Vistas
 config/         app, base_datos, rutas, htmx, menu, seguridad, funcionalidades, mantenimiento
 public/         index.php (controlador frontal), .htaccess, assets con huella, favicon y manifest
-cli/            migrar.php, verificar_entorno.php
-bd/migraciones/ 001 a 006 (.sql y .down.sql)
+cli/            migrar, verificar_entorno, sembrar, usuarios, auditoria, trabajador_cron, programador, cola, mantenimiento, correo, cron_local
+bd/migraciones/ 001 a 009 (.sql y .down.sql); bd/semillas/ 001 y 002
 recursos/       Fuentes de CSS (tokens, Tailwind) y JS (retroalimentacion-ui.js, componentes-alpine.js)
 herramientas/   construir-activos.mjs, verificar-contraste.mjs, composer.phar (no versionado)
-almacenamiento/ Privado: caché, registros JSON, estado de mantenimiento (bloqueado para la web)
+almacenamiento/ Privado: caché, registros JSON, estado, adjuntos y exportaciones (bloqueado para la web)
 tests/          Unitarias e Integracion (PHPUnit 11)
 docs/           adr/, procesos/ (FP-01 a FP-11), ui/, seguridad/, ia/
 referencias/    Prototipo HTML, Excel originales, guía y SRS v1.0, con su generador Word

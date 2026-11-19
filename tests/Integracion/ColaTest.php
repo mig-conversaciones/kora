@@ -305,7 +305,7 @@ final class ColaTest extends TestCase
             self::$bd,
             new ServicioAuditoria(self::$bd, $registro),
             ['senal' => $this->senal] + require RAIZ . '/config/mantenimiento.php',
-            '006'
+            (require RAIZ . '/config/app.php')['version_esquema']
         );
         $contenedor->establecer(\App\Nucleo\Cache::class, new \App\Nucleo\Cache(sys_get_temp_dir() . '/kora-cache-pruebas'));
         $contenedor->establecer(\App\Trabajos\LimpiezaPeriodica::class, new \App\Trabajos\LimpiezaPeriodica(

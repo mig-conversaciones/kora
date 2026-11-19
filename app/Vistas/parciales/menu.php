@@ -19,7 +19,7 @@
             <?php foreach ($grupo['entradas'] as $entrada): ?>
                 <li>
                     <?php if (isset($entrada['ruta'])): ?>
-                        <?php $activa = $entrada['ruta'] === $rutaActual; ?>
+                        <?php $activa = $entrada['ruta'] === $rutaActual || ($entrada['ruta'] !== '/' && str_starts_with($rutaActual, $entrada['ruta'] . '/')); ?>
                         <a class="menu-enlace" href="<?= $this->url($entrada['ruta']) ?>"<?= $activa ? ' aria-current="page"' : '' ?>>
                             <?= $this->parcial('parciales/icono', ['nombre' => $entrada['icono']]) ?>
                             <span class="menu-texto"><?= $this->e($entrada['texto']) ?></span>

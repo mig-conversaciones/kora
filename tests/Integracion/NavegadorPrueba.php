@@ -28,16 +28,17 @@ final class NavegadorPrueba
     }
 
     /**
-     * @param array<string,string> $cuerpo
+     * @param array<string,mixed> $cuerpo
      * @param array<string,string> $cabeceras nombres en minúsculas
+     * @param array<string,array{nombre:string,ruta:string,tamano:int,error:int}> $archivos como Solicitud::normalizarArchivos
      */
-    public function solicitar(string $metodo, string $rutaConConsulta, array $cuerpo = [], array $cabeceras = []): Respuesta
+    public function solicitar(string $metodo, string $rutaConConsulta, array $cuerpo = [], array $cabeceras = [], array $archivos = []): Respuesta
     {
         $partes = parse_url($rutaConConsulta);
         $consulta = [];
         parse_str((string) ($partes['query'] ?? ''), $consulta);
         $cabeceras += ['user-agent' => 'Mozilla/5.0 (Windows NT 10.0) Chrome/130.0 Pruebas'];
-        $solicitud = new Solicitud($metodo, (string) ($partes['path'] ?? '/'), $consulta, $cuerpo, $cabeceras, $this->cookies, $this->ip);
+        $solicitud = new Solicitud($metodo, (string) ($partes['path'] ?? '/'), $consulta, $cuerpo, $cabeceras, $this->cookies, $this->ip, $archivos);
         $aplicacion = Aplicacion::crear(require RAIZ . '/config/app.php');
         if ($this->configurar !== null) {
             ($this->configurar)($aplicacion->contenedor());
@@ -80,12 +81,23 @@ final class NavegadorPrueba
     /**
      * POST HTMX con el token en la cabecera X-CSRF-Token (como retroalimentacion-ui.js).
      *
-     * @param array<string,string> $cuerpo
+     * @param array<string,mixed> $cuerpo
+     * @param array<string,string> $cabeceras
+     * @param array<string,array{nombre:string,ruta:string,tamano:int,error:int}> $archivos
+     */
+    public function postHtmx(string $ruta, array $cuerpo = [], array $cabeceras = [], array $archivos = []): Respuesta
+    {
+        return $this->solicitar('POST', $ruta, $cuerpo, $cabeceras + ['hx-request' => 'true', 'x-csrf-token' => $this->ultimoCsrf], $archivos);
+    }
+
+    /**
+     * GET HTMX (fragmento).
+     *
      * @param array<string,string> $cabeceras
      */
-    public function postHtmx(string $ruta, array $cuerpo = [], array $cabeceras = []): Respuesta
+    public function getHtmx(string $ruta, array $cabeceras = []): Respuesta
     {
-        return $this->solicitar('POST', $ruta, $cuerpo, $cabeceras + ['hx-request' => 'true', 'x-csrf-token' => $this->ultimoCsrf]);
+        return $this->solicitar('GET', $ruta, [], $cabeceras + ['hx-request' => 'true']);
     }
 
     /** Ruta de aplicación (sin la ruta base) de la redirección de la última respuesta (Location o HX-Redirect). */

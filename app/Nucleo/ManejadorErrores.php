@@ -51,6 +51,9 @@ final class ManejadorErrores
         if ($error instanceof ErrorHttp && $error->getMessage() !== '') {
             $mensaje = $error->getMessage();
         }
+        if ($error instanceof ErrorHttp && $error->titulo !== '') {
+            $titulo = $error->titulo;
+        }
         $idSolicitud = (string) $solicitud->atributo('request_id', '');
 
         if ($this->esperaJson($solicitud)) {
@@ -68,6 +71,11 @@ final class ManejadorErrores
                 ? $this->vista->fragmento('errores/fragmento', $datos)
                 : $this->paginaSegura($datos);
             $respuesta = Respuesta::html($html, $estado)->conCabecera('Vary', 'HX-Request');
+            if ($solicitud->esHtmx() && $estado !== 503) {
+                // El error controlado va a la región de errores y nunca reemplaza el formulario, que conserva lo
+                // escrito (un 409 «Periodo cerrado» no debe borrar el gasto que se estaba editando).
+                $respuesta->conCabecera('HX-Retarget', '#contenedor-errores')->conCabecera('HX-Reswap', 'innerHTML');
+            }
         }
         if ($estado === 503) {
             $respuesta->conCabecera('Retry-After', '120');

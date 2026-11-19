@@ -2,6 +2,63 @@
 
 Formato basado en *Keep a Changelog*, con versionado semántico (RNF-015).
 
+## [0.4.0] — Iteración 3 «Maestros y finanzas» (sin publicar)
+
+### Agregado
+
+- **Migraciones 007 a 009** del Anexo B, con su reversión:
+  - importaciones (lotes y filas);
+  - catálogos: productos, homologación, categorías de gasto y parámetros;
+  - finanzas: asignaciones, gastos, procesos de autoconsumo, recaudos y cierres de periodo.
+
+  La columna generada `activa_unica` garantiza una sola asignación activa por unidad y vigencia, también en MySQL 5.7.
+- **Semilla `002_catalogos_finanzas.sql`:**
+  - categorías de gasto, con Materiales de formación (Obs. 1);
+  - los seis parámetros de los indicadores;
+  - factores de los derivados lácteos, que no pisan un ajuste ya hecho (RF-018, S-12).
+- **Catálogos** (`/catalogos`, RF-016 a RF-023):
+  - **Unidades**, con bloqueo de la inactivación mientras tengan registros activos.
+  - **Productos**, con código SGAC único, coherencia de precios y medida bloqueada si hay recepciones.
+  - **Derivados lácteos**, con factor y metas de rendimiento, e incidencias de configuración.
+  - **Homologación** con normalización (sin tildes, minúsculas) y «concepto fuente».
+  - **Categorías de gasto**, con la marca IND_17 limitada a Mantenimiento y Alimentación.
+  - **Destinos internos**, con unidad receptora.
+  - **Parámetros** con historial por vigencia y validación de rangos.
+- **Presupuesto y gastos** (`/finanzas`, RF-024 a RF-028):
+  - **Asignaciones** con desglose ≤ total y una activa por unidad y vigencia.
+  - **Gastos**, con el componente académico ≤ valor y soporte PDF, PNG o JPG de hasta 5 MB. La firma del archivo se verifica, se guarda en almacenamiento privado y se descarga con autorización.
+  - **Ejecución por línea presupuestal**, con la aclaración «No corresponde a ejecución CDP/RP».
+  - **Cierre mensual**: 409 «Periodo cerrado» al crear, editar o archivar. La reapertura exige motivo y reautenticación, y queda auditada.
+- **Procesos de autoconsumo** (`/finanzas/procesos`, RF-036, RF-037):
+  - código AUTO_xxx sugerido y destino del catálogo o en texto libre;
+  - medida tomada del producto, y bloqueo de unidad, medida, producto y vigencia si el proceso tiene entregas;
+  - avance físico y monetario.
+- **Usuarios, roles y auditoría** (`/sistema`, RF-009 a RF-012, RAU-001):
+  - Invitar, cambiar el rol y las unidades (con reautenticación y auditoría del antes y el después), desactivar (revoca las sesiones al instante), reactivar y reenviar la invitación.
+  - Separación de funciones con `PoliticaUsuarios`: nadie se modifica a sí mismo y un Administrador no gestiona Superadministradores. Todo intento queda auditado como «denegado».
+  - Matriz de roles y permisos visible para todos. Solo el Superadministrador la modifica, con reautenticación; el rol superadministrador está protegido.
+  - Consulta de la auditoría con filtros, paginación por cursor y estado del sellado.
+- **Alcance por unidad (Obs. 5):**
+  - `PoliticaAlcanceUnidad` (asignaciones, gastos y procesos) y `AutorizacionRecurso` para decidir sobre el registro.
+  - Una unidad ajena responde 403 auditado y un registro ajeno, 404.
+- **Base de los módulos** ([ADR-017](docs/adr/017-modulos-de-gestion.md)):
+  - `ControladorModulo` y la página común con pestañas.
+  - Parciales `campo` (accesible, con error por campo), `paginacion` y `selector_vigencia`.
+  - `Entrada`, con decimales exactos sin `float` y formato local «12.500.000».
+  - `ReglasDependencias`: los bloqueos se activan solos con las tablas de la I4.
+  - `RecursoAuditado`, que guarda la unidad en el evento de auditoría.
+- **Menú** reorganizado en «Vista general», «Mi gestión», «Catálogos» y «Sistema» (RF-002). Una entrada puede exigir cualquiera de varios permisos.
+- **Pruebas:** 97 en total (24 nuevas):
+  - `MaestrosFinanzasTest`, con 6 flujos completos y varios roles;
+  - `ReglasNegocioTest`, con decimales, políticas y normalización.
+- **Documentación:** [ADR-017](docs/adr/017-modulos-de-gestion.md), [runbook de maestros y finanzas](docs/runbooks/maestros-y-finanzas.md) y [FP-11](docs/procesos/FP-11-registro-de-gasto-ejecutado.md) con su estado de implementación.
+
+### Cambiado
+
+- **Errores controlados en HTMX** (403, 404, 409…): van a `#contenedor-errores` (`HX-Retarget`) y ya no reemplazan el formulario. `ErrorHttp` admite un título propio.
+- **`Solicitud`** recibe los archivos subidos (`archivos`), normalizados, sin el tipo MIME del navegador.
+- **Pruebas:** la versión de esquema esperada se lee de `config/app.php`, en lugar de un literal.
+
 ## [0.3.0] — Iteración 2 «Identidad y acceso» (sin publicar)
 
 ### Agregado

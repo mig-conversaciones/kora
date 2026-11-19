@@ -47,9 +47,9 @@ final class ServicioAuditoria
         $usuario = $solicitud->atributo('usuario');
         $actor = $usuario instanceof UsuarioSesion ? $usuario : null;
         $this->bd->ejecutar(
-            'INSERT INTO eventos_auditoria (evento_id, ocurrido_en, request_id, actor_id, actor_rol, centro_id, accion, recurso, recurso_id,
+            'INSERT INTO eventos_auditoria (evento_id, ocurrido_en, request_id, actor_id, actor_rol, centro_id, unidad_id, accion, recurso, recurso_id,
                                             resultado, origen, ip_tratada, ip_hmac, agente, valores_antes, valores_despues, motivo, metadatos)
-             VALUES (:evento, UTC_TIMESTAMP(3), :request, :actor, :rol, :centro, :accion, :recurso, :recurso_id,
+             VALUES (:evento, UTC_TIMESTAMP(3), :request, :actor, :rol, :centro, :unidad, :accion, :recurso, :recurso_id,
                      :resultado, :origen, :ip, :ip_hmac, :agente, :antes, :despues, :motivo, :metadatos)',
             [
                 'evento' => GeneradorUlid::generar(),
@@ -58,7 +58,12 @@ final class ServicioAuditoria
                 'rol' => $actor?->rol,
                 'centro' => $actor?->centroId,
                 'accion' => mb_substr($accion, 0, 80),
-                'recurso' => $recurso === null ? null : (new \ReflectionClass($recurso))->getShortName(),
+                'recurso' => match (true) {
+                    $recurso === null => null,
+                    $recurso instanceof RecursoAuditado => $recurso->tipo,
+                    default => (new \ReflectionClass($recurso))->getShortName(),
+                },
+                'unidad' => $recurso !== null && property_exists($recurso, 'unidadId') && $recurso->unidadId !== null ? (int) $recurso->unidadId : null,
                 'recurso_id' => $recurso !== null && property_exists($recurso, 'id') ? (string) $recurso->id : null,
                 'resultado' => $resultado,
                 'origen' => $this->origen($solicitud),

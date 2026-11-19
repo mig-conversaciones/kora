@@ -297,7 +297,7 @@ final class IdentidadTest extends TestCase
                 $c->obtener(BaseDatos::class),
                 $c->obtener(ServicioAuditoria::class),
                 ['senal' => $senal, 'latido_trabajador' => sys_get_temp_dir() . '/kora-latido-inexistente.txt'] + require RAIZ . '/config/mantenimiento.php',
-                '006'
+                (require RAIZ . '/config/app.php')['version_esquema']
             ));
         }, $ip);
     }
